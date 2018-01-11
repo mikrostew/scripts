@@ -1,0 +1,293 @@
+#!/usr/bin/env bash
+# squash commits, rebase, merge, and submit, for LI workflow
+
+# TODO - blurb about how to use this
+
+# SETTINGS
+use_merge_tool="opendiff"
+
+# colors
+COLOR_RESET='\033[0m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+
+
+echo_err() {
+  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" >&2
+}
+echo_ack() {
+  echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" >&2
+}
+echo_info() {
+  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" >&2
+}
+
+echo_fail_banner() {
+  echo_err "***************";
+  echo_err "*  Failed :(  *";
+  echo_err "***************";
+}
+echo_success_banner() {
+  echo_ack "****************";
+  echo_ack "*  Success :)  *";
+  echo_ack "****************";
+}
+
+show_usage() {
+  echo_err "Usage:"
+  echo_err "  ${0##*/} <commit-msg> [, <commit-msg-extra-line>]"
+}
+
+# echo the input command and arguments, then run the command
+do_cmd() {
+  # echo -e "${COLOR_FG_GREEN}($@)${COLOR_RESET}" >&2
+  echo_ack "($@)"
+  # this is also helpful to see how things are being quoted when debugging issues
+  ( set -x; "$@" )
+}
+
+# run git with the input arguments
+# (any destructive commands should use this, to see what's being changed)
+do_git() {
+  do_cmd git "$@"
+}
+
+
+based_on_master_or_origin() {
+  # adapted from https://stackoverflow.com/a/9753364
+  local tracking_branch="$(git rev-parse --abbrev-ref --symbolic-full-name $1@{u} 2>/dev/null)"
+  if [ "$tracking_branch" == "origin/master" ]; then
+    echo "origin/master"
+  else
+    echo "master"
+  fi
+}
+
+# number of changes between two input branches
+# (typically a branch and master, or master and origin/master)
+commit_diff_on_branch() {
+  local git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)"
+  if [ "$?" -eq 0 ] && [ -n "$git_rev_list_origin" ]; then
+    local git_origin_arr=($git_rev_list_origin) # splits into array - it's 2 numbers separated by spaces
+    echo "${git_origin_arr[0]}"
+  else
+    echo "0"
+  fi
+}
+
+current_git_branch() {
+  echo "$(git rev-parse --abbrev-ref HEAD)"
+}
+
+# repo url, without the 'ssh://git@' bit at the beginning
+git_repo_url() {
+  # from https://stackoverflow.com/a/16880000
+  echo "$(git ls-remote --get-url origin | sed -e 's/^ssh:\/\///' -e 's/^git@//')"
+}
+
+git_review_board_id() {
+  echo "$(git config --get branch.$1.reviewid)"
+}
+
+# undo the last merge that was done (usually because something failed)
+git_undo_merge() {
+  do_git reset --merge ORIG_HEAD && do_git checkout "$1"
+}
+
+# run mergetool for conflicts (git mergetool)
+gmt() {
+  # TODO: different tool for different platforms (Mac/Linux)
+  do_git mergetool --tool=$use_merge_tool
+}
+
+# pull changes from origin, with rebase (git pull rebase)
+gpr() {
+  # sometimes `git pull --rebase` fails with "fatal: Cannot rebase onto multiple branches."
+  # so try doing the full command (https://stackoverflow.com/a/35844073)
+  local branch_name=$(current_git_branch)
+  do_git pull origin $branch_name --rebase
+}
+
+in_git_repo() {
+  git status >/dev/null && return 0 || return 1
+}
+
+in_git_submit_repo() {
+  # get the JSON showing which repos are supported for 'git submit'
+  local allowed_repos_json="$(curl https://tools.corp.linkedin.com/apps/tools/commit-queue-manager/api/v1/allowed-repos/ 2>/dev/null)"
+  # parse that into a list of only the repo URLs
+  local allowed_repos_text="$(echo $allowed_repos_json | jq '.repos | .[] | .repo_url')"
+  [[ "$allowed_repos_text" =~ "$1" ]]
+  return
+}
+
+in_mint_submit_repo() {
+  if [ -f "$PWD/product-spec.json" ]; then
+    # test if there is something defined for 'mint submit'
+    submit_def="$(cat $PWD/product-spec.json | jq '.build.commands.submit')"
+    [ "$submit_def" != 'null' ]
+    return
+  else
+    # product-spec.json does not exist
+    return
+  fi
+}
+
+no_uncommitted_changes() {
+  [ "$(git status --porcelain --untracked-files=no)" != "" ] && echoerr ">_<  You have uncommitted changes" && return -1 || return 0
+}
+
+not_on_git_branch() {
+  [ "$(current_git_branch)" == "$1" ] && echoerr ">_<  Doesn't work on branch '$1'" && return -1 || return 0
+}
+
+# squash commits in current branch into a single commit
+squash_branch() {
+  # arguments: <commit-message> [, <extra-line>]
+  local branch_name=$(current_git_branch)
+  local based_on=$(based_on_master_or_origin $branch_name)
+  # TODO: this may not be what I want in all situations?
+  local num_commits_on_branch="$(commit_diff_on_branch $branch_name $based_on)"
+  echo_info "$num_commits_on_branch change(s) between '$branch_name' and '$based_on'"
+  squash_commits "$num_commits_on_branch" "$1" "$2"
+}
+
+# squash the input number of commits on the current branch
+# $1: number of commits to squash
+# $2: commit message
+# $3: extra line for message (extra info, overrides, etc.)
+squash_commits() {
+  if [ -n "$1" ] && [ "$1" -gt 0 ]; then
+    if [ -n "$2" ]; then
+      if [ -n "$3" ]; then
+        # multiple lines of commit messages
+        do_git reset --soft HEAD~${1} && do_git commit -m "$2" -m "$3"
+      else
+        # "squash" commits by combining all into a single commit
+        do_git reset --soft HEAD~${1} && do_git commit -m "$2"
+      fi
+      if [ "$?" -ne 0 ]; then
+        echo_err "Dang it! Squashing commits failed somehow"
+        return 1;
+      fi
+    else
+      echo_err "Come on! You gotta have a commit message"
+      return 1;
+    fi
+  else
+    echo_err "-_- No changes to squash"
+    return 1;
+  fi
+  return 0;
+}
+
+
+# required things
+# TODO: jq
+
+# arguments
+commit_msg="$1"
+commit_msg_extra_line="$2" # optional
+
+if [ -z "$commit_msg" ]
+then
+  echo_err "ERROR: Missing commit message"
+  show_usage
+  exit 1
+fi
+
+
+if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
+then
+  branch_name=$(current_git_branch)
+
+  # squash changes on this branch
+  squash_branch "$commit_msg" "$commit_msg_extra_line"
+  if [ "$?" -ne 0 ]; then
+    echo_err "Dang it! squashing failed (TODO: auto recovery here?)"
+    exit 1
+  fi
+
+  review_id="$(git_review_board_id $branch_name)"
+  if [ "$?" -ne 0 ]; then
+    echo_err "Dang it! Getting the review board ID failed"
+    exit 1
+  fi
+  echo_info "Review ID: $review_id"
+
+  # rebase against master
+  do_git pull --rebase origin master && do_git checkout master && do_git pull --rebase
+  while [ "$?" -ne 0 ]; do
+    read -p "Press any key to continue... " -n1 -s # DEBUG
+    gmt && do_git rebase --continue
+    # TODO: how to detect that I should abort?
+  done
+
+  # merge into master
+  do_git merge "$branch_name"
+  if [ "$?" -ne 0 ]; then
+    echo_err "Dang it! merge failed - good luck"
+    gmt
+    read -p "Press any key to continue... " -n1 -s # DEBUG
+  fi
+
+  # apply the RB to the commit
+  # if this fails, means I don't have the necessary ACLs
+  do_git review dcommit -r "$review_id"
+  if [ "$?" -ne 0 ]; then
+    # dcommit failed, probably missing a shipit from ACL
+    echo_err "Dang it! 'git review dcommit' failed, undoing the merge"
+    git_undo_merge "$branch_name"
+    exit 1
+  fi
+
+  # check if can use 'git submit' (LinkedIn), otherwise need to 'git push'
+  repo_url="$(git_repo_url)"
+  echo_info "repo URL: '$repo_url'"
+  if in_git_submit_repo "$repo_url"; then
+    echo_info "'git submit' - OK"
+
+    # also, check product-spec.json for 'mint submit'
+    if in_mint_submit_repo; then
+      echo_info "'mint submit' - OK"
+      # mint submit
+      do_cmd mint submit
+      if [ "$?" -ne 0 ];then
+        echo_fail_banner
+      else
+        echo_success_banner
+      fi
+      # mint submit is async, so for now undo the merge in case I have to resubmit
+      echo_info "Undoing the merge so I can keep working..."
+      git_undo_merge "$branch_name"
+    else
+      echo_info "'mint submit' - not supported"
+      # git submit
+      do_git submit
+      if [ "$?" -ne 0 ]; then
+        # submit failed, could be precommit, or ACL check, or whatever
+        echo_fail_banner
+        echo_info "Undoing the merge..."
+        git_undo_merge "$branch_name"
+        exit 1
+      fi
+      echo_success_banner
+      echo_info "Pulling changes into master..."
+      # rebase to pick up the change
+      gpr
+      # and done!
+    fi
+  else
+    echo_info "'git submit' - not supported, pushing..."
+    do_git push
+    if [ "$?" -ne 0 ]; then
+      # push failed
+      echo_fail_banner
+      echo_info "Undoing the merge..."
+      git_undo_merge "$branch_name"
+      exit 1
+    fi
+    echo_success_banner
+  fi
+fi
