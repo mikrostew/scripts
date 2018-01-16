@@ -10,7 +10,6 @@
 // and writes the results to a JSON file
 
 const fs = require('fs');
-const path = require('path');
 
 // bins of 1kB, 4KB, 16KB, ... , 64MB
 const BINS = [];
@@ -22,29 +21,41 @@ for (let i = 0; i < 9; i++) {
 const statsFiles = process.argv.slice(2);
 
 statsFiles.forEach((statFile) => {
-  const stats = {};
-  BINS.forEach((binSize) => { stats[binSize] = 0; });
-  stats.bigger = 0; // for files bigger than the biggest bin size
+  const fileCounts = {};
+  BINS.forEach((binSize) => { fileCounts[binSize] = 0; });
+  fileCounts.bigger = 0; // for files bigger than the biggest bin size
 
   console.log(`Processing file '${statFile}'...`);
   const data = JSON.parse(fs.readFileSync(statFile, 'utf8'));
 
+  const numFiles = data.length;
+
   data.forEach((fileInfo) => {
     // TODO do some maths here to find the bin, instead of inner loop ¯\_(ツ)_/¯
-    stats.bigger += 1;
+    fileCounts.bigger += 1;
     for (let i = 0; i < BINS.length; i++) {
       const binSize = BINS[i];
       if (fileInfo.size <= binSize) {
-        stats[binSize] += 1;
-        stats.bigger -= 1;
+        fileCounts[binSize] += 1;
+        fileCounts.bigger -= 1;
         break;
       }
     }
   });
+
+  const percentages = {};
+  Object.keys(fileCounts).forEach((size) => {
+    percentages[size] = 100 * (fileCounts[size] / numFiles);
+  });
+
+  const distribution = {
+    fileCounts,
+    percentages,
+  };
   console.log('Distribution:');
-  console.log(stats);
+  console.log(distribution);
 
   const outFile = `${statFile}-size-distribution.json`;
-  fs.writeFileSync(outFile, JSON.stringify(stats, null, 2));
+  fs.writeFileSync(outFile, JSON.stringify(distribution, null, 2));
   console.log(`Wrote file ${outFile}`);
 });
