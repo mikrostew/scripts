@@ -233,7 +233,7 @@ then
   fi
 
   # apply the RB to the commit
-  # if this fails, means I don't have the necessary ACLs
+  # if this fails, means I don't have the necessary ACLs (for git submit repos)
   do_git review dcommit -r "$review_id"
   if [ "$?" -ne 0 ]; then
     # dcommit failed, probably missing a shipit from ACL
