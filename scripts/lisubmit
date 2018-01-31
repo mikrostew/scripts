@@ -197,7 +197,7 @@ get_li_rb_api_def() {
   local cache_file_expired="$(find $cache_file -mtime +1)" # if cache file is older than 1 day
 
   if [ -n "$cache_file_expired" ]; then
-    echoerr "not cached, requesting..."
+    echo_err "not cached, requesting..."
     api_def="$(curl -X GET -H 'Accept: application/json' 'https://rb.corp.linkedin.com/api/' 2>/dev/null)"
     # TODO check return code for error
     echo "$api_def" > "$cache_file"
