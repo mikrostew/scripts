@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# pastes template into Description field when creating a new Jira ticket
+
+
+default_type="task"
+echo -n "Ticket type - task/bug [$default_type]: "
+read input_type
+if [ -z "$input_type" ]
+then
+  ticket_type="$default_type"
+else
+  ticket_type="$input_type"
+fi
+
+# make sure Chrome window has focus
+osascript -e 'tell application "Google Chrome" to activate'
+
+# emulate keystrokes to type the template into the field
+if [ "$ticket_type" == "task" ]
+then
+  osascript <<EOFTask
+tell application "System Events"
+  keystroke "h2. Summary" & return & return
+  keystroke "h2. Objective" & return & return
+  keystroke "h2. Acceptance Criteria" & return & return
+  keystroke "h2. Pre-Requisites" & return & return
+end tell
+EOFTask
+elif [ "$ticket_type" == "bug" ]
+then
+  osascript <<EOFBug
+tell application "System Events"
+  keystroke "h2. Summary" & return & return
+  keystroke "h2. Steps to Reproduce" & return & return
+  keystroke "h2. Bug Fix Acceptance Criteria" & return & return
+  keystroke "h2. Additional Details" & return & return
+end tell
+EOFBug
+fi
