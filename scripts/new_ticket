@@ -1,9 +1,36 @@
 #!/usr/bin/env bash
 # pastes template into Description field when creating a new Jira ticket
 
+# colors
+COLOR_RESET='\033[0m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_BOLD_BLUE='\033[1;34m'
 
-default_type="task"
-echo -n "Ticket type - task/bug [$default_type]: "
+
+echo_err() {
+  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" >&2
+}
+echo_ack() {
+  echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" >&2
+}
+echo_info() {
+  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" >&2
+}
+
+join() {
+  local IFS="/"
+  echo "$*"
+}
+
+TICKET_TASK="task"
+TICKET_BUG="bug"
+TICKET_RESEARCH="research"
+
+ticket_types=( $TICKET_TASK $TICKET_BUG $TICKET_RESEARCH )
+default_type="$TICKET_TASK"
+
+echo -n "Ticket type - $(join ${ticket_types[@]}) [$default_type]: "
 read input_type
 if [ -z "$input_type" ]
 then
@@ -16,8 +43,10 @@ fi
 osascript -e 'tell application "Google Chrome" to activate'
 
 # emulate keystrokes to type the template into the field
-if [ "$ticket_type" == "task" ]
+# TODO: allow typing in a partial name as long as it is enough to ID the task
+if [ "$ticket_type" == "$TICKET_TASK" ]
 then
+  echo_info "Filling out ticket type '$TICKET_TASK'"
   osascript <<EOFTask
 tell application "System Events"
   keystroke "h2. Summary" & return & return
@@ -26,8 +55,9 @@ tell application "System Events"
   keystroke "h2. Pre-Requisites" & return & return
 end tell
 EOFTask
-elif [ "$ticket_type" == "bug" ]
+elif [ "$ticket_type" == "$TICKET_BUG" ]
 then
+  echo_info "Filling out ticket type '$TICKET_BUG'"
   osascript <<EOFBug
 tell application "System Events"
   keystroke "h2. Summary" & return & return
@@ -36,4 +66,15 @@ tell application "System Events"
   keystroke "h2. Additional Details" & return & return
 end tell
 EOFBug
+elif [ "$ticket_type" == "$TICKET_RESEARCH" ]
+then
+  echo_info "Filling out ticket type '$TICKET_RESEARCH'"
+  osascript <<EOFResearch
+tell application "System Events"
+  keystroke "h2. Summary" & return & return
+  keystroke "h2. Objective" & return & return
+  keystroke "h2. Components" & return & return
+  keystroke "h2. Contacts" & return & return
+end tell
+EOFResearch
 fi
