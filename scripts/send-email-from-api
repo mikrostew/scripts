@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+to_email="${1:?First arg is the to: email address}"
+subject="${2:?Second arg is the subject}"
+message="${3:?Third arg is the message}"
+
+GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
+user="$(GET_API_TOKEN email-api-user)"
+pass="$(GET_API_TOKEN email-api-pass)"
+
+server="smtp.gmail.com:587"
+
+sendEmail -o tls=yes -f "$user" -t "$to_email" -s "$server" -xu "$user" -xp "$pass" -u "$subject" -m "$message"
+
