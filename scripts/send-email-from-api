@@ -5,8 +5,8 @@ subject="${2:?Second arg is the subject}"
 message="${3:?Third arg is the message}"
 
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
-user="$(GET_API_TOKEN email-api-user)"
-pass="$(GET_API_TOKEN email-api-pass)"
+user="$($GET_API_TOKEN email-api-user)"
+pass="$($GET_API_TOKEN email-api-pass)"
 
 server="smtp.gmail.com:587"
 
