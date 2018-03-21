@@ -81,7 +81,13 @@ else
 
   echo_info "No RB for this branch - creating one..."
   # if there is an argument supplied, use that for the description
-  input_description="$1"
+  if [ -n "$1" ]
+  then
+    input_description="$1"
+  else
+    # TODO - otherwise use the commit message
+    input_description="$(git log -1 --pretty=%B)"
+  fi
   echo -n "Description of these changes [$input_description]: "
   read rb_description
   if [ -z "$rb_description" ]
