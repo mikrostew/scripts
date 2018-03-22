@@ -301,11 +301,11 @@ then
   repo_url="$(git_repo_url)"
   echo_info "repo URL: '$repo_url'"
   if in_git_submit_repo "$repo_url"; then
-    echo_info "'git submit' - OK"
+    echo_info "supports git submit? YES"
 
     # also, check product-spec.json for 'mint submit'
     if in_mint_submit_repo; then
-      echo_info "'mint submit' - OK"
+      echo_info "supports mint submit? YES"
       # mint submit
       do_cmd mint submit
       if [ "$?" -ne 0 ];then
@@ -317,7 +317,7 @@ then
       echo_info "Undoing the merge so I can keep working..."
       git_undo_merge "$branch_name"
     else
-      echo_info "'mint submit' - not supported"
+      echo_info "supports mint submit? NO"
       # git submit
       do_git submit
       if [ "$?" -ne 0 ]; then
@@ -334,7 +334,7 @@ then
       # and done!
     fi
   else
-    echo_info "'git submit' - not supported, pushing..."
+    echo_info "supports git submit? NO"
     do_git push
     if [ "$?" -ne 0 ]; then
       # push failed
