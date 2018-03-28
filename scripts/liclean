@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# standalone script to clean dirs and files in a MP (for LinkedIn workflow)
+
+# TODO - blurb about how to use this
+
+# colors
+COLOR_RESET='\033[0m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+
+
+echo_err() {
+  echo -e "${COLOR_FG_RED}[ERROR] $@${COLOR_RESET}" >&2
+}
+echo_ack() {
+  echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" >&2
+}
+echo_info() {
+  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" >&2
+}
+
+# echo the input command and arguments, then run the command
+do_cmd() {
+  # echo -e "${COLOR_FG_GREEN}($@)${COLOR_RESET}" >&2
+  echo_ack "($@)"
+  # this is also helpful to see how things are being quoted when debugging issues
+  ( set -x; "$@" )
+}
+
+in_linkedin_mp() {
+  local file_to_check="product-spec.json"
+  [ -f "$file_to_check" ] && return 0 || echo_err "$(pwd) is not a LinkedIn MultiProduct (missing $file_to_check)" && return -1
+}
+
+show_usage() {
+  echo_err "Usage:"
+  # TODO with args from below
+  echo_err "  ${0##*/} <new-branch-name>"
+}
+
+
+# this is what is not tracked by git (from voyager-web):
+#
+# $ git clean -ndx
+# Would remove .eyeglass_cache/
+# Would remove .gradle/
+# Would remove .npmrc
+# Would remove .pemberlyrc
+# Would remove bower_components/
+# Would remove build/
+# Would remove config/
+# Would remove core/bower_components
+# Would remove core/node_modules
+# Would remove core/vendor/babel/
+# Would remove core/vendor/fake-jquery.js
+# Would remove dist/
+# Would remove extended/bower_components
+# Would remove extended/node_modules
+# Would remove extended/vendor/babel/
+# Would remove extended/vendor/fake-jquery.js
+# Would remove i18n/
+# Would remove node_modules/
+# Would remove pemberly
+# Would remove tmp/
+
+
+if in_linkedin_mp; then
+  username="$(whoami)"
+
+  if [ -n "$TMPDIR" ]; then
+    # $TMPDIR is set on OSX
+    disk_cache_dir="$TMPDIR/$username"
+  else
+    # try to determine the tmpdir used by node
+    # using node in the MP:
+    using_just="$(just node -e 'console.log(require("os").tmpdir())' | sed -e '/^[[:space:]]*#/d')"
+    # using system node:
+    using_system="$(node -e 'console.log(require("os").tmpdir())')"
+    if [ -n "$using_just" ]; then
+      disk_cache_dir="$using_just/$username"
+    elif [ -n "$using_system" ]; then
+      disk_cache_dir="$using_system/$username"
+    else
+      echo_err "could not figure out tmp directory"
+    fi
+  fi
+
+  # default: remove build products and disk_cache
+  echo_info "removing build files..."
+  do_cmd rm -rf .eyeglass_cache/ build/ dist/ tmp/
+
+  if [ -n "$disk_cache_dir" ]; then
+    echo_info "removing disk cache files..."
+    do_cmd rm -rf "$disk_cache_dir"
+  fi
+
+  # TODO optional args:
+  #  --deps   * removes all that above, as well as bower_components/ and node_modules/, and pemberly stuff - requires re-running `just init`
+  #  --all    * total clean, including config/ and i18n/ - requires running `mint update` and `just init`
+
+  # TODO arg to re-run those commands after cleaning? --
+  #  --init?
+fi
