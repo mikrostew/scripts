@@ -13,7 +13,8 @@
 #   set dropdowns so that 'Service recieves "no input" in "any application"'
 # In the second column containing the long list, double-click "Run Shell Script"
 #   (this adds the Run Shell Script window on the right)
-# Select "/bin/bash" in the "Shell" drop-down
+# Select "/bin/sh" in the "Shell" drop-down
+#   (so the shebang at the top of this file will use the correct bash)
 # Paste "/Users/mistewar/dotfiles/scripts/new_terminal" in the text box
 #   (the path to this script file)
 # In the top right, click the "Run" button and make sure this works as expected
