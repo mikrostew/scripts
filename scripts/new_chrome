@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# opens new iTerm2 window
+# opens new Chrome window
 
-# to set this up to run as hotkey Ctrl-⌥ -⌘ -T (Control-Option-Command-T)
+# to set this up to run as hotkey Ctrl-⌥ -⌘ -C (Control-Option-Command-C)
 # (instructions adapted from https://apple.stackexchange.com/a/276839)
 #
 # 1. Create a service using Automator
@@ -15,20 +15,20 @@
 #   (this adds the Run Shell Script window on the right)
 # Select "/bin/sh" in the "Shell" drop-down
 #   (so the shebang at the top of this file will use the correct bash)
-# Paste "/Users/mistewar/dotfiles/scripts/new_terminal" in the text box
+# Paste "/Users/mistewar/dotfiles/scripts/new_chrome" in the text box
 #   (the path to this script file)
 # In the top right, click the "Run" button and make sure this works as expected
 # File > Save...
-#   save this as "NewITermWindow"
+#   save this as "NewChromeWindow"
 #
 # 2. Create the hotkey shortcut
 #
 # System Preferences > Keyboard > Shortcuts
 # Select "Services" in the sidebar
-# Find "NewITermWindow" under "General"
+# Find "NewChromeWindow" under "General"
 # Click on the service name
 # Click "Add Shortcut"
-# type "Ctrl-⌥ -⌘ -T" (Control-Option-Command-T) to assign that shortcut
+# type "Ctrl-⌥ -⌘ -C" (Control-Option-Command-C) to assign that shortcut
 #
 # 3. Allow this shortcut to run from anywhere
 #   (should only have to set this up for the first Automator script)
@@ -45,6 +45,6 @@
 # Now you should be able to run this keyboard shortcut from anywhere
 
 
-# open an iTerm2 window
-osascript -e 'tell application "iTerm2" to create window with default profile'
+# open a new Chrome window (and bring it to the front with focus)
+osascript -e 'tell application "Google Chrome" to make new window activate'
 
