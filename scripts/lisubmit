@@ -257,7 +257,18 @@ echo -n "Commit message [$input_msg]: "
 read commit_msg
 if [ -z "$commit_msg" ]; then commit_msg="$input_msg"; fi
 
-echo -n "Commit message 2nd line (for PCLOVERRIDE, etc.) [$input_msg_extra_line]: "
+echo "Commit message 2nd line, for overrides"
+echo "These should only be used by oncall, or for immediate response situations:"
+echo "  ACLOVERRIDE           - cannot get an ACL owner to ship within your SLA"
+echo "  PCVALIDATIONOVERRIDE  - unblock trunk with a non-functional change (fixing ACL, extending whitelist)"
+echo "  LIXOVERDUEOVERRIDE    - if precommit is being blocked by an overdue lix"
+echo "  DISABLEDTESTOVERRIDE  - bypass enforcement of disabled tests per pillar"
+echo "  I18NOVERRIDE          - bypass i18n validation in precommit"
+echo "  PCLOVERRIDE           - fix compatibility test that is failing in PCL"
+echo "  EOLVALIDATIONOVERRIDE - commit is blocked by out of date dependency"
+echo "  TRUNKBLOCKERFIX       - override trunk lock"
+echo "  CHERRYPICKOVERRIDE    - commit a change to hotfix branch but not master"
+echo -n "[$input_msg_extra_line]: "
 read commit_msg_extra_line
 if [ -z "$commit_msg_extra_line" ]; then commit_msg_extra_line="$input_msg_extra_line"; fi
 
