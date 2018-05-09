@@ -74,9 +74,10 @@ if in_linkedin_mp; then
   else
     # try to determine the tmpdir used by node
     # using node in the MP:
+    # (have to filter out the junk printed by just)
     using_just="$(just node -e 'console.log(require("os").tmpdir())' | sed -e '/^[[:space:]]*#/d')"
     # using system node:
-    using_system="$(node -e 'console.log(require("os").tmpdir())')"
+    using_system="$(node -e 'console.log(require("os").tmpdir())' 2>/dev/null)"
     if [ -n "$using_just" ]; then
       disk_cache_dir="$using_just/$username"
     elif [ -n "$using_system" ]; then
@@ -99,6 +100,6 @@ if in_linkedin_mp; then
   #  --deps   * removes all that above, as well as bower_components/ and node_modules/, and pemberly stuff - requires re-running `just init`
   #  --all    * total clean, including config/ and i18n/ - requires running `mint update` and `just init`
 
-  # TODO arg to re-run those commands after cleaning? --
+  # TODO arg to re-run those commands after cleaning?
   #  --init?
 fi
