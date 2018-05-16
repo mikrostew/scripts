@@ -15,7 +15,7 @@
 #   (this adds the Run Shell Script window on the right)
 # Select "/bin/sh" in the "Shell" drop-down
 #   (so the shebang at the top of this file will use the correct bash)
-# Paste "/Users/mistewar/dotfiles/scripts/new_chrome" in the text box
+# Paste "$HOME/dotfiles/scripts/new_chrome" in the text box
 #   (the path to this script file)
 # In the top right, click the "Run" button and make sure this works as expected
 # File > Save...
