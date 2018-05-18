@@ -5,5 +5,5 @@
 
 # run eslint if it's installed globally or locally in node_modules/.bin/
 # don't install eslint if it's not available (this makes vim startup super slow)
-npx --no-install eslint "$@" || echo "v1.0.0"
+npx --no-install eslint "$@" 2>/dev/null || echo "v1.0.0"
 
