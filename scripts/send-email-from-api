@@ -10,5 +10,8 @@ pass="$($GET_API_TOKEN email-api-pass)"
 
 server="smtp.gmail.com:587"
 
-sendEmail -o tls=yes -f "$user" -t "$to_email" -s "$server" -xu "$user" -xp "$pass" -u "$subject" -m "$message"
+# from http://caspian.dotconf.net/menu/Software/SendEmail/
+# install with `brew install sendemail`
+# TODO: install for linux
+/usr/local/bin/sendEmail -o tls=yes -f "$user" -t "$to_email" -s "$server" -xu "$user" -xp "$pass" -u "$subject" -m "$message"
 
