@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# show the TODOs I have left in the code (outputs the lines in each file to /dev/tty)
+
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_RESET='\033[0m'
+
+in_dir="${1:-.}" # default to current directory ('.')
+
+grep --color=always -nrI\
+  --exclude-dir bower_components\
+  --exclude-dir node_modules\
+  --exclude-dir target\
+  --exclude-dir .git\
+  "TODO" "$in_dir"\
+  | tee /dev/tty\
+  | wc -l\
+  | tr -d '[:space:]'\
+  | echo -e "${COLOR_FG_BOLD_BLUE}total: $(cat -)${COLOR_RESET}"
+
