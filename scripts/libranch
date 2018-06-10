@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# standalone script to create a new branch (for LinkedIn workflow)
+# standalone script to create a new branch that tracks origin/master (for LinkedIn workflow)
 
-# TODO - blurb about how to use this
+# usage:
+#  libranch <branch-name>
 
 # colors
 COLOR_RESET='\033[0m'
@@ -22,7 +23,6 @@ echo_info() {
 
 # echo the input command and arguments, then run the command
 do_cmd() {
-  # echo -e "${COLOR_FG_GREEN}($@)${COLOR_RESET}" >&2
   echo_ack "($@)"
   # this is also helpful to see how things are being quoted when debugging issues
   ( set -x; "$@" )
