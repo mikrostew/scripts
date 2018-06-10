@@ -183,14 +183,6 @@ squash_commits() {
   return 0;
 }
 
-# trim leading and trailing double quotes
-trim_double_quotes() {
-  local string="$1"
-  string="${string#\"}"
-  string="${string%\"}"
-  echo "$string"
-}
-
 # get the API definition for review board at LinkedIn
 get_li_rb_api_def() {
   local api_def=""
@@ -210,19 +202,19 @@ get_li_rb_api_def() {
 
 # get the template to use for querying the RB api
 get_li_rb_uri_template() {
-  local template="$(get_li_rb_api_def | jq ".uri_templates.$1")"
-  echo "$(trim_double_quotes $template)"
+  template="$(get_li_rb_api_def | jq --raw-output ".uri_templates.$1")"
+  echo "$template"
 }
 
 # get RB title
 get_li_rb_title() {
   if [ -n "$1" ]; then
-    local api_uri_template=$(get_li_rb_uri_template "review_request")
-    local request_url=${api_uri_template/\{review_request_id\}/$1}
+    api_uri_template=$(get_li_rb_uri_template "review_request")
+    request_url=${api_uri_template/\{review_request_id\}/$1}
     if [ -n "$request_url" ]
     then
-      local summary=$(curl -X GET -H 'Accept: application/json' "$request_url" 2>/dev/null | jq '.review_request.summary')
-      echo "$(trim_double_quotes "$summary")"
+      summary=$(curl -X GET -H 'Accept: application/json' "$request_url" 2>/dev/null | jq --raw-output '.review_request.summary')
+      echo "$summary"
     fi
   fi
 }
