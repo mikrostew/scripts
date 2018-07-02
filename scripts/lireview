@@ -85,7 +85,7 @@ else
   then
     input_description="$1"
   else
-    # TODO - otherwise use the commit message
+    # otherwise use the commit message
     input_description="$(git log -1 --pretty=%B)"
   fi
   echo -n "Description of these changes [$input_description]: "
