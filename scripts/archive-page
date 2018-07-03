@@ -4,7 +4,19 @@
 
 page_url="${1:?No URL entered}"
 
-# TODO
+# check for required things
+requirements=( wget )
+all_reqs_ok="true"
+for executable in "${requirements[@]}"; do
+  if [ ! $(command -v $executable) ]; then
+    echo_err "'$executable' is required but not installed"
+    all_reqs_ok="false"
+  fi
+done
+if [ "$all_reqs_ok" == "false" ]; then
+  exit 1
+fi
+
 # explanation of the options:
 # --wait=1 - wait 1 second between retrievals, to ease the load on the server
 # --random-wait - vary the request time between 0.5 to 1.5 times the --wait seconds
