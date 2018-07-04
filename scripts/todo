@@ -12,7 +12,9 @@ grep --color=always -nrI\
   --exclude-dir node_modules\
   --exclude-dir target\
   --exclude-dir .git\
-  "TODO" "$in_dir"\
+  -e "# TODO" \
+  -e "// TODO" \
+  "$in_dir"\
   | tee /dev/tty\
   | wc -l\
   | tr -d '[:space:]'\
