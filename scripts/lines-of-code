@@ -19,12 +19,7 @@ valid_files=( $(echo "$@" | sed -E 's/[^[:space:]]+.swp\ //g') )
 
 all_files="$(cat ${valid_files[*]})"
 all_files_no_blank="$(echo "$all_files" | sed '/^[[:space:]]*$/d')"
-# TODO: detect the comment char from the text
-# - '//' for JS, CSS, C, Rust, Java, etc.
-# - '#' for bash, etc.
-# - '/*','*','*/' for C, Java, etc.
-# - '<!--','-->' for HTML
-all_files_no_comments="$(echo "$all_files_no_blank" | sed '/^[[:space:]]*#/d')"
+all_files_no_comments="$(echo "$all_files_no_blank" | sed '/^[[:space:]]*#/d' | sed '/^[[:space:]]*\/\//d')"
 
 num_lines="$(echo "$all_files" | wc -l )"
 num_lines_no_blank="$(echo "$all_files_no_blank" | wc -l )"
