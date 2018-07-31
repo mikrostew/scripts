@@ -1,17 +1,6 @@
 #!/usr/bin/env bash
 
 # count lines of code for the input files
-# (non-comment count currently only works for bash)
-
-# courtesy of https://stackoverflow.com/a/3352015
-trim() {
-  local var="$*"
-  # remove leading whitespace characters
-  var="${var#"${var%%[![:space:]]*}"}"
-  # remove trailing whitespace characters
-  var="${var%"${var##*[![:space:]]}"}"
-  echo -n "$var"
-}
 
 # TODO: not sure if these sed commands work on Linux
 # filter out *.swp files
@@ -19,14 +8,16 @@ valid_files=( $(echo "$@" | sed -E 's/[^[:space:]]+.swp\ //g') )
 
 all_files="$(cat ${valid_files[*]})"
 all_files_no_blank="$(echo "$all_files" | sed '/^[[:space:]]*$/d')"
+# strips comment lines starting with '#' and '//'
 all_files_no_comments="$(echo "$all_files_no_blank" | sed '/^[[:space:]]*#/d' | sed '/^[[:space:]]*\/\//d')"
 
-num_lines="$(echo "$all_files" | wc -l )"
-num_lines_no_blank="$(echo "$all_files_no_blank" | wc -l )"
-num_lines_no_comments="$(echo "$all_files_no_comments" | wc -l )"
+# count lines for each (from https://stackoverflow.com/a/42399738)
+num_lines="$(echo -n "$all_files" | grep -c '^' )"
+num_lines_no_blank="$(echo -n "$all_files_no_blank" | grep -c '^' )"
+num_lines_no_comments="$(echo -n "$all_files_no_comments" | grep -c '^' )"
 
 echo "Files          : ${#valid_files[@]}"
-echo "Total lines    : $(trim $num_lines)"
-echo "No empty lines : $(trim $num_lines_no_blank)"
-echo "No comments    : $(trim $num_lines_no_comments)"
+echo "Total lines    : $num_lines"
+echo "No empty lines : $num_lines_no_blank"
+echo "No comments    : $num_lines_no_comments"
 
