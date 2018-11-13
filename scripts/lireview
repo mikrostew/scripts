@@ -109,10 +109,10 @@ else
   # TODO: prompt for more things, with defaults?
 
   # because do_git function does not work inside spawn, just echo that here
-  echo_ack "(git review create --owners-only --open --description '$rb_description')"
+  echo_ack "( git review create --owners-only --open --description '$rb_description' )"
   # use `expect` to automatically answer the prompts, which look like this:
   expect <<EndOfGitReviewExpect
-    set timeout 30
+    set timeout 60
     spawn git review create --owners-only --open --description "$rb_description"
     # regex matches across newlines
     expect -re "^Recommended reviewers.*Additional reviewers.*"
