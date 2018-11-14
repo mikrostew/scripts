@@ -80,12 +80,6 @@ current_git_branch() {
   echo "$(git rev-parse --abbrev-ref HEAD)"
 }
 
-# repo url, without the 'ssh://git@' bit at the beginning
-git_repo_url() {
-  # from https://stackoverflow.com/a/16880000
-  echo "$(git ls-remote --get-url origin | sed -e 's/^ssh:\/\///' -e 's/^git@//')"
-}
-
 git_review_board_id() {
   echo "$(git config --get branch.$1.reviewid)"
 }
@@ -111,15 +105,6 @@ gpr() {
 
 in_git_repo() {
   git status >/dev/null && return 0 || return 1
-}
-
-in_git_submit_repo() {
-  # get the JSON showing which repos are supported for 'git submit'
-  local allowed_repos_json="$(curl https://tools.corp.linkedin.com/apps/tools/commit-queue-manager/api/v1/allowed-repos/ 2>/dev/null)"
-  # parse that into a list of only the repo URLs
-  local allowed_repos_text="$(echo $allowed_repos_json | jq '.repos | .[] | .repo_url')"
-  [[ "$allowed_repos_text" =~ "$1" ]]
-  return
 }
 
 in_mint_submit_repo() {
@@ -312,52 +297,34 @@ then
     exit 1
   fi
 
-  # check if can use 'git submit' (LinkedIn), otherwise need to 'git push'
-  repo_url="$(git_repo_url)"
-  echo_info "repo URL: '$repo_url'"
-  if in_git_submit_repo "$repo_url"; then
-    echo_info "supports git submit? YES"
-
-    # also, check product-spec.json for 'mint submit'
-    if in_mint_submit_repo; then
-      echo_info "supports mint submit? YES"
-      # mint submit
-      do_cmd mint submit
-      if [ "$?" -ne 0 ];then
-        echo_fail_banner
-      else
-        echo_success_banner
-      fi
-      # mint submit is async, so for now undo the merge in case I have to resubmit
-      echo_info "Undoing the merge so I can keep working..."
-      git_undo_merge "$branch_name"
+  # check product-spec.json for 'mint submit'
+  if in_mint_submit_repo; then
+    echo_info "supports mint submit? YES"
+    # mint submit
+    do_cmd mint submit
+    if [ "$?" -ne 0 ];then
+      echo_fail_banner
     else
-      echo_info "supports mint submit? NO"
-      # git submit
-      do_git submit
-      if [ "$?" -ne 0 ]; then
-        # submit failed, could be precommit, or ACL check, or whatever
-        echo_fail_banner
-        echo_info "Undoing the merge..."
-        git_undo_merge "$branch_name"
-        exit 1
-      fi
       echo_success_banner
-      echo_info "Pulling changes into master..."
-      # rebase to pick up the change
-      gpr
-      # and done!
     fi
+    # mint submit is async, so for now undo the merge in case I have to resubmit
+    echo_info "Undoing the merge so I can keep working..."
+    git_undo_merge "$branch_name"
   else
-    echo_info "supports git submit? NO"
-    do_git push
+    echo_info "supports mint submit? NO"
+    # git submit
+    do_git submit
     if [ "$?" -ne 0 ]; then
-      # push failed
+      # submit failed, could be precommit, or ACL check, or whatever
       echo_fail_banner
       echo_info "Undoing the merge..."
       git_undo_merge "$branch_name"
       exit 1
     fi
     echo_success_banner
+    echo_info "Pulling changes into master..."
+    # rebase to pick up the change
+    gpr
+    # and done!
   fi
 fi
