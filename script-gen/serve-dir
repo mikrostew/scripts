@@ -1,15 +1,15 @@
-#!/usr/bin/env bash
-
 # serve the files in the current directory
 # (from https://stackoverflow.com/a/7105609)
 
+# TODO: auto-generate some help docs
 # argument(s)
 # - port (optional)
 
 port="${1:-8080}"
 
-COLOR_RESET='\033[0m'
-COLOR_FG_BOLD_BLUE='\033[1;34m'
+# colors
+@@import COLOR_RESET from .bash_colors
+@@import COLOR_FG_BOLD_BLUE from .bash_colors
 
 address="$(ifconfig | awk '/inet / && $2 != "127.0.0.1"{print $2}')"
 echo -e "Current directory: ${COLOR_FG_BOLD_BLUE}$PWD${COLOR_RESET}"
