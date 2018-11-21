@@ -1,20 +1,21 @@
-#!/usr/bin/env bash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/send-email-from-outlook, and run './generate-scripts.sh'
-###########################################################################
-
 to_email="${1:?First arg is the to: email address}"
 subject="${2:?Second arg is the subject}"
 email_contents="${3:?Third arg is the email contents}"
+
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 from_addr="$($GET_API_TOKEN outlook-email)"
 user="$($GET_API_TOKEN outlook-user)"
 pass="$($GET_API_TOKEN outlook-pass)"
+
 outlook_smtp='smtp-mail.outlook.com:587'
+
+# from http://caspian.dotconf.net/menu/Software/SendEmail/
+# install with `brew install sendemail` or `yum install sendemail`
 SEND_EMAIL="$( \
   ([ -f /usr/local/bin/sendEmail ] && echo '/usr/local/bin/sendEmail') \
   || ([ -f /usr/bin/sendEmail ] && echo '/usr/bin/sendEmail') \
   || echo 'sendEmail' \
 )"
+
 $SEND_EMAIL -o tls=yes -f "$from_addr" -t "$to_email" -s "$outlook_smtp" -xu "$user" -xp "$pass" -u "$subject" -m "$email_contents"
+

@@ -1,0 +1,4 @@
+# a shim so I don't have to add cargo-watch to my path
+
+command "$HOME/src/cargo-watch/target/debug/cargo-watch" "$@"
+

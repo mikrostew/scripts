@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file script-gen/eslint-for-vim, and run './generate-scripts.sh'
+###########################################################################
 
-# provides a way for syntastic in vim to query the locally installed eslint version
-# (from from https://github.com/vim-syntastic/syntastic/issues/2102)
-
-# run eslint if it's installed globally or locally in node_modules/.bin/
-# don't install eslint if it's not available (this makes vim startup super slow)
 npx --no-install eslint "$@" 2>/dev/null || echo "v1.0.0"
-

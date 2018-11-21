@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-
-# download a webpage and all its requisites using wget
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file script-gen/archive-page, and run './generate-scripts.sh'
+###########################################################################
 
 page_url="${1:?No URL entered}"
-
-# check for required things
 requirements=( wget )
 all_reqs_ok="true"
 for executable in "${requirements[@]}"; do
@@ -16,13 +16,4 @@ done
 if [ "$all_reqs_ok" == "false" ]; then
   exit 1
 fi
-
-# explanation of the options:
-# --wait=1 - wait 1 second between retrievals, to ease the load on the server
-# --random-wait - vary the request time between 0.5 to 1.5 times the --wait seconds
-# --convert-links - after download, convert links to be suitable for local viewing
-# --page-requisites - download all the files required to display the page
-# --user-agent="" - don't send the user-agent header
-
 wget --wait=1 --random-wait --convert-links --page-requisites --user-agent="" "$page_url"
-

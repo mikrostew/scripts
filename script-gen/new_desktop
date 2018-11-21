@@ -1,0 +1,57 @@
+# opens new: iTerm2 window, Chrome window, and Sticky note
+
+# to set this up to run as hotkey Ctrl-⌥ -⌘ -D (Control-Option-Command-D)
+# (instructions adapted from https://apple.stackexchange.com/a/276839)
+#
+# 1. Create a service using Automator
+#
+# Launch Automator (hit ⌘ -Space and use spotlight)
+# File > New
+# Select "Service" and click "Choose"
+# In the top right hand of the window:
+#   select "No input" in the "Service receives" drop-down list
+#   select "Any application" in the "In" drop-down list
+# In the second column containing the long list, double-click "Run Shell Script"
+#   (this adds the Run Shell Script window on the right)
+# Select "/bin/sh" in the "Shell" drop-down
+#   (so the shebang at the top of this file will use the correct bash)
+# Paste "$HOME/dotfiles/scripts/new_desktop" in the text box
+#   (the path to this script file)
+# In the top right, click the "Run" button and make sure this works as expected
+# File > Save...
+#   save this as "PopulateNewDesktop"
+#
+# 2. Create the hotkey shortcut
+#
+# System Preferences > Keyboard > Shortcuts
+# Select "Services" in the sidebar
+# Find "PopulateNewDesktop" under "General"
+# Click on the service name
+# Click "Add Shortcut"
+# type "Ctrl-⌥ -⌘ -D" (Control-Option-Command-D) to assign that shortcut
+#
+# 3. Allow this shortcut to run from anywhere
+#   (should only have to set this up for the first Automator script)
+#
+# System Preferences > Security & Privacy > Privacy
+# click the padlock in the lower left to allow changes
+# Select "Accessibility" in the sidebar
+# Click on the + sign
+# Add Automator
+# Add Finder (navigate to /System/Library/CoreServices/Finder)
+# click the padlock to close it
+# Exit System Preferences
+#
+# Now you should be able to run this keyboard shortcut from anywhere
+
+
+# open an iTerm2 window
+osascript -e 'tell application "iTerm2" to create window with default profile'
+
+# open a new Chrome window (and bring it to the front with focus)
+osascript -e 'tell application "Google Chrome" to make new window activate'
+
+# create a new Sticky note
+osascript -e 'tell application "System Events" to keystroke "New Task"'
+osascript -e 'tell application "System Events" to keystroke "a" using {command down}'
+osascript -e 'tell application "System Events" to keystroke "y" using {shift down, command down}'

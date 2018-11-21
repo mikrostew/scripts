@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/new_firefox, and run './generate-scripts.sh'
+# the file script-gen/chrome-tabs, and run './generate-scripts.sh'
 ###########################################################################
 
-osascript -e 'tell application "Firefox Nightly" to activate'
-osascript -e 'tell application "System Events" to keystroke "n" using command down'
+strings "$HOME/Library/Application Support/Google/Chrome/Default/Current Session" | grep -E '^https?://' | sort | uniq

@@ -1,17 +1,21 @@
-#!/usr/bin/env bash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/lines-of-code, and run './generate-scripts.sh'
-###########################################################################
+# count lines of code for the input files
 
+# TODO: not sure if these sed commands work on Linux
+# filter out *.swp files
 valid_files=( $(echo "$@" | sed -E 's/[^[:space:]]+.swp\ //g') )
+
 all_files="$(cat ${valid_files[*]})"
 all_files_no_blank="$(echo "$all_files" | sed '/^[[:space:]]*$/d')"
+# strips comment lines starting with '#' and '//'
 all_files_no_comments="$(echo "$all_files_no_blank" | sed '/^[[:space:]]*#/d' | sed '/^[[:space:]]*\/\//d')"
+
+# count lines for each (from https://stackoverflow.com/a/42399738)
 num_lines="$(echo -n "$all_files" | grep -c '^' )"
 num_lines_no_blank="$(echo -n "$all_files_no_blank" | grep -c '^' )"
 num_lines_no_comments="$(echo -n "$all_files_no_comments" | grep -c '^' )"
+
 echo "Files          : ${#valid_files[@]}"
 echo "Total lines    : $num_lines"
 echo "No empty lines : $num_lines_no_blank"
 echo "No comments    : $num_lines_no_comments"
+

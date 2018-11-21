@@ -1,0 +1,62 @@
+# opens new iTerm2 window
+
+# to set this up to run as hotkey Ctrl-⌥ -⌘ -T (Control-Option-Command-T)
+# (instructions adapted from https://apple.stackexchange.com/a/276839)
+#
+# 1. Create a service using Automator
+#
+# Launch Automator (hit ⌘ -Space and use spotlight)
+# File > New
+# Select "Service" and click "Choose"
+# In the top right hand of the window:
+#   set dropdowns so that 'Service recieves "no input" in "any application"'
+# In the second column containing the long list, double-click "Run Shell Script"
+#   (this adds the Run Shell Script window on the right)
+# Select "/bin/sh" in the "Shell" drop-down
+#   (so the shebang at the top of this file will use the correct bash)
+# Paste "$HOME/dotfiles/scripts/new_terminal" in the text box
+#   (the path to this script file)
+# In the top right, click the "Run" button and make sure this works as expected
+# File > Save...
+#   save this as "NewITermWindow"
+#
+# 2. Create the hotkey shortcut
+#
+# System Preferences > Keyboard > Shortcuts
+# Select "Services" in the sidebar
+# Find "NewITermWindow" under "General"
+# Click on the service name
+# Click "Add Shortcut"
+# type "Ctrl-⌥ -⌘ -T" (Control-Option-Command-T) to assign that shortcut
+#
+# 3. Allow this shortcut to run from anywhere
+#   (should only have to set this up for the first Automator script)
+#
+# System Preferences > Security & Privacy > Privacy
+# click the padlock in the lower left to allow changes
+# Select "Accessibility" in the sidebar
+# Click on the + sign
+# Add Automator
+# Add Finder (navigate to /System/Library/CoreServices/Finder)
+# click the padlock to close it
+# Exit System Preferences
+#
+# Now you should be able to run this keyboard shortcut from anywhere
+
+# open an iTerm2 window
+
+osascript -e 'tell application "iTerm2" to create window with default profile'
+
+# resize because it's always too small
+
+# this returns something like "159 -1142 959 -542"
+bounds=$(osascript -e 'tell application "iTerm2" to get bounds of front window' | sed 's/,//g')
+# parse that and set new dimensions
+bounds_array=( $bounds )
+start_x=${bounds_array[0]}
+start_y=${bounds_array[1]}
+new_width=$(($start_x + 1200))
+new_height=$(($start_y + 800))
+new_bounds="{ $start_x, $start_y, $new_width, $new_height }"
+osascript -e "tell application \"iTerm2\" to set bounds of front window to $new_bounds"
+

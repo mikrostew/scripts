@@ -1,14 +1,19 @@
-#!/usr/bin/env bash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/lireview, and run './generate-scripts.sh'
-###########################################################################
+# create a new RB from the local changes, or update existing review
 
+# TODO - blurb about how to use this
+
+# SETTINGS
 ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
-COLOR_RESET='\033[0m'
-COLOR_FG_RED='\033[0;31m'
-COLOR_FG_GREEN='\033[0;32m'
-COLOR_FG_BOLD_BLUE='\033[1;34m'
+
+# TODO - do I need the rest of this stuff?
+
+# colors
+@@import COLOR_RESET from .bash_colors
+@@import COLOR_FG_RED from .bash_colors
+@@import COLOR_FG_GREEN from .bash_colors
+@@import COLOR_FG_BOLD_BLUE from .bash_colors
+
+# TODO: import these functions
 echo_err() {
   echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" >&2
 }
@@ -18,19 +23,31 @@ echo_ack() {
 echo_info() {
   echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" >&2
 }
+
+
+# echo the input command and arguments, then run the command
 do_cmd() {
   echo_ack "($@)"
+  # this is also helpful to see how things are being quoted when debugging issues
   ( set -x; "$@" )
 }
+
+# run git with the input arguments
+# (any destructive commands should use this, to see what's being changed)
 do_git() {
   do_cmd git "$@"
 }
+
 current_git_branch() {
   echo "$(git rev-parse --abbrev-ref HEAD)"
 }
+
 git_review_board_id() {
   echo "$(git config --get branch.$1.reviewid)"
 }
+
+
+# check for required things
 requirements=( jq expect )
 all_reqs_ok="true"
 for executable in "${requirements[@]}"; do
@@ -42,11 +59,22 @@ done
 if [ "$all_reqs_ok" == "false" ]; then
   exit 1
 fi
+
+
+
 branch_name=$(current_git_branch)
 review_id="$(git_review_board_id $branch_name)"
+
+# check if there is already a RB for this branch
 if [ -n "$review_id" ]
 then
+  # update
+
+  # TODO: check if ACL is covered, then do platform-review if that is required?
+  # see go/voyager/web/platform-review for details of that command
+
   echo_info "RB $review_id already exists for this branch - updating..."
+  # if there is an argument supplied, use that for the description
   input_description="$1"
   echo -n "Description of these changes [$input_description]: "
   read diff_description
@@ -55,12 +83,17 @@ then
     diff_description="$input_description"
   fi
   do_git review update --open --diff-description "$diff_description"
+  # use `git review update --help` to figure out how to add other options
 else
+  # create
+
   echo_info "No RB for this branch - creating one..."
+  # if there is an argument supplied, use that for the description
   if [ -n "$1" ]
   then
     input_description="$1"
   else
+    # otherwise use the commit message
     input_description="$(git log -1 --pretty=%B)"
   fi
   echo -n "Description of these changes [$input_description]: "
@@ -69,12 +102,21 @@ else
   then
     rb_description="$input_description"
   fi
+
+  # TODO: prompt for more things, with defaults?
+
+  # because do_git function does not work inside spawn, just echo that here
   echo_ack "( git review create --owners-only --open --description '$rb_description' )"
+  # use `expect` to automatically answer the prompts, which look like this:
   expect <<EndOfGitReviewExpect
     set timeout 60
     spawn git review create --owners-only --open --description "$rb_description"
+    # regex matches across newlines
     expect -re "^Recommended reviewers.*Additional reviewers.*"
     send "$ADDITIONAL_USERS_GROUPS\n"
+    # allow command to run to completion
     expect eof
 EndOfGitReviewExpect
+  # use `git review create --help` to figure out how to add other options
 fi
+
