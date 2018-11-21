@@ -1,12 +1,12 @@
-#!/usr/bin/env bash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/weather, and run './generate-scripts.sh'
-###########################################################################
+# get current weather by zip code
+# using OpenWeatherMap API - http://openweathermap.org/api
 
-COLOR_RESET='\033[0m'
-COLOR_FG_BOLD_BLUE='\033[1;34m'
+@@import COLOR_RESET from .bash_colors
+@@import COLOR_FG_BOLD_BLUE from .bash_colors
+
+# Daly City, Mountain View, SF
 zip_codes=( 94015 94043 94105 )
+
 for zip in ${zip_codes[*]}; do
   api_key="$($HOME/Dropbox/secret/get-api-token open-weather-map)"
   page=$(curl "http://api.openweathermap.org/data/2.5/weather?zip=${zip},us&appid=${api_key}" 2>/dev/null)
@@ -17,9 +17,11 @@ for zip in ${zip_codes[*]}; do
   humidity="$(echo $page | jq --raw-output -M '.main.humidity')"
   main="$(echo $page | jq --raw-output -M '.weather | .[0] | .main')"
   description="$(echo $page | jq --raw-output -M '.weather | .[0] | .description')"
+
   echo -e "${COLOR_FG_BOLD_BLUE}$name${COLOR_RESET} ($zip)"
   echo -e "Weather:     ${COLOR_FG_BOLD_BLUE}$main - $description${COLOR_RESET}"
   echo -e "Temperature: ${COLOR_FG_BOLD_BLUE}$temp_f${COLOR_RESET}°F (${temp_celcius}°C)"
   echo -e "Humidity:    ${COLOR_FG_BOLD_BLUE}$humidity${COLOR_RESET}%"
   echo ""
 done
+
