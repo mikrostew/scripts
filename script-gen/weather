@@ -1,8 +1,8 @@
 # get current weather by zip code
 # using OpenWeatherMap API - http://openweathermap.org/api
 
-@@import COLOR_RESET from .bash_colors
-@@import COLOR_FG_BOLD_BLUE from .bash_colors
+@import COLOR_RESET from .bash_colors
+@import COLOR_FG_BOLD_BLUE from .bash_colors
 
 # Daly City, Mountain View, SF
 zip_codes=( 94015 94043 94105 )

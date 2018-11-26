@@ -1,7 +1,7 @@
 # show any TODOs contained in comments in source code
 
-@@import COLOR_RESET from .bash_colors
-@@import COLOR_FG_BOLD_BLUE from .bash_colors
+@import COLOR_RESET from .bash_colors
+@import COLOR_FG_BOLD_BLUE from .bash_colors
 
 in_dir="${1:-.}" # default to current directory
 

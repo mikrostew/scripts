@@ -1,7 +1,7 @@
 # open the browser with info on the input stock
 
-@@import COLOR_RESET from .bash_colors
-@@import COLOR_FG_RED from .bash_colors
+@import COLOR_RESET from .bash_colors
+@import COLOR_FG_RED from .bash_colors
 
 err_no_symbol="$(echo -e "${COLOR_FG_RED}Error: No stock symbol provided${COLOR_RESET}")"
 stock_symbol="${1:?$err_no_symbol}"

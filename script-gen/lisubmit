@@ -6,10 +6,10 @@
 use_merge_tool="opendiff"
 
 # colors
-@@import COLOR_RESET from .bash_colors
-@@import COLOR_FG_RED from .bash_colors
-@@import COLOR_FG_GREEN from .bash_colors
-@@import COLOR_FG_BOLD_BLUE from .bash_colors
+@import COLOR_RESET from .bash_colors
+@import COLOR_FG_RED from .bash_colors
+@import COLOR_FG_GREEN from .bash_colors
+@import COLOR_FG_BOLD_BLUE from .bash_colors
 
 # TODO: import these functions
 echo_err() {

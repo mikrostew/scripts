@@ -5,17 +5,10 @@
 ###########################################################################
 
 COLOR_RESET='\033[0m'
-COLOR_FG_RED='\033[0;31m'
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_BOLD_BLUE='\033[1;34m'
-echo_err() {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" >&2
-}
-echo_ack() {
-  echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" >&2
-}
-echo_info() {
-  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" >&2
+echo_info ()
+{
+    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
 }
 join() {
   local IFS="/"
