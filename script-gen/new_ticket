@@ -1,9 +1,5 @@
 # pastes template into Description field when creating a new Jira ticket
 
-# colors
-# TODO: don't need all of these - only what echo_info needs...
-@import COLOR_RESET from .bash_colors
-@import COLOR_FG_BOLD_BLUE from .bash_colors
 @import echo_info from .bash_shared_functions
 
 join() {

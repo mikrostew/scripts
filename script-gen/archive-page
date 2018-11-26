@@ -1,5 +1,7 @@
 # download a webpage and all its requisites using wget
 
+@import echo_err from .bash_shared_functions
+
 page_url="${1:?No URL entered}"
 
 # check for required things

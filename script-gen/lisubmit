@@ -2,25 +2,12 @@
 
 # TODO - blurb about how to use this
 
+@import echo_err from .bash_shared_functions
+@import echo_ack from .bash_shared_functions
+@import echo_info from .bash_shared_functions
+
 # SETTINGS
 use_merge_tool="opendiff"
-
-# colors
-@import COLOR_RESET from .bash_colors
-@import COLOR_FG_RED from .bash_colors
-@import COLOR_FG_GREEN from .bash_colors
-@import COLOR_FG_BOLD_BLUE from .bash_colors
-
-# TODO: import these functions
-echo_err() {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" >&2
-}
-echo_ack() {
-  echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" >&2
-}
-echo_info() {
-  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" >&2
-}
 
 echo_fail_banner() {
   echo_err "***************";

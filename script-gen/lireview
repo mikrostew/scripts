@@ -5,25 +5,11 @@
 # SETTINGS
 ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
 
-# TODO - do I need the rest of this stuff?
+# TODO - do I need all of this stuff?
 
-# colors
-@import COLOR_RESET from .bash_colors
-@import COLOR_FG_RED from .bash_colors
-@import COLOR_FG_GREEN from .bash_colors
-@import COLOR_FG_BOLD_BLUE from .bash_colors
-
-# TODO: import these functions
-echo_err() {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" >&2
-}
-echo_ack() {
-  echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" >&2
-}
-echo_info() {
-  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" >&2
-}
-
+@import echo_err from .bash_shared_functions
+@import echo_ack from .bash_shared_functions
+@import echo_info from .bash_shared_functions
 
 # echo the input command and arguments, then run the command
 do_cmd() {
