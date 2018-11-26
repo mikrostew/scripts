@@ -1,16 +1,15 @@
 # serve the files in the current directory
 # (from https://stackoverflow.com/a/7105609)
 
+# TODO: multiple imports on one line would be nice
+@import COLOR_RESET from .bash_colors
+@import COLOR_FG_BOLD_BLUE from .bash_colors
+
 # TODO: auto-generate some help docs
 # argument(s)
 # - port (optional)
 
 port="${1:-8080}"
-
-# colors
-# TODO: multiple imports on one line would be nice
-@import COLOR_RESET from .bash_colors
-@import COLOR_FG_BOLD_BLUE from .bash_colors
 
 address="$(ifconfig | awk '/inet / && $2 != "127.0.0.1"{print $2}')"
 echo -e "Current directory: ${COLOR_FG_BOLD_BLUE}$PWD${COLOR_RESET}"

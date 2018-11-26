@@ -7,35 +7,9 @@
 @import echo_ack from .bash_shared_functions
 @import echo_info from .bash_shared_functions
 
-# echo the input command and arguments, then run the command
-do_cmd() {
-  echo_ack "($@)"
-  # this is also helpful to see how things are being quoted when debugging issues
-  ( set -x; "$@" )
-}
-
-# run git with the input arguments
-# (any destructive commands should use this, to see what's being changed)
-do_git() {
-  do_cmd git "$@"
-}
-
-current_git_branch() {
-  echo "$(git rev-parse --abbrev-ref HEAD)"
-}
-
-in_git_repo() {
-  git status >/dev/null && return 0 || return 1
-}
-
-on_git_branch() {
-  [ "$(current_git_branch)" != "$1" ] && echo_err ">_<  Must be on branch '$1' for this" && return -1 || return 0
-}
-
-show_usage() {
-  echo_err "Usage:"
-  echo_err "  ${0##*/} <new-branch-name>"
-}
+@import do_git from .bash_git
+@import in_git_repo from .bash_git
+@import on_git_branch from .bash_git
 
 
 # arguments
@@ -44,8 +18,8 @@ new_branch_name="$1"
 if [ -z "$new_branch_name" ]
 then
   echo_err "ERROR: Missing branch name"
-  show_usage
-  exit 1
+  echo_err "Usage:"
+  echo_err "  ${0##*/} <new-branch-name>"
 fi
 
 

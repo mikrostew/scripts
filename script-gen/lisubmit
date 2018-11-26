@@ -5,93 +5,21 @@
 @import echo_err from .bash_shared_functions
 @import echo_ack from .bash_shared_functions
 @import echo_info from .bash_shared_functions
+@import echo_fail_banner from .bash_shared_functions
+@import echo_success_banner from .bash_shared_functions
+@import do_cmd from .bash_shared_functions
 
-# SETTINGS
-use_merge_tool="opendiff"
-
-echo_fail_banner() {
-  echo_err "***************";
-  echo_err "*  Failed :(  *";
-  echo_err "***************";
-}
-echo_success_banner() {
-  echo_ack "****************";
-  echo_ack "*  Success :)  *";
-  echo_ack "****************";
-}
-
-show_usage() {
-  echo_err "Usage:"
-  echo_err "  ${0##*/} <commit-msg> [, <commit-msg-extra-line>]"
-}
-
-# echo the input command and arguments, then run the command
-do_cmd() {
-  # echo -e "${COLOR_FG_GREEN}($@)${COLOR_RESET}" >&2
-  echo_ack "($@)"
-  # this is also helpful to see how things are being quoted when debugging issues
-  ( set -x; "$@" )
-}
-
-# run git with the input arguments
-# (any destructive commands should use this, to see what's being changed)
-do_git() {
-  do_cmd git "$@"
-}
-
-
-based_on_master_or_origin() {
-  # adapted from https://stackoverflow.com/a/9753364
-  local tracking_branch="$(git rev-parse --abbrev-ref --symbolic-full-name $1@{u} 2>/dev/null)"
-  if [ "$tracking_branch" == "origin/master" ]; then
-    echo "origin/master"
-  else
-    echo "master"
-  fi
-}
-
-# number of changes between two input branches
-# (typically a branch and master, or master and origin/master)
-commit_diff_on_branch() {
-  local git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)"
-  if [ "$?" -eq 0 ] && [ -n "$git_rev_list_origin" ]; then
-    local git_origin_arr=($git_rev_list_origin) # splits into array - it's 2 numbers separated by spaces
-    echo "${git_origin_arr[0]}"
-  else
-    echo "0"
-  fi
-}
-
-current_git_branch() {
-  echo "$(git rev-parse --abbrev-ref HEAD)"
-}
-
-git_review_board_id() {
-  echo "$(git config --get branch.$1.reviewid)"
-}
-
-# undo the last merge that was done (usually because something failed)
-git_undo_merge() {
-  do_git reset --merge ORIG_HEAD && do_git checkout "$1"
-}
-
-# run mergetool for conflicts (git mergetool)
-gmt() {
-  # TODO: different tool for different platforms (Mac/Linux)
-  do_git mergetool --tool=$use_merge_tool
-}
-
-# pull changes from origin, with rebase (git pull rebase)
-gpr() {
-  # sometimes `git pull --rebase` fails with "fatal: Cannot rebase onto multiple branches."
-  # so try doing the full command (https://stackoverflow.com/a/35844073)
-  local branch_name=$(current_git_branch)
-  do_git pull origin $branch_name --rebase
-}
-
-in_git_repo() {
-  git status >/dev/null && return 0 || return 1
-}
+@import do_git from .bash_git
+@import current_git_branch from .bash_git
+@import git_review_board_id from .bash_git
+@import git_undo_merge from .bash_git
+@import gmt from .bash_git
+@import gpr from .bash_git
+@import in_git_repo from .bash_git
+@import no_uncommitted_changes from .bash_git
+@import not_on_git_branch from .bash_git
+@import squash_branch from .bash_git
+@import get_li_rb_title from .bash_git
 
 in_mint_submit_repo() {
   if [ -f "$PWD/product-spec.json" ]; then
@@ -105,94 +33,14 @@ in_mint_submit_repo() {
   fi
 }
 
-no_uncommitted_changes() {
-  [ "$(git status --porcelain --untracked-files=no)" != "" ] && echo_err ">_<  You have uncommitted changes" && return -1 || return 0
+show_usage() {
+  echo_err "Usage:"
+  echo_err "  ${0##*/} <commit-msg> [, <commit-msg-extra-line>]"
 }
-
-not_on_git_branch() {
-  [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
-}
-
-# squash commits in current branch into a single commit
-squash_branch() {
-  # arguments: <commit-message> [, <extra-line>]
-  local branch_name=$(current_git_branch)
-  local based_on=$(based_on_master_or_origin $branch_name)
-  # TODO: this may not be what I want in all situations?
-  local num_commits_on_branch="$(commit_diff_on_branch $branch_name $based_on)"
-  echo_info "$num_commits_on_branch change(s) between '$branch_name' and '$based_on'"
-  squash_commits "$num_commits_on_branch" "$1" "$2"
-}
-
-# squash the input number of commits on the current branch
-# $1: number of commits to squash
-# $2: commit message
-# $3: extra line for message (extra info, overrides, etc.)
-squash_commits() {
-  if [ -n "$1" ] && [ "$1" -gt 0 ]; then
-    if [ -n "$2" ]; then
-      if [ -n "$3" ]; then
-        # multiple lines of commit messages
-        do_git reset --soft HEAD~${1} && do_git commit -m "$2" -m "$3"
-      else
-        # "squash" commits by combining all into a single commit
-        # don't run precommit hooks here (which could cause failure at this point)
-        do_git reset --soft HEAD~${1} && do_git commit -n -m "$2"
-      fi
-      if [ "$?" -ne 0 ]; then
-        echo_err "Dang it! Squashing commits failed somehow"
-        return 1;
-      fi
-    else
-      echo_err "Come on! You gotta have a commit message"
-      return 1;
-    fi
-  else
-    echo_err "-_- No changes to squash"
-    return 1;
-  fi
-  return 0;
-}
-
-# get the API definition for review board at LinkedIn
-get_li_rb_api_def() {
-  local api_def=""
-  local cache_file="$DOTFILES_DIR/cache/li-rb-api-def.cache"
-  local cache_file_expired="$(find $cache_file -mtime +1)" # if cache file is older than 1 day
-
-  if [ -n "$cache_file_expired" ]; then
-    echo_err "not cached, requesting..."
-    api_def="$(curl -X GET -H 'Accept: application/json' 'https://rb.corp.linkedin.com/api/' 2>/dev/null)"
-    # TODO check return code for error
-    echo "$api_def" > "$cache_file"
-  else
-    api_def=$(<"$cache_file")
-  fi
-  echo "$api_def"
-}
-
-# get the template to use for querying the RB api
-get_li_rb_uri_template() {
-  template="$(get_li_rb_api_def | jq --raw-output ".uri_templates.$1")"
-  echo "$template"
-}
-
-# get RB title
-get_li_rb_title() {
-  if [ -n "$1" ]; then
-    api_uri_template=$(get_li_rb_uri_template "review_request")
-    request_url=${api_uri_template/\{review_request_id\}/$1}
-    if [ -n "$request_url" ]
-    then
-      summary=$(curl -X GET -H 'Accept: application/json' "$request_url" 2>/dev/null | jq --raw-output '.review_request.summary')
-      echo "$summary"
-    fi
-  fi
-}
-
 
 # required things
 # check for required things
+# TODO: extract this to a function
 requirements=( jq )
 all_reqs_ok="true"
 for executable in "${requirements[@]}"; do

@@ -2,38 +2,19 @@
 
 # TODO - blurb about how to use this
 
-# SETTINGS
-ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
-
-# TODO - do I need all of this stuff?
-
 @import echo_err from .bash_shared_functions
 @import echo_ack from .bash_shared_functions
 @import echo_info from .bash_shared_functions
 
-# echo the input command and arguments, then run the command
-do_cmd() {
-  echo_ack "($@)"
-  # this is also helpful to see how things are being quoted when debugging issues
-  ( set -x; "$@" )
-}
+@import do_git from .bash_git
+@import git_review_board_id from .bash_git
+@import current_git_branch from .bash_git
 
-# run git with the input arguments
-# (any destructive commands should use this, to see what's being changed)
-do_git() {
-  do_cmd git "$@"
-}
-
-current_git_branch() {
-  echo "$(git rev-parse --abbrev-ref HEAD)"
-}
-
-git_review_board_id() {
-  echo "$(git config --get branch.$1.reviewid)"
-}
-
+# SETTINGS
+ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
 
 # check for required things
+# TODO: factor out this function
 requirements=( jq expect )
 all_reqs_ok="true"
 for executable in "${requirements[@]}"; do
@@ -45,8 +26,6 @@ done
 if [ "$all_reqs_ok" == "false" ]; then
   exit 1
 fi
-
-
 
 branch_name=$(current_git_branch)
 review_id="$(git_review_board_id $branch_name)"

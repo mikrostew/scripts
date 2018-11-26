@@ -5,6 +5,7 @@
 page_url="${1:?No URL entered}"
 
 # check for required things
+# TODO: factor this out as a function
 requirements=( wget )
 all_reqs_ok="true"
 for executable in "${requirements[@]}"; do

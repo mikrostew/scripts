@@ -12,17 +12,26 @@ echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
-echo_ack ()
+do_cmd ()
 {
-    echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
+    echo -en "${COLOR_FG_GREEN}( " 1>&2;
+    for arg in "$@";
+    do
+        case "$arg" in
+            *\ *)
+                echo -n "\"$arg\" "
+            ;;
+            *)
+                echo -n "$arg "
+            ;;
+        esac;
+    done;
+    echo -e ")${COLOR_RESET}" 1>&2;
+    command "$@"
 }
 echo_info ()
 {
     echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
-}
-do_cmd() {
-  echo_ack "($@)"
-  ( set -x; "$@" )
 }
 in_linkedin_mp() {
   local file_to_check="product-spec.json"
