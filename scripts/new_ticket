@@ -4,8 +4,8 @@
 # the file script-gen/new_ticket, and run './generate-scripts.sh'
 ###########################################################################
 
-COLOR_RESET='\033[0m'
 COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_RESET='\033[0m'
 echo_info ()
 {
     echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2

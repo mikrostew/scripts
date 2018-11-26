@@ -4,8 +4,8 @@
 # the file script-gen/todo, and run './generate-scripts.sh'
 ###########################################################################
 
-COLOR_RESET='\033[0m'
 COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_RESET='\033[0m'
 in_dir="${1:-.}" # default to current directory
 hash_comments='#'         # Python, Bash, Ruby, Perl
 slash_comments='//'       # C/C++, Javascript, Java, PHP

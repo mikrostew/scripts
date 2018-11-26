@@ -4,14 +4,7 @@
 # TODO: don't need all of these - only what echo_info needs...
 @import COLOR_RESET from .bash_colors
 @import COLOR_FG_BOLD_BLUE from .bash_colors
-
-# TODO: import these functions
-# like:
 @import echo_info from .bash_shared_functions
-# instead of:
-# echo_info() {
-#   echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" >&2
-# }
 
 join() {
   local IFS="/"

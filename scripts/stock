@@ -4,8 +4,8 @@
 # the file script-gen/stock, and run './generate-scripts.sh'
 ###########################################################################
 
-COLOR_RESET='\033[0m'
 COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
 err_no_symbol="$(echo -e "${COLOR_FG_RED}Error: No stock symbol provided${COLOR_RESET}")"
 stock_symbol="${1:?$err_no_symbol}"
 stock_url="https://finance.yahoo.com/quote/$stock_symbol/"

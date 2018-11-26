@@ -4,8 +4,8 @@
 # the file script-gen/weather, and run './generate-scripts.sh'
 ###########################################################################
 
-COLOR_RESET='\033[0m'
 COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_RESET='\033[0m'
 zip_codes=( 94015 94043 94105 )
 for zip in ${zip_codes[*]}; do
   api_key="$($HOME/Dropbox/secret/get-api-token open-weather-map)"

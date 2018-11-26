@@ -4,9 +4,9 @@
 # the file script-gen/serve-dir, and run './generate-scripts.sh'
 ###########################################################################
 
-port="${1:-8080}"
-COLOR_RESET='\033[0m'
 COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_RESET='\033[0m'
+port="${1:-8080}"
 address="$(ifconfig | awk '/inet / && $2 != "127.0.0.1"{print $2}')"
 echo -e "Current directory: ${COLOR_FG_BOLD_BLUE}$PWD${COLOR_RESET}"
 echo -e "Serving at ${COLOR_FG_BOLD_BLUE}$address:$port${COLOR_RESET}"
