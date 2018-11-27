@@ -4,5 +4,21 @@
 # the file script-gen/new_firefox, and run './generate-scripts.sh'
 ###########################################################################
 
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+requirement_check osascript "search 'how to install osascript'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 osascript -e 'tell application "Firefox Nightly" to activate'
 osascript -e 'tell application "System Events" to keystroke "n" using command down'

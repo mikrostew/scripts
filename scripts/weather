@@ -6,6 +6,28 @@
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_RESET='\033[0m'
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+requirement_check bc "search 'how to install bc'"
+combined_return=$(( combined_return + $? ))
+requirement_check jq "search 'how to install jq'"
+combined_return=$(( combined_return + $? ))
+requirement_check xargs "search 'how to install xargs'"
+combined_return=$(( combined_return + $? ))
+requirement_check curl "search 'how to install curl'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 zip_codes=( 94015 94043 94105 )
 for zip in ${zip_codes[*]}; do
   api_key="$($HOME/Dropbox/secret/get-api-token open-weather-map)"

@@ -45,6 +45,7 @@
 #
 # Now you should be able to run this keyboard shortcut from anywhere
 
+@uses_cmds osascript
 
 # open an iTerm2 window
 osascript -e 'tell application "iTerm2" to create window with default profile'

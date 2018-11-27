@@ -5,6 +5,8 @@
 @import COLOR_RESET from .bash_colors
 @import COLOR_FG_BOLD_BLUE from .bash_colors
 
+@uses_cmds curl jq bc xargs
+
 # Daly City, Mountain View, SF
 zip_codes=( 94015 94043 94105 )
 

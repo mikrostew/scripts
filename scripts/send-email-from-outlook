@@ -4,6 +4,22 @@
 # the file script-gen/send-email-from-outlook, and run './generate-scripts.sh'
 ###########################################################################
 
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+requirement_check sendEmail "search 'how to install sendEmail'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 to_email="${1:?First arg is the to: email address}"
 subject="${2:?Second arg is the subject}"
 email_contents="${3:?Third arg is the email contents}"
@@ -12,9 +28,4 @@ from_addr="$($GET_API_TOKEN outlook-email)"
 user="$($GET_API_TOKEN outlook-user)"
 pass="$($GET_API_TOKEN outlook-pass)"
 outlook_smtp='smtp-mail.outlook.com:587'
-SEND_EMAIL="$( \
-  ([ -f /usr/local/bin/sendEmail ] && echo '/usr/local/bin/sendEmail') \
-  || ([ -f /usr/bin/sendEmail ] && echo '/usr/bin/sendEmail') \
-  || echo 'sendEmail' \
-)"
-$SEND_EMAIL -o tls=yes -f "$from_addr" -t "$to_email" -s "$outlook_smtp" -xu "$user" -xp "$pass" -u "$subject" -m "$email_contents"
+sendEmail -o tls=yes -f "$from_addr" -t "$to_email" -s "$outlook_smtp" -xu "$user" -xp "$pass" -u "$subject" -m "$email_contents"

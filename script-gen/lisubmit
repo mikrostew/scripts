@@ -22,6 +22,8 @@
 @import squash_branch from .bash_git
 @import get_li_rb_title from .bash_git
 
+@uses_cmds jq
+
 in_mint_submit_repo() {
   if [ -f "$PWD/product-spec.json" ]; then
     # test if there is something defined for 'mint submit'
@@ -39,26 +41,9 @@ show_usage() {
   echo_err "  ${0##*/} <commit-msg> [, <commit-msg-extra-line>]"
 }
 
-# required things
-# check for required things
-# TODO: extract this to a function
-requirements=( jq )
-all_reqs_ok="true"
-for executable in "${requirements[@]}"; do
-  if [ ! $(command -v $executable) ]; then
-    echo_err "'$executable' is required but not installed"
-    all_reqs_ok="false"
-  fi
-done
-if [ "$all_reqs_ok" == "false" ]; then
-  exit 1
-fi
-
-
 # arguments
 input_msg="$1"
 input_msg_extra_line="$2" # optional
-
 
 branch_name="$(current_git_branch)"
 

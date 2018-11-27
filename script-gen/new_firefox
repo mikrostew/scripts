@@ -44,6 +44,7 @@
 #
 # Now you should be able to run this keyboard shortcut from anywhere
 
+@uses_cmds osascript
 
 # open a new Firefox window (and bring it to the front with focus)
 # (I'm running nightly version)

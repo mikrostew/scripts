@@ -44,6 +44,8 @@
 #
 # Now you should be able to run this keyboard shortcut from anywhere
 
+@uses_cmds pbpaste osascript
+
 clipboard_contents="$(pbpaste)"
 
 if [[ "$clipboard_contents" =~ ^http ]]

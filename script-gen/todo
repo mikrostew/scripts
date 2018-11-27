@@ -4,6 +4,8 @@
 @import COLOR_RESET from .bash_colors
 @import COLOR_FG_BOLD_BLUE from .bash_colors
 
+@uses_cmds grep wc tr
+
 in_dir="${1:-.}" # default to current directory
 
 # possible comment styles

@@ -4,6 +4,22 @@
 # the file script-gen/send-email-from-api, and run './generate-scripts.sh'
 ###########################################################################
 
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+requirement_check sendEmail "search 'how to install sendEmail'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 to_email="${1:?First arg is the to: email address}"
 subject="${2:?Second arg is the subject}"
 message="${3:?Third arg is the message}"
@@ -11,9 +27,4 @@ GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 user="$($GET_API_TOKEN email-api-user)"
 pass="$($GET_API_TOKEN email-api-pass)"
 server="smtp.gmail.com:587"
-SEND_EMAIL="$( \
-  ([ -f /usr/local/bin/sendEmail ] && echo '/usr/local/bin/sendEmail') \
-  || ([ -f /usr/bin/sendEmail ] && echo '/usr/bin/sendEmail') \
-  || echo 'sendEmail' \
-)"
-$SEND_EMAIL -o tls=yes -f "$user" -t "$to_email" -s "$server" -xu "$user" -xp "$pass" -u "$subject" -m "$message"
+sendEmail -o tls=yes -f "$user" -t "$to_email" -s "$server" -xu "$user" -xp "$pass" -u "$subject" -m "$message"

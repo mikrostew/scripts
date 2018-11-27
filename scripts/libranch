@@ -53,6 +53,22 @@ echo_info ()
 {
     echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
 }
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+requirement_check git "search 'how to install git'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 new_branch_name="$1"
 if [ -z "$new_branch_name" ]
 then

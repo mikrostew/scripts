@@ -4,6 +4,10 @@
 @import COLOR_RESET from .bash_colors
 @import COLOR_FG_RED from .bash_colors
 
+# TODO: how to have platform-specific directives
+# (for now just assume OSX)
+@uses_cmds open
+
 err_no_symbol="$(echo -e "${COLOR_FG_RED}Error: No stock symbol provided${COLOR_RESET}")"
 stock_symbol="${1:?$err_no_symbol}"
 stock_url="https://finance.yahoo.com/quote/$stock_symbol/"

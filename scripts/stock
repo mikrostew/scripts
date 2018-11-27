@@ -6,6 +6,22 @@
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+requirement_check open "search 'how to install open'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 err_no_symbol="$(echo -e "${COLOR_FG_RED}Error: No stock symbol provided${COLOR_RESET}")"
 stock_symbol="${1:?$err_no_symbol}"
 stock_url="https://finance.yahoo.com/quote/$stock_symbol/"

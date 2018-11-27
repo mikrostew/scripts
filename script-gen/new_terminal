@@ -46,6 +46,8 @@
 
 # open an iTerm2 window
 
+@uses_cmds osascript
+
 osascript -e 'tell application "iTerm2" to create window with default profile'
 
 # resize because it's always too small

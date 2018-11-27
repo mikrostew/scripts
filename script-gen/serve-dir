@@ -6,6 +6,8 @@
 @import COLOR_RESET from .bash_colors
 @import COLOR_FG_BOLD_BLUE from .bash_colors
 
+@uses_cmds ifconfig awk ruby
+
 # TODO: auto-generate some help docs
 # argument(s)
 # - port (optional)

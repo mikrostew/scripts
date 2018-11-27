@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # count lines of code for the input files
 
+@uses_cmds sed grep
+
 # TODO: not sure if these sed commands work on Linux
 # filter out *.swp files
 valid_files=( $(echo "$@" | sed -E 's/[^[:space:]]+.swp\ //g') )
