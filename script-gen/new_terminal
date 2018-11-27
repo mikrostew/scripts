@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # opens new iTerm2 window
 
 # to set this up to run as hotkey Ctrl-⌥ -⌘ -T (Control-Option-Command-T)

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # get current weather by zip code
 # using OpenWeatherMap API - http://openweathermap.org/api
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # clean dirs and files in a MP (for LinkedIn workflow)
 
 # TODO - blurb about how to use this

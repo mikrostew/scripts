@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # create a new RB from the local changes, or update existing review
 
 # TODO - blurb about how to use this

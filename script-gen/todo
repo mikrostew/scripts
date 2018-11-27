@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # show any TODOs contained in comments in source code
 
 @import COLOR_RESET from .bash_colors

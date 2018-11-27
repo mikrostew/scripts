@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # opens new: iTerm2 window, Chrome window, and Sticky note
 
 # to set this up to run as hotkey Ctrl-⌥ -⌘ -D (Control-Option-Command-D)

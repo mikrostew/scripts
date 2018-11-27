@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # create a new branch that tracks origin/master (for LinkedIn workflow)
 
 # usage:

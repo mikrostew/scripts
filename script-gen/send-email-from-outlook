@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+# send email from outlook address, using SMTP
+
 to_email="${1:?First arg is the to: email address}"
 subject="${2:?Second arg is the subject}"
 email_contents="${3:?Third arg is the email contents}"

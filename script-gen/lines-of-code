@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # count lines of code for the input files
 
 # TODO: not sure if these sed commands work on Linux

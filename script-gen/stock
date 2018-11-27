@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # open the browser with info on the input stock
 
 @import COLOR_RESET from .bash_colors

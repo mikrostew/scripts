@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # squash commits, rebase, merge, and submit, for LI workflow
 
 # TODO - blurb about how to use this

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # provides a way for syntastic in vim to query the locally installed eslint version
 # (from from https://github.com/vim-syntastic/syntastic/issues/2102)
 
