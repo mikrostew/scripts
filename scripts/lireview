@@ -8,21 +8,9 @@ COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-echo_err ()
+current_git_branch ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-do_git ()
-{
-    do_cmd git "$@"
-}
-git_review_board_id ()
-{
-    echo "$(git config --get branch.$1.reviewid)"
-}
-echo_ack ()
-{
-    echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
+    echo "$(git rev-parse --abbrev-ref HEAD)"
 }
 do_cmd ()
 {
@@ -41,13 +29,25 @@ do_cmd ()
     echo -e ")${COLOR_RESET}" 1>&2;
     command "$@"
 }
-current_git_branch ()
+do_git ()
 {
-    echo "$(git rev-parse --abbrev-ref HEAD)"
+    do_cmd git "$@"
+}
+echo_ack ()
+{
+    echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
+}
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
     echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+}
+git_review_board_id ()
+{
+    echo "$(git config --get branch.$1.reviewid)"
 }
 requirement_check ()
 {

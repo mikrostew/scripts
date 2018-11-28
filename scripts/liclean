@@ -8,10 +8,6 @@ COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-echo_err ()
-{
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
 do_cmd ()
 {
     echo -en "${COLOR_FG_GREEN}( " 1>&2;
@@ -28,6 +24,10 @@ do_cmd ()
     done;
     echo -e ")${COLOR_RESET}" 1>&2;
     command "$@"
+}
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
