@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file script-gen/nextoncall, and run './generate-scripts.sh'
+###########################################################################
+
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+requirement_check jq "search 'how to install jq'"
+combined_return=$(( combined_return + $? ))
+requirement_check e2d "search 'how to install e2d'"
+combined_return=$(( combined_return + $? ))
+requirement_check curl "search 'how to install curl'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+data="$(curl -sS https://oncall.prod.linkedin.com/api/v0/users/$(whoami)/upcoming)"
+exit_code="$?"
+if [ "$exit_code" -ne 0 ]
+then
+  echo -e "${COLOR_FG_RED}Error running curl${COLOR_RESET}" >&2
+  exit "$exit_code"
+fi
+echo "$data" | jq -r '.[]|"\(.team) \(.role) \(.start)"' | while read team role ts; do echo "$role oncall for $team at $ts"; done | e2d -f6

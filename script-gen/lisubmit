@@ -33,10 +33,8 @@ input_msg_extra_line="$2" # optional
 branch_name="$(current_git_branch)"
 
 review_id="$(git_review_board_id $branch_name)"
-if [ "$?" -ne 0 ]; then
-  echo_err "Dang it! Getting the review board ID failed"
-  exit 1
-fi
+@EXIT_IF_CMD_ERROR "Dang it! Getting the review board ID failed"
+
 echo_info "Submitting RB $review_id"
 
 review_title="$(get_li_rb_title $review_id)"
@@ -71,10 +69,7 @@ if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
   # squash changes on this branch
   squash_branch "$commit_msg" "$commit_msg_extra_line"
-  if [ "$?" -ne 0 ]; then
-    echo_err "Dang it! squashing failed (TODO: auto recovery here?)"
-    exit 1
-  fi
+  @EXIT_IF_CMD_ERROR "Dang it! squashing failed (TODO: auto recovery here?)"
 
   # rebase against master
   do_git pull --rebase origin master && do_git checkout master && do_git pull --rebase

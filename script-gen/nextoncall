@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# show my upcoming oncall shifts
+# from #oneliners
+
+@uses_cmds curl jq e2d
+
+data="$(curl -sS https://oncall.prod.linkedin.com/api/v0/users/$(whoami)/upcoming)"
+@EXIT_IF_CMD_ERROR "Error running curl"
+
+# TODO: colorize the output (and break this up some)
+echo "$data" | jq -r '.[]|"\(.team) \(.role) \(.start)"' | while read team role ts; do echo "$role oncall for $team at $ts"; done | e2d -f6
