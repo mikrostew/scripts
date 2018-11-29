@@ -3,9 +3,7 @@
 
 # TODO - blurb about how to use this
 
-@import echo_err from .bash_shared_functions
-@import echo_info from .bash_shared_functions
-@import do_cmd from .bash_shared_functions
+@import { echo_err, echo_info, do_cmd } from .bash_shared_functions
 
 in_linkedin_mp() {
   local file_to_check="product-spec.json"

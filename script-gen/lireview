@@ -3,13 +3,8 @@
 
 # TODO - blurb about how to use this
 
-@import echo_err from .bash_shared_functions
-@import echo_ack from .bash_shared_functions
-@import echo_info from .bash_shared_functions
-
-@import do_git from .bash_git
-@import git_review_board_id from .bash_git
-@import current_git_branch from .bash_git
+@import { echo_err, echo_ack, echo_info } from .bash_shared_functions
+@import { do_git, git_review_board_id, current_git_branch } from .bash_git
 
 @uses_cmds jq expect git
 

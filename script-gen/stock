@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # open the browser with info on the input stock
 
-@import COLOR_RESET from .bash_colors
-@import COLOR_FG_RED from .bash_colors
+@import_var { COLOR_RESET, COLOR_FG_RED } from .bash_colors
 
-# TODO: how to have platform-specific directives
+# TODO: how to have platform-specific directives?
 # (for now just assume OSX)
 @uses_cmds open
 

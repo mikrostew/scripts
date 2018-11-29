@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # show any TODOs contained in comments in source code
 
-@import COLOR_RESET from .bash_colors
-@import COLOR_FG_BOLD_BLUE from .bash_colors
+@import_var { COLOR_RESET, COLOR_FG_BOLD_BLUE } from .bash_colors
 
 @uses_cmds grep wc tr
 
@@ -33,7 +32,6 @@ matched_lines="$(grep \
   "$in_dir" \
   2>/dev/null \
 )"
-
 
 num_lines="$(echo "$matched_lines" | wc -l | tr -d '[:space:]')"
 

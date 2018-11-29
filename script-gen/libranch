@@ -4,14 +4,8 @@
 # usage:
 #  libranch <branch-name>
 
-@import echo_err from .bash_shared_functions
-@import echo_ack from .bash_shared_functions
-@import echo_info from .bash_shared_functions
-
-@import do_git from .bash_git
-@import in_git_repo from .bash_git
-@import on_git_branch from .bash_git
-
+@import { echo_err, echo_ack, echo_info } from .bash_shared_functions
+@import { do_git, in_git_repo, on_git_branch } from .bash_git
 
 # arguments
 new_branch_name="$1"
@@ -22,7 +16,6 @@ then
   echo_err "Usage:"
   echo_err "  ${0##*/} <new-branch-name>"
 fi
-
 
 # create new branch (that tracks origin/master)
 if in_git_repo && on_git_branch 'master'
