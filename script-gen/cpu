@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# show running processes, sorted by CPU usage
+
+@import do_cmd from .bash_shared_functions
+
+if ?PLATFORM_IS_MAC?
+then
+  do_cmd top -F -R -o cpu
+else
+  # Linux
+  do_cmd top -o +%CPU
+fi

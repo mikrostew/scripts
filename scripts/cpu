@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file script-gen/cpu, and run './generate-scripts.sh'
+###########################################################################
+
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_RESET='\033[0m'
+do_cmd ()
+{
+    echo -en "${COLOR_FG_GREEN}( " 1>&2;
+    for arg in "$@";
+    do
+        case "$arg" in
+            *\ *)
+                echo -n "\"$arg\" "
+            ;;
+            *)
+                echo -n "$arg "
+            ;;
+        esac;
+    done;
+    echo -e ")${COLOR_RESET}" 1>&2;
+    command "$@"
+}
+if [ "$(uname -s)" == "Darwin" ]
+then
+  do_cmd top -F -R -o cpu
+else
+  do_cmd top -o +%CPU
+fi
