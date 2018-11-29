@@ -3,6 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/todo, and run './generate-scripts.sh'
 ###########################################################################
+#8aad947e97b586dcfecfb343617e1b5e
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_RESET='\033[0m'

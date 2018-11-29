@@ -3,6 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/nextoncall, and run './generate-scripts.sh'
 ###########################################################################
+#1b7999b14f66a35b637e8a2c2e2f0e3f
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'

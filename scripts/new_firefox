@@ -3,6 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/new_firefox, and run './generate-scripts.sh'
 ###########################################################################
+#38150cdbe2b6836e0069161650d2f457
 
 requirement_check ()
 {

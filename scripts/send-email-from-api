@@ -3,6 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/send-email-from-api, and run './generate-scripts.sh'
 ###########################################################################
+#6b8516b79a22afcad89696d19602cb0c
 
 requirement_check ()
 {

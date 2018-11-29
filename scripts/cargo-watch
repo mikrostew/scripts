@@ -3,5 +3,6 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/cargo-watch, and run './generate-scripts.sh'
 ###########################################################################
+#76a79672708ac6c3bea14e321634bae8
 
 command "$HOME/src/cargo-watch/target/debug/cargo-watch" "$@"

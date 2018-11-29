@@ -3,6 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/liclean, and run './generate-scripts.sh'
 ###########################################################################
+#4a66766a487b07f0a5fc411ec4b6de37
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
