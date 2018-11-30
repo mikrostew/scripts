@@ -34,7 +34,7 @@ exec 3< <(grep \
   "$in_dir" \
   2>/dev/null \
 )
-spinner $!
+spinner $! "grepping files..."
 
 matched_lines="$(cat <&3)"
 
