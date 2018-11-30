@@ -30,7 +30,7 @@ fi
 osascript -e 'tell application "Google Chrome" to activate'
 
 # emulate keystrokes to type the template into the field
-# TODO: allow typing in a partial name as long as it is enough to ID the task
+# it would be nice to allow typing in a partial name as long as it is enough to ID the task
 if [ "$ticket_type" == "$TICKET_TASK" ]
 then
   echo_info "Filling out ticket type '$TICKET_TASK'"

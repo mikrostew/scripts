@@ -31,7 +31,7 @@ statsFiles.forEach((statFile) => {
   const numFiles = data.length;
 
   data.forEach((fileInfo) => {
-    // TODO do some maths here to find the bin, instead of inner loop ¯\_(ツ)_/¯
+    // could do some maths here to find the bin, instead of inner loop ¯\_(ツ)_/¯
     fileCounts.bigger += 1;
     for (let i = 0; i < BINS.length; i++) {
       const binSize = BINS[i];

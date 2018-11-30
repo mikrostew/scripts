@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/libranch, and run './generate-scripts.sh'
 ###########################################################################
-#b499783e2acac6e51ba5b9d8aa13b6aa
+#80e94a2934353173f1a9f9a71aebc2db
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'

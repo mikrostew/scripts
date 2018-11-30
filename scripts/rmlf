@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/rmlf, and run './generate-scripts.sh'
 ###########################################################################
-#6c20b35bab9cbb6198f7f4e9d2790c07
+#947bce856c20c2d8504d95a061092a6c
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'

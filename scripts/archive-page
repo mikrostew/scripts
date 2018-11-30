@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/archive-page, and run './generate-scripts.sh'
 ###########################################################################
-#ec2ba577ffa0ff350893ce4598c6476d
+#fd4f940d3879743badc4eb72a227e3fb
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
