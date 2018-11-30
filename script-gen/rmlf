@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# remove any trailing newlines from the input file
+# (from https://stackoverflow.com/a/12148703)
+
+@import num_arguments_ok from .bash_shared_functions
+
+arguments=('<filename>')
+if num_arguments_ok arguments[@] "$#"
+then
+  printf %s "$(< $1)" > $1
+fi
+
