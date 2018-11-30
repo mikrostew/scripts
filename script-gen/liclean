@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # clean dirs and files in a MP (for LinkedIn workflow)
 
-# TODO - blurb about how to use this
+# how to use this:
+#  $ liclean
+#  (then follow the prompts)
 
 @import { echo_err, echo_info, do_cmd } from .bash_shared_functions
 
@@ -9,13 +11,6 @@ in_linkedin_mp() {
   local file_to_check="product-spec.json"
   [ -f "$file_to_check" ] && return 0 || echo_err "$(pwd) is not a LinkedIn MultiProduct (missing $file_to_check)" && return -1
 }
-
-show_usage() {
-  echo_err "Usage:"
-  # TODO with args from below
-  echo_err "  ${0##*/} <new-branch-name>"
-}
-
 
 # this is what is not tracked by git (from voyager-web):
 #

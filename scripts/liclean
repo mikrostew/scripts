@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/liclean, and run './generate-scripts.sh'
 ###########################################################################
-#726966bc2f7612502559b970a56dca04
+#254625ac18fcc005083c9240f281b268
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -37,10 +37,6 @@ echo_info ()
 in_linkedin_mp() {
   local file_to_check="product-spec.json"
   [ -f "$file_to_check" ] && return 0 || echo_err "$(pwd) is not a LinkedIn MultiProduct (missing $file_to_check)" && return -1
-}
-show_usage() {
-  echo_err "Usage:"
-  echo_err "  ${0##*/} <new-branch-name>"
 }
 if in_linkedin_mp; then
   username="$(whoami)"
