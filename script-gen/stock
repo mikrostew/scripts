@@ -3,9 +3,7 @@
 
 @import_var { COLOR_RESET, COLOR_FG_RED } from .bash_colors
 
-# TODO: how to have platform-specific command requirements?
-# (for now just assume OSX)
-@uses_cmds open
+@uses_cmds open xdg-open
 
 err_no_symbol="$(echo -e "${COLOR_FG_RED}Error: No stock symbol provided${COLOR_RESET}")"
 stock_symbol="${1:?$err_no_symbol}"

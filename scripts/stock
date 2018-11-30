@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/stock, and run './generate-scripts.sh'
 ###########################################################################
-#f6b3a92f89da926e63c10949adbc4bea
+#0c87b5b951159587bed63d5fc6ec4ea1
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -20,8 +20,14 @@ requirement_check ()
     fi
 }
 combined_return=0
-requirement_check open "search 'how to install open'"
-combined_return=$(( combined_return + $? ))
+if [ "$(uname -s)" == "Linux" ]; then
+  requirement_check xdg-open "search 'how to install xdg-open'"
+  combined_return=$(( combined_return + $? ))
+fi
+if [ "$(uname -s)" == "Darwin" ]; then
+  requirement_check open "search 'how to install open'"
+  combined_return=$(( combined_return + $? ))
+fi
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 err_no_symbol="$(echo -e "${COLOR_FG_RED}Error: No stock symbol provided${COLOR_RESET}")"
 stock_symbol="${1:?$err_no_symbol}"
