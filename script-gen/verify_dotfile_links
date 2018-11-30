@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# verify the links to the dotfiles haven't changed
+
+@import echo_err from .bash_shared_functions
+
+@uses_cmds readlink
+
+# optionally input the directory where the repo is checked out
+checkoutdir="${1:-$HOME/dotfiles}"
+
+# use bash 4.x associative arrays
+declare -A links
+
+# vim
+links[".vimrc"]=".vimrc"
+links[".vim"]=".vim"
+
+# bash
+links[".bash_profile"]=".bash_profile"
+links[".bashrc"]=".bashrc"
+
+# inputrc
+links[".inputrc"]=".inputrc"
+
+# gitignore
+links[".gitignore"]=".gitignore"
+
+# tmux
+links[".tmux.conf"]=".tmux.conf"
+
+# bundler
+links[".bundle"]=".bundle"
+
+# rubocop
+links[".rubocop.yml"]=".rubocop.yml"
+
+# platform-specific
+
+if ?PLATFORM_IS_MAC?
+then
+    # ssh
+    links[".ssh/config"]=".ssh-config-mac"
+elif ?PLATFORM_IS_LINUX?
+then
+    # ssh
+    links[".ssh/config"]=".ssh-config-linux"
+fi
+
+# verify the links
+for i in "${!links[@]}"
+do
+  if [ -L "$HOME/$i" ]
+  then
+    # symlink exists, check if it points to the right place
+    link_target="$(readlink $HOME/$i)"
+    if [ "$link_target" != "$checkoutdir/${links[$i]}" ]
+    then
+      echo_err "symlink '$HOME/$i => $checkoutdir/${links[$i]}' has been changed!"
+    fi
+  else
+    echo_err "symlink '$HOME/$i => $checkoutdir/${links[$i]}' does not exist!"
+  fi
+done
