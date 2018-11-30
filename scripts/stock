@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/stock, and run './generate-scripts.sh'
 ###########################################################################
-#49c1f16dda5c547f5e853af4f4b29d6b
+#f6b3a92f89da926e63c10949adbc4bea
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'

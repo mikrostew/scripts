@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/weather, and run './generate-scripts.sh'
 ###########################################################################
-#0fe6755b0a0c0763574edb04fdd5c188
+#eb8738a1c9deb5759e0c629529bed67d
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_RESET='\033[0m'
