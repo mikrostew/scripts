@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file script-gen/min_version_check, and run './generate-scripts.sh'
+###########################################################################
+#3a92d23f955c213c7553c4e2b14f4e3f
+
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+requirement_check semver "search 'how to install semver'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+normalize_version() {
+  if [[ "$1" =~ ^[0-9]+$ ]]; then
+    echo "$1.0.0"
+  elif [[ "$1" =~ ^[0-9]+\.[0-9]+$ ]]; then
+    echo "$1.0"
+  elif [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+    echo "$BASH_REMATCH"
+  else
+    echo "$1"
+  fi
+}
+meets_version() {
+  semver --range "$2" "$1" >/dev/null
+}
+if [ -n "$5" ]; then
+  install_path=$(eval "$5")
+else
+  install_path=$(which "$1")
+fi
+if [ -z "$install_path" ]; then
+  echo -e "$1 : ${COLOR_FG_RED}not installed (want $2), install with '${4:-(unknown command)}'${COLOR_RESET}"
+  exit 1
+fi
+current_version=$(eval "$3")
+if [ -n "$current_version" ]; then
+  if meets_version "$(normalize_version $current_version)" "$2"; then
+    exit 0
+  else
+    echo -e "$1 : ${COLOR_FG_RED}found $current_version (want $2)${COLOR_RESET} ($install_path)"
+  fi
+else
+  echo -e "$1 : ${COLOR_FG_RED}unknown version (want $2)${COLOR_RESET} ($install_path)"
+fi
+exit 1 # if it hasn't already exited, it didn't meet the version

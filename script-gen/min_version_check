@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# check minimum version, and print out the result
+
+@import_var { COLOR_FG_RED, COLOR_RESET } from .bash_colors
+
+@uses_cmds semver
+
+# convert versions to X.X.X format
+normalize_version() {
+  if [[ "$1" =~ ^[0-9]+$ ]]; then
+    echo "$1.0.0"
+  elif [[ "$1" =~ ^[0-9]+\.[0-9]+$ ]]; then
+    echo "$1.0"
+  elif [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+    # there may be some junk after the version (looking at you bash), get rid of that
+    echo "$BASH_REMATCH"
+  else
+    echo "$1"
+  fi
+}
+
+# compare input semver with input constraint
+# (using semver from NPM for this - https://github.com/npm/node-semver)
+# $1 - program version (semver format)
+# $2 - version range (semver format)
+meets_version() {
+  semver --range "$2" "$1" >/dev/null
+}
+
+# Arguments:
+# $1 - program/command/language name
+# $2 - acceptable version range (semver)
+# $3 - how to get the version of this (NOTE: will be eval-ed)
+# $4 - command to install this
+# $5 - [optional] path to where this is installed, instead of using `which` (NOTE: will be eval-ed)
+
+# check if this is installed
+if [ -n "$5" ]; then
+  install_path=$(eval "$5")
+else
+  install_path=$(which "$1")
+fi
+if [ -z "$install_path" ]; then
+  echo -e "$1 : ${COLOR_FG_RED}not installed (want $2), install with '${4:-(unknown command)}'${COLOR_RESET}"
+  exit 1
+fi
+# check the minimum version
+current_version=$(eval "$3")
+if [ -n "$current_version" ]; then
+  if meets_version "$(normalize_version $current_version)" "$2"; then
+    # don't print anything for this
+    exit 0
+  else
+    echo -e "$1 : ${COLOR_FG_RED}found $current_version (want $2)${COLOR_RESET} ($install_path)"
+  fi
+else
+  echo -e "$1 : ${COLOR_FG_RED}unknown version (want $2)${COLOR_RESET} ($install_path)"
+fi
+exit 1 # if it hasn't already exited, it didn't meet the version
+
