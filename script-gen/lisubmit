@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # squash commits, rebase, merge, and submit, for LI workflow
 
-# TODO - blurb about how to use this
+# how to use this:
+#  $ lisubmit
+#  (then answer the prompts)
 
 @import { echo_err, echo_ack, echo_info, echo_fail_banner, echo_success_banner, do_cmd } from .bash_shared_functions
 

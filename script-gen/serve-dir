@@ -6,10 +6,7 @@
 
 @uses_cmds ifconfig awk ruby
 
-# TODO: auto-generate some help docs
 # argument(s)
-# - port (optional)
-
 port="${1:-8080}"
 
 address="$(ifconfig | awk '/inet / && $2 != "127.0.0.1"{print $2}')"

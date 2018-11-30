@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/serve-dir, and run './generate-scripts.sh'
 ###########################################################################
-#918058c47c046c01e79a93ae34ffa86d
+#639b57f845c5b3d6c8ddc7e50307cfc2
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_RESET='\033[0m'
