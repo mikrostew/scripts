@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/verify_dotfile_links, and run './generate-scripts.sh'
+# the file script-gen/make_dotfile_links, and run './generate-scripts.sh'
 ###########################################################################
-#dee622d378d3656bc1106f72bf81189e
+#15add2078ccbd1e10ed543f4f01ad31a
 
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
+COLOR_FG_YELLOW='\033[0;33m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
@@ -41,20 +44,23 @@ links[".rubocop.yml"]=".rubocop.yml"
 if [ "$(uname -s)" == "Darwin" ]
 then
   links[".ssh/config"]=".ssh-config-mac"
-elif [ "$(uname -s)" == "Linux" ]
+elif ?PLATFORM_IS_LINUX
 then
   links[".ssh/config"]=".ssh-config-linux"
 fi
 for i in "${!links[@]}"
 do
+  echo -n "$HOME/$i => $checkoutdir/${links[$i]}"
   if [ -L "$HOME/$i" ]
   then
-    link_target="$(readlink $HOME/$i)"
-    if [ "$link_target" != "$checkoutdir/${links[$i]}" ]
-    then
-      echo_err "symlink '$HOME/$i => $checkoutdir/${links[$i]}' has been changed!"
-    fi
-  else
-    echo_err "symlink '$HOME/$i => $checkoutdir/${links[$i]}' does not exist!"
+    echo -e " ${COLOR_FG_YELLOW}(symlink already exists, skipping)${COLOR_RESET}"
+    continue
   fi
+  if [ -e "$HOME/$i" ]
+  then
+    echo -ne " ${COLOR_FG_BOLD_BLUE}(file exists, renamed to '$HOME/$i-old')${COLOR_RESET}"
+    mv "$HOME/$i" "$HOME/$i-old"
+  fi
+  ln -s "$checkoutdir/${links[$i]}" "$HOME/$i"
+  echo -e " [${COLOR_FG_GREEN}OK${COLOR_RESET}]"
 done

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# verify the links to the dotfiles haven't changed
+# Create links for dotfiles
 
 @import echo_err from .bash_shared_functions
+@import_var { COLOR_FG_YELLOW, COLOR_FG_BOLD_BLUE, COLOR_FG_GREEN, COLOR_RESET } from .bash_colors
 
 @uses_cmds readlink
 
@@ -39,24 +40,26 @@ if ?PLATFORM_IS_MAC?
 then
   # ssh
   links[".ssh/config"]=".ssh-config-mac"
-elif ?PLATFORM_IS_LINUX?
+elif ?PLATFORM_IS_LINUX
 then
   # ssh
   links[".ssh/config"]=".ssh-config-linux"
 fi
 
-# verify the links
+# create the links
 for i in "${!links[@]}"
 do
+  echo -n "$HOME/$i => $checkoutdir/${links[$i]}"
   if [ -L "$HOME/$i" ]
   then
-    # symlink exists, check if it points to the right place
-    link_target="$(readlink $HOME/$i)"
-    if [ "$link_target" != "$checkoutdir/${links[$i]}" ]
-    then
-      echo_err "symlink '$HOME/$i => $checkoutdir/${links[$i]}' has been changed!"
-    fi
-  else
-    echo_err "symlink '$HOME/$i => $checkoutdir/${links[$i]}' does not exist!"
+    echo -e " ${COLOR_FG_YELLOW}(symlink already exists, skipping)${COLOR_RESET}"
+    continue
   fi
+  if [ -e "$HOME/$i" ]
+  then
+    echo -ne " ${COLOR_FG_BOLD_BLUE}(file exists, renamed to '$HOME/$i-old')${COLOR_RESET}"
+    mv "$HOME/$i" "$HOME/$i-old"
+  fi
+  ln -s "$checkoutdir/${links[$i]}" "$HOME/$i"
+  echo -e " [${COLOR_FG_GREEN}OK${COLOR_RESET}]"
 done
