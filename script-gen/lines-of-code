@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 # count lines of code for the input files
 
+@import echo_err from .bash_shared_functions
+
 @uses_cmds sed grep
+
+if [ "$#" -eq 0 ]
+then
+  echo_err "No input files given!"
+  exit 1
+fi
 
 # TODO: not sure if these sed commands work on Linux
 # filter out *.swp files
-valid_files=( $(echo "$@" | sed -E 's/[^[:space:]]+.swp\ //g') )
+valid_files=( $(echo "$@" | sed -E 's/[^[:space:]]+.swp//g') )
 
 all_files="$(cat ${valid_files[*]})"
 all_files_no_blank="$(echo "$all_files" | sed '/^[[:space:]]*$/d')"

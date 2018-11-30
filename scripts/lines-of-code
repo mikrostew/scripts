@@ -3,8 +3,14 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lines-of-code, and run './generate-scripts.sh'
 ###########################################################################
-#abda26e6371e818303ba6be8503b244f
+#2b4d11fa5e201621d08acaf12b14e6ac
 
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
 requirement_check ()
 {
     local cmd="$1";
@@ -23,7 +29,12 @@ combined_return=$(( combined_return + $? ))
 requirement_check sed "search 'how to install sed'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-valid_files=( $(echo "$@" | sed -E 's/[^[:space:]]+.swp\ //g') )
+if [ "$#" -eq 0 ]
+then
+  echo_err "No input files given!"
+  exit 1
+fi
+valid_files=( $(echo "$@" | sed -E 's/[^[:space:]]+.swp//g') )
 all_files="$(cat ${valid_files[*]})"
 all_files_no_blank="$(echo "$all_files" | sed '/^[[:space:]]*$/d')"
 all_files_no_comments="$(echo "$all_files_no_blank" | sed '/^[[:space:]]*#/d' | sed '/^[[:space:]]*\/\//d')"
