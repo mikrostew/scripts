@@ -3,8 +3,9 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/nextoncall, and run './generate-scripts.sh'
 ###########################################################################
-#1b7999b14f66a35b637e8a2c2e2f0e3f
+#385b6056b9c9d7da861d5f59e218fc94
 
+COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 requirement_check ()
@@ -34,4 +35,15 @@ then
   echo -e "${COLOR_FG_RED}Error running curl${COLOR_RESET}" >&2
   exit "$exit_code"
 fi
-echo "$data" | jq -r '.[]|"\(.team) \(.role) \(.start)"' | while read team role ts; do echo "$role oncall for $team at $ts"; done | e2d -f6
+json_data="$(echo "$data" | jq -r '.[]|"\(.team) \(.role) \(.start)"')"
+exit_code="$?"
+if [ "$exit_code" -ne 0 ]
+then
+  echo -e "${COLOR_FG_RED}Error running jq${COLOR_RESET}" >&2
+  exit "$exit_code"
+fi
+while read team role ts
+do
+  formatted_time="$(echo $ts | e2d)"
+  echo -e "$role oncall for $team at ${COLOR_FG_BOLD_BLUE}$formatted_time${COLOR_RESET}"
+done <<< "$json_data"

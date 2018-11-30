@@ -2,10 +2,18 @@
 # show my upcoming oncall shifts
 # from #oneliners
 
+@import_var { COLOR_FG_BOLD_BLUE, COLOR_RESET } from .bash_colors
+
 @uses_cmds curl jq e2d
 
 data="$(curl -sS https://oncall.prod.linkedin.com/api/v0/users/$(whoami)/upcoming)"
 @EXIT_IF_CMD_ERROR "Error running curl"
 
-# TODO: colorize the output (and break this up some)
-echo "$data" | jq -r '.[]|"\(.team) \(.role) \(.start)"' | while read team role ts; do echo "$role oncall for $team at $ts"; done | e2d -f6
+json_data="$(echo "$data" | jq -r '.[]|"\(.team) \(.role) \(.start)"')"
+@EXIT_IF_CMD_ERROR "Error running jq"
+
+while read team role ts
+do
+  formatted_time="$(echo $ts | e2d)"
+  echo -e "$role oncall for $team at ${COLOR_FG_BOLD_BLUE}$formatted_time${COLOR_RESET}"
+done <<< "$json_data"
