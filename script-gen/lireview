@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # create a new RB from the local changes, or update existing review
 
-# TODO - blurb about how to use this
+# how to use this:
+#  $ lireview
+#  (then follow the prompts)
 
 @import { echo_err, echo_ack, echo_info } from .bash_shared_functions
 @import { do_git, git_review_board_id, current_git_branch } from .bash_git
