@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file script-gen/dir-sizes, and run './generate-scripts.sh'
+###########################################################################
+#a2bba3f13c2375672ce0bdd46cc28f21
+
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+requirement_check du "search 'how to install du'"
+combined_return=$(( combined_return + $? ))
+requirement_check sort "search 'how to install sort'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+du -skx "$@" | sort --numeric-sort --reverse
