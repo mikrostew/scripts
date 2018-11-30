@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file script-gen/spinner, and run './generate-scripts.sh'
+###########################################################################
+#b9be01fdc012668f16502ceada206cb6
+
+cmd_pid="${1:?must specify pid for spinner}"
+spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
+num_chars=${#spin_chars}
+i=0
+while kill -0 $cmd_pid 2>/dev/null
+do
+  i=$(( (i + 1) % num_chars ))
+  printf "\b${spin_chars:$i:1}" >&2
+  sleep 0.1
+done
+printf "\b" >&2
