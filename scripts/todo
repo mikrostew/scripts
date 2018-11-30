@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/todo, and run './generate-scripts.sh'
 ###########################################################################
-#8aad947e97b586dcfecfb343617e1b5e
+#02bf0d43aa254d5e62330d8cfc8b39c1
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_RESET='\033[0m'
@@ -20,6 +20,8 @@ requirement_check ()
     fi
 }
 combined_return=0
+requirement_check spinner "search 'how to install spinner'"
+combined_return=$(( combined_return + $? ))
 requirement_check wc "search 'how to install wc'"
 combined_return=$(( combined_return + $? ))
 requirement_check grep "search 'how to install grep'"
@@ -34,7 +36,7 @@ dquote_comments='"'       # vim script
 html_comments='<!--'      # HTML, XML
 slash_block_comments='/*' # C/C++, CSS, Java
 dash_comments='--'        # SQL
-matched_lines="$(grep \
+exec 3< <(grep \
   -nrIF \
   --color=always \
   --exclude-dir bower_components \
@@ -50,7 +52,9 @@ matched_lines="$(grep \
   -e "$dash_comments TODO" \
   "$in_dir" \
   2>/dev/null \
-)"
+)
+spinner $!
+matched_lines="$(cat <&3)"
 num_lines="$(echo "$matched_lines" | wc -l | tr -d '[:space:]')"
 echo "$matched_lines"
 echo -e "${COLOR_FG_BOLD_BLUE}total: $num_lines${COLOR_RESET}"

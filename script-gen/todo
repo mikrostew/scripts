@@ -3,7 +3,7 @@
 
 @import_var { COLOR_RESET, COLOR_FG_BOLD_BLUE } from .bash_colors
 
-@uses_cmds grep wc tr
+@uses_cmds grep wc tr spinner
 
 in_dir="${1:-.}" # default to current directory
 
@@ -15,7 +15,9 @@ html_comments='<!--'      # HTML, XML
 slash_block_comments='/*' # C/C++, CSS, Java
 dash_comments='--'        # SQL
 
-matched_lines="$(grep \
+# use process substitution to capture the output asynchronously
+# (from https://stackoverflow.com/a/20018118/)
+exec 3< <(grep \
   -nrIF \
   --color=always \
   --exclude-dir bower_components \
@@ -31,7 +33,10 @@ matched_lines="$(grep \
   -e "$dash_comments TODO" \
   "$in_dir" \
   2>/dev/null \
-)"
+)
+spinner $!
+
+matched_lines="$(cat <&3)"
 
 num_lines="$(echo "$matched_lines" | wc -l | tr -d '[:space:]')"
 
