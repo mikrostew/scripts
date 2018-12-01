@@ -4,7 +4,7 @@
 # usage:
 #  libranch <branch-name>
 
-@import { echo_err, echo_ack, echo_info } from .bash_shared_functions
+@import echo_err from .bash_shared_functions
 @import { do_git, in_git_repo, on_git_branch } from .bash_git
 
 # arguments

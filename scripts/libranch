@@ -3,9 +3,8 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/libranch, and run './generate-scripts.sh'
 ###########################################################################
-#80e94a2934353173f1a9f9a71aebc2db
+#d2f578922676549b607458f90c5345aa
 
-COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -34,17 +33,9 @@ do_git ()
 {
     do_cmd git "$@"
 }
-echo_ack ()
-{
-    echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
-}
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-echo_info ()
-{
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
 }
 in_git_repo ()
 {

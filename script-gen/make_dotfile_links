@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Create links for dotfiles
 
-@import echo_err from .bash_shared_functions
 @import_var { COLOR_FG_YELLOW, COLOR_FG_BOLD_BLUE, COLOR_FG_GREEN, COLOR_RESET } from .bash_colors
 
 @uses_cmds readlink

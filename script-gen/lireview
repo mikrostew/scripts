@@ -5,7 +5,7 @@
 #  $ lireview
 #  (then follow the prompts)
 
-@import { echo_err, echo_ack, echo_info } from .bash_shared_functions
+@import { echo_ack, echo_info } from .bash_shared_functions
 @import { do_git, git_review_board_id, current_git_branch } from .bash_git
 
 @uses_cmds jq expect git

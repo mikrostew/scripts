@@ -3,17 +3,12 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/make_dotfile_links, and run './generate-scripts.sh'
 ###########################################################################
-#1d529106a28afcb0d54cfda1193787fc
+#3127832616bd8476a0e5094f6efcfe90
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
-COLOR_FG_RED='\033[0;31m'
 COLOR_FG_YELLOW='\033[0;33m'
 COLOR_RESET='\033[0m'
-echo_err ()
-{
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
 requirement_check ()
 {
     local cmd="$1";

@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # download a webpage and all its requisites using wget
 
-@import echo_err from .bash_shared_functions
-
 @uses_cmds wget
 
 page_url="${1:?No URL entered}"
