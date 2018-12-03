@@ -3,11 +3,15 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/nextoncall, and run './generate-scripts.sh'
 ###########################################################################
-#976e2b780ea594b02fb888d097e04028
+#d034f97f5899ac1425b25e574bb26579
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
 requirement_check ()
 {
     local cmd="$1";

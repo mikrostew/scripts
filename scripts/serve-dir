@@ -3,10 +3,15 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/serve-dir, and run './generate-scripts.sh'
 ###########################################################################
-#639b57f845c5b3d6c8ddc7e50307cfc2
+#85fa5de5bff006a8d6385c8278fa04ad
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
 requirement_check ()
 {
     local cmd="$1";

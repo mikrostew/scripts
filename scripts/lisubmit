@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lisubmit, and run './generate-scripts.sh'
 ###########################################################################
-#d64ac481d3862eb7a475ceebc30c767e
+#2894e7b1f0f325bdc3451ede50e87662
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -84,10 +84,14 @@ get_li_rb_api_def ()
     local cache_file="$DOTFILES_DIR/cache/li-rb-api-def.cache";
     local cache_file_expired="$(find $cache_file -mtime +1)";
     if [ -n "$cache_file_expired" ]; then
-        echo_err "RB API definitions not cached, requesting...";
+        echo_info "RB API definitions not cached, requesting...";
         api_def="$(curl -X GET -H 'Accept: application/json' 'https://rb.corp.linkedin.com/api/' 2>/dev/null)";
-        echo_info "return code: $?";
-        echo "$api_def" > "$cache_file";
+        exit_code="$?";
+        if [ "$exit_code" -ne 0 ]; then
+            echo_err "Failed to get RB API definitions. Exit code was: $exit_code";
+        else
+            echo "$api_def" > "$cache_file";
+        fi;
     else
         api_def=$(<"$cache_file");
     fi;
@@ -139,6 +143,18 @@ not_on_git_branch ()
 {
     [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
 }
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
 squash_branch ()
 {
     local branch_name=$(current_git_branch);
@@ -176,18 +192,6 @@ squash_commits ()
         return 1;
     fi;
     return 0
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 combined_return=0
 requirement_check jq "search 'how to install jq'"

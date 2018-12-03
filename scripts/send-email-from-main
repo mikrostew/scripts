@@ -3,8 +3,14 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/send-email-from-main, and run './generate-scripts.sh'
 ###########################################################################
-#02d6eae5a134eb379ccc1030aa991ea1
+#30bc17d36e37b55bd87897b6de1c20c4
 
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
 requirement_check ()
 {
     local cmd="$1";

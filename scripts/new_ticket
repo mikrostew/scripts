@@ -3,10 +3,15 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/new_ticket, and run './generate-scripts.sh'
 ###########################################################################
-#ba3cab728ddbea30857d9b10216c0f51
+#0da17dceebc4a8d5422363adce83c85f
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
 echo_info ()
 {
     echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2

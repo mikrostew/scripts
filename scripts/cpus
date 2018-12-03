@@ -3,8 +3,10 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/cpus, and run './generate-scripts.sh'
 ###########################################################################
-#57864263965192b7682b42b8b3cd0dc9
+#5afa5245a9bdb5353c28f4d78e356158
 
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
@@ -22,20 +24,20 @@ requirement_check ()
     fi
 }
 combined_return=0
-if [ "$(uname -s)" == "Linux" ]; then
-  requirement_check lscpu "search 'how to install lscpu'"
+if [ "$(uname -s)" == "Darwin" ]; then
+  requirement_check sysctl "search 'how to install sysctl/OSX'"
   combined_return=$(( combined_return + $? ))
 fi
 requirement_check wc "search 'how to install wc'"
 combined_return=$(( combined_return + $? ))
+if [ "$(uname -s)" == "Linux" ]; then
+  requirement_check lscpu "search 'how to install lscpu/Linux'"
+  combined_return=$(( combined_return + $? ))
+fi
 requirement_check egrep "search 'how to install egrep'"
 combined_return=$(( combined_return + $? ))
 requirement_check sort "search 'how to install sort'"
 combined_return=$(( combined_return + $? ))
-if [ "$(uname -s)" == "Darwin" ]; then
-  requirement_check sysctl "search 'how to install sysctl'"
-  combined_return=$(( combined_return + $? ))
-fi
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 if [ "$(uname -s)" == "Darwin" ]
 then

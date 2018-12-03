@@ -3,8 +3,14 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/new_firefox, and run './generate-scripts.sh'
 ###########################################################################
-#38150cdbe2b6836e0069161650d2f457
+#621a078640882703864544d4a71ad206
 
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
 requirement_check ()
 {
     local cmd="$1";

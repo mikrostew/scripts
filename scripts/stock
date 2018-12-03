@@ -3,10 +3,14 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/stock, and run './generate-scripts.sh'
 ###########################################################################
-#0c87b5b951159587bed63d5fc6ec4ea1
+#ad48df3ebcdc17a6b012a330fdc144fe
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
 requirement_check ()
 {
     local cmd="$1";
@@ -21,11 +25,11 @@ requirement_check ()
 }
 combined_return=0
 if [ "$(uname -s)" == "Linux" ]; then
-  requirement_check xdg-open "search 'how to install xdg-open'"
+  requirement_check xdg-open "search 'how to install xdg-open/Linux'"
   combined_return=$(( combined_return + $? ))
 fi
 if [ "$(uname -s)" == "Darwin" ]; then
-  requirement_check open "search 'how to install open'"
+  requirement_check open "search 'how to install open/OSX'"
   combined_return=$(( combined_return + $? ))
 fi
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi

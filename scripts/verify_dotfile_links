@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/verify_dotfile_links, and run './generate-scripts.sh'
 ###########################################################################
-#6ce946ec8bbcba4cc9fe3dab1191c8de
+#01698fff994fa28f10dfb3c7828da1d7
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'

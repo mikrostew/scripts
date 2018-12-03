@@ -3,8 +3,14 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/new_terminal, and run './generate-scripts.sh'
 ###########################################################################
-#6ddf89b6642f5a844a908838c3e2a9fc
+#06273e321c4b76bc2a494348b0fb3343
 
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
 requirement_check ()
 {
     local cmd="$1";
