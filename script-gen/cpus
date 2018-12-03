@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# show the number of logical and physical CPUs on this machine
+
+# (adapted from https://stackoverflow.com/a/23378780/)
+
+@uses_cmds sysctl lscpu egrep wc sort
+
+if ?PLATFORM_IS_MAC?
+then
+  echo "logical CPUs:  $(sysctl -n hw.logicalcpu_max) max ($(sysctl -n hw.logicalcpu) available)"
+  echo "physical CPUs: $(sysctl -n hw.physicalcpu_max) max ($(sysctl -n hw.physicalcpu) available)"
+elif ?PLATFORM_IS_LINUX?
+then
+  echo "logical CPUs:  $(lscpu -p | egrep -v '^#' | wc -l)"
+  echo "physical CPUs: $(lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l)"
+fi
+

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file script-gen/cpus, and run './generate-scripts.sh'
+###########################################################################
+#57864263965192b7682b42b8b3cd0dc9
+
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+if [ "$(uname -s)" == "Linux" ]; then
+  requirement_check lscpu "search 'how to install lscpu'"
+  combined_return=$(( combined_return + $? ))
+fi
+requirement_check wc "search 'how to install wc'"
+combined_return=$(( combined_return + $? ))
+requirement_check egrep "search 'how to install egrep'"
+combined_return=$(( combined_return + $? ))
+requirement_check sort "search 'how to install sort'"
+combined_return=$(( combined_return + $? ))
+if [ "$(uname -s)" == "Darwin" ]; then
+  requirement_check sysctl "search 'how to install sysctl'"
+  combined_return=$(( combined_return + $? ))
+fi
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+if [ "$(uname -s)" == "Darwin" ]
+then
+  echo "logical CPUs:  $(sysctl -n hw.logicalcpu_max) max ($(sysctl -n hw.logicalcpu) available)"
+  echo "physical CPUs: $(sysctl -n hw.physicalcpu_max) max ($(sysctl -n hw.physicalcpu) available)"
+elif [ "$(uname -s)" == "Linux" ]
+then
+  echo "logical CPUs:  $(lscpu -p | egrep -v '^#' | wc -l)"
+  echo "physical CPUs: $(lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l)"
+fi
