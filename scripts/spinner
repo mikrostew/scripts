@@ -3,10 +3,32 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/spinner, and run './generate-scripts.sh'
 ###########################################################################
-#c20aa692844868e3879a814038124b87
+#50c75b228d27f3623e14984d738d349e
 
-cmd_pid="${1:?must specify pid for spinner}"
-spin_msg="$2"
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
+while getopts ":m:" opt
+do
+  case $opt in
+    m)
+      spin_msg="$OPTARG"
+      ;;
+    \?)
+      echo_err "$0: Invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: Option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+cmd_pid="${1:?Must specify PID for spinner}"
 spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
 num_chars=${#spin_chars}
 total_length=$(( 2 + ${#spin_msg} ))

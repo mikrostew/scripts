@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/todo, and run './generate-scripts.sh'
 ###########################################################################
-#a69c287313057969c4344b81c9619f22
+#774e8434934712f86871348e4be0525e
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -58,7 +58,7 @@ exec 3< <(grep \
   "$in_dir" \
   2>/dev/null \
 )
-spinner $! "grepping files..."
+spinner -m "grepping files..." $!
 matched_lines="$(cat <&3)"
 num_lines="$(echo "$matched_lines" | wc -l | tr -d '[:space:]')"
 echo "$matched_lines"
