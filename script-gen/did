@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# appends to a very simple did.txt file
+# (adapted from https://theptrk.com/2018/07/11/did-txt-file/)
+
+@import do_cmd from .bash_shared_functions
+
+@uses_cmds vim
+
+do_cmd vim +'r!date' +'normal o' +'normal ggo-  ' +startinsert "$HOME/Dropbox/doc/did.txt"
+

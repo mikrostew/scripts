@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file script-gen/did, and run './generate-scripts.sh'
+###########################################################################
+#e78effd79c7eee1b7a94b706902026d0
+
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+do_cmd ()
+{
+    echo -en "${COLOR_FG_GREEN}( " 1>&2;
+    for arg in "$@";
+    do
+        case "$arg" in
+            *\ *)
+                echo -n "\"$arg\" "
+            ;;
+            *)
+                echo -n "$arg "
+            ;;
+        esac;
+    done;
+    echo -e ")${COLOR_RESET}" 1>&2;
+    command "$@"
+}
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+requirement_check vim "search 'how to install vim'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+do_cmd vim +'r!date' +'normal o' +'normal ggo-  ' +startinsert "$HOME/Dropbox/doc/did.txt"
