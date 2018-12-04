@@ -10,32 +10,9 @@
 #  $ spinner $! "grepping files..."
 #  ⠼ grepping files...
 
-@import echo_err from .bash_shared_functions
-
-# use getopts to parse positional arguments
-# TODO: eventually generate the boilerplate for this
-while getopts ":m:" opt
-do
-  case $opt in
-    m)
-      spin_msg="$OPTARG"
-      ;;
-    \?)
-      echo_err "$0: Invalid option '-$OPTARG'"
-      exit 1
-      ;;
-    :)
-      echo_err "$0: Option '-$OPTARG' requires an argument"
-      exit 1
-      ;;
-  esac
-done
-
-# get rid of any positional params
-shift $((OPTIND-1))
-
-# TODO: check this arg as well, echo_err on error
-cmd_pid="${1:?Must specify PID for spinner}"
+# generate the args for this:
+@arg_optional 'm:' 'spin_msg' 'Text to display along with the spinner animation'
+@arg 'cmd_pid' 'PID of the long-running command'
 
 spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
 

@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/spinner, and run './generate-scripts.sh'
 ###########################################################################
-#50c75b228d27f3623e14984d738d349e
+#c900a10739444da6b910a04827d95e96
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -28,7 +28,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-cmd_pid="${1:?Must specify PID for spinner}"
+cmd_pid="${1:?Missing argument 'cmd_pid'}"
 spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
 num_chars=${#spin_chars}
 total_length=$(( 2 + ${#spin_msg} ))
