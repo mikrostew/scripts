@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# git - checkout branch from list of branches (Git Checkout from List)
+
+@import { all_git_branches, in_git_repo, do_git } from .bash_git
+@import { echo_info } from .bash_shared_functions
+
+if in_git_repo
+then
+  all_branches=( $(all_git_branches | sort) )
+  num_branches="${#all_branches[@]}"
+  for((i=0; i<$num_branches; i++))
+  do
+    # convert to 1-based index, which is nicer to select
+    (( index = i + 1 ))
+    echo -e "[$index] ${all_branches[$i]}"
+  done
+  echo -n "Branch number: "
+  read branch_num
+  if [ -n "$branch_num" ] && (( "$branch_num" <= "$num_branches" ))
+  then
+    (( branch_index = branch_num - 1 ))
+    do_git checkout "${all_branches[$branch_index]}"
+  else
+    echo_info "no branch selected"
+  fi
+fi
