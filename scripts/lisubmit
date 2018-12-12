@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lisubmit, and run './generate-scripts.sh'
 ###########################################################################
-#2894e7b1f0f325bdc3451ede50e87662
+#d5550aaba45d1ab29d3dc8d0d61da7ce
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -35,19 +35,19 @@ current_git_branch ()
 }
 do_cmd ()
 {
-    echo -en "${COLOR_FG_GREEN}( " 1>&2;
+    local cmd_args="";
     for arg in "$@";
     do
         case "$arg" in
             *\ *)
-                echo -n "\"$arg\" "
+                cmd_args="$cmd_args \"$arg\""
             ;;
             *)
-                echo -n "$arg "
+                cmd_args="$cmd_args $arg"
             ;;
         esac;
     done;
-    echo -e ")${COLOR_RESET}" 1>&2;
+    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
     command "$@"
 }
 do_git ()

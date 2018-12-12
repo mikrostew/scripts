@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/new_ticket, and run './generate-scripts.sh'
 ###########################################################################
-#0da17dceebc4a8d5422363adce83c85f
+#7342232d70117d470524e0e3ddabbd6e
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'

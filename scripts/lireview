@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lireview, and run './generate-scripts.sh'
 ###########################################################################
-#dd6a38fd71267f6bc6aeadc12797d740
+#a18b9774ef6f0ec7deac8c3a6a026e85
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -15,19 +15,19 @@ current_git_branch ()
 }
 do_cmd ()
 {
-    echo -en "${COLOR_FG_GREEN}( " 1>&2;
+    local cmd_args="";
     for arg in "$@";
     do
         case "$arg" in
             *\ *)
-                echo -n "\"$arg\" "
+                cmd_args="$cmd_args \"$arg\""
             ;;
             *)
-                echo -n "$arg "
+                cmd_args="$cmd_args $arg"
             ;;
         esac;
     done;
-    echo -e ")${COLOR_RESET}" 1>&2;
+    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
     command "$@"
 }
 do_git ()
