@@ -10,9 +10,8 @@ then
   num_branches="${#all_branches[@]}"
   for((i=0; i<$num_branches; i++))
   do
-    # convert to 1-based index, which is nicer to select
-    (( index = i + 1 ))
-    echo -e "[$index] ${all_branches[$i]}"
+    # display a 1-based index, which is nicer to select
+    echo -e "[$(( index + 1 ))] ${all_branches[$i]}"
   done
   echo -n "Branch number: "
   read branch_num
