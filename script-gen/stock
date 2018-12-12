@@ -12,9 +12,7 @@ stock_url="https://finance.yahoo.com/quote/$stock_symbol/"
 if ?PLATFORM_IS_LINUX?
 then
   xdg-open "$stock_url"
-fi
-
-if ?PLATFORM_IS_MAC?
+elif ?PLATFORM_IS_MAC?
 then
   open "$stock_url"
 fi

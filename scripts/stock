@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/stock, and run './generate-scripts.sh'
 ###########################################################################
-#ad48df3ebcdc17a6b012a330fdc144fe
+#4c45da2e258bff25936c6841ceb593f0
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -39,8 +39,7 @@ stock_url="https://finance.yahoo.com/quote/$stock_symbol/"
 if [ "$(uname -s)" == "Linux" ]
 then
   xdg-open "$stock_url"
-fi
-if [ "$(uname -s)" == "Darwin" ]
+elif [ "$(uname -s)" == "Darwin" ]
 then
   open "$stock_url"
 fi
