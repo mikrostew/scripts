@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# show a busy spinner while the input PID is running
+# Show a busy spinner while the input PID is running
 
 # use this like:
 #  $ sleep 10 &
@@ -7,7 +7,7 @@
 #  ⠼
 
 # or you can add an optional message for the spinner
-#  $ spinner $! "grepping files..."
+#  $ spinner -m "grepping files..." $!
 #  ⠼ grepping files...
 
 # generate the args for this:
