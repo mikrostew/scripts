@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file script-gen/lilinks, and run './generate-scripts.sh'
+###########################################################################
+#e74f6fc032f003842c5922e0cb4e9ec8
+
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
+echo_info ()
+{
+    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+}
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+combined_return=0
+if [ "$(uname -s)" == "Linux" ]; then
+  requirement_check xdg-open "search 'how to install xdg-open/Linux'"
+  combined_return=$(( combined_return + $? ))
+fi
+if [ "$(uname -s)" == "Darwin" ]; then
+  requirement_check open "search 'how to install open/OSX'"
+  combined_return=$(( combined_return + $? ))
+fi
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+declare -A menu_items
+menu_items['Cafe Menus']='cafe_menus'
+menu_items['Floor Plans']='floor_plans'
+menu_items['Review Boards']='review_boards'
+open_url() {
+  if [ "$(uname -s)" == "Darwin" ]
+  then
+    open "$1"
+  elif [ "$(uname -s)" == "Linux" ]
+  then
+    xdg-open "$1"
+  fi
+}
+cafe_menus() {
+  open_url 'https://linkedin.cafebonappetit.com/cafe/cafe-elevate/'
+  open_url 'https://linkedin.cafebonappetit.com/cafe/journey/'
+  open_url 'https://linkedin.cafebonappetit.com/cafe/mezzo/'
+  open_url 'https://linkedin.cafebonappetit.com/cafe/nosh/'
+}
+floor_plans() {
+  echo "floor_plans: TODO"
+}
+review_boards() {
+  open_url 'https://rb.corp.linkedin.com/users/aravisha/'
+  open_url 'https://rb.corp.linkedin.com/users/bblank/'
+  open_url 'https://rb.corp.linkedin.com/users/cokim/'
+  open_url 'https://rb.corp.linkedin.com/users/dcombs/'
+  open_url 'https://rb.corp.linkedin.com/users/mistewar/'
+  open_url 'https://rb.corp.linkedin.com/users/syeung/'
+}
+readarray -t menu_items_by_index <<< "$(for key in "${!menu_items[@]}"; do echo "$key"; done | sort )"
+num_items="${#menu_items_by_index[@]}"
+echo ""
+echo "What do you want to open?"
+for(( i = 0; i < $num_items; i++ ))
+do
+  echo -e "[$(( i + 1 ))] ${menu_items_by_index[$i]}"
+done
+echo ""
+echo -n "Selection: "
+read item_num
+if [ -n "$item_num" ] && (( "$item_num" <= "$num_items" ))
+then
+  (( item_index = item_num - 1 ))
+  item_name="${menu_items_by_index[$item_index]}"
+  echo_info "opening $item_name..."
+  func_name="${menu_items[$item_name]}"
+  "$func_name"
+else
+  echo_info "(no option selected)"
+fi
