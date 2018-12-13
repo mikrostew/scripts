@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/gcl, and run './generate-scripts.sh'
 ###########################################################################
-#29643913e88e80e5bf0482e3abb52849
+#2d9a36ce2a3e15612bcd41df6da98da6
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -94,7 +94,7 @@ then
   num_branches="${#all_branches[@]}"
   for((i=0; i<$num_branches; i++))
   do
-    echo -e "[$(( index + 1 ))] ${all_branches[$i]}"
+    echo -e "[$(( i + 1 ))] ${all_branches[$i]}"
   done
   echo -n "Branch number: "
   read branch_num

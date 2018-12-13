@@ -11,7 +11,7 @@ then
   for((i=0; i<$num_branches; i++))
   do
     # display a 1-based index, which is nicer to select
-    echo -e "[$(( index + 1 ))] ${all_branches[$i]}"
+    echo -e "[$(( i + 1 ))] ${all_branches[$i]}"
   done
   echo -n "Branch number: "
   read branch_num
