@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/verify_dotfile_links, and run './generate-scripts.sh'
 ###########################################################################
-#6e20cee8e96e192e8e00746e435a3e66
+#12c9828a5ce87d7742427fa27d9aa90d
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -31,7 +31,7 @@ show_help_msg() {
   echo '  -h               Show this help message'
   echo ''
   echo 'Arguments:'
-  echo '  checkout_dir     (optional) The directory where the repo is checked out (defaults to $HOME/dotfiles)'
+  echo '  checkout_dir     (optional) The directory where the repo is checked out (defaults to "$HOME/dotfiles")'
 }
 while getopts ":h" opt
 do
@@ -54,8 +54,7 @@ combined_return=0
 requirement_check readlink "search 'how to install readlink'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-checkout_dir="${1}"
-checkoutdir="${checkout_dir:-$HOME/dotfiles}"
+checkout_dir="${1:-$HOME/dotfiles}"
 declare -A links
 links[".vimrc"]=".vimrc"
 links[".vim"]=".vim"
@@ -78,11 +77,11 @@ do
   if [ -L "$HOME/$i" ]
   then
     link_target="$(readlink $HOME/$i)"
-    if [ "$link_target" != "$checkoutdir/${links[$i]}" ]
+    if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
     then
-      echo_err "symlink '$HOME/$i => $checkoutdir/${links[$i]}' has been changed!"
+      echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' has been changed!"
     fi
   else
-    echo_err "symlink '$HOME/$i => $checkoutdir/${links[$i]}' does not exist!"
+    echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' does not exist!"
   fi
 done

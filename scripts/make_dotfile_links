@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/make_dotfile_links, and run './generate-scripts.sh'
 ###########################################################################
-#cd25b0ddfc9956dbc7d59c744c5e290b
+#0ab26416653f6187d7685666eb5ca26e
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -34,7 +34,7 @@ show_help_msg() {
   echo '  -h               Show this help message'
   echo ''
   echo 'Arguments:'
-  echo '  checkout_dir     (optional) The directory where the repo is checked out (defaults to $HOME/dotfiles)'
+  echo '  checkout_dir     (optional) The directory where the repo is checked out (defaults to "$HOME/dotfiles")'
 }
 while getopts ":h" opt
 do
@@ -57,8 +57,7 @@ combined_return=0
 requirement_check readlink "search 'how to install readlink'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-checkout_dir="${1}"
-checkoutdir="${checkout_dir:-$HOME/dotfiles}"
+checkout_dir="${1:-$HOME/dotfiles}"
 declare -A links
 links[".vimrc"]=".vimrc"
 links[".vim"]=".vim"
@@ -78,7 +77,7 @@ then
 fi
 for i in "${!links[@]}"
 do
-  echo -n "$HOME/$i => $checkoutdir/${links[$i]}"
+  echo -n "$HOME/$i => $checkout_dir/${links[$i]}"
   if [ -L "$HOME/$i" ]
   then
     echo -e " ${COLOR_FG_YELLOW}(symlink already exists, skipping)${COLOR_RESET}"
@@ -89,6 +88,6 @@ do
     echo -ne " ${COLOR_FG_BOLD_BLUE}(file exists, renamed to '$HOME/$i-old')${COLOR_RESET}"
     mv "$HOME/$i" "$HOME/$i-old"
   fi
-  ln -s "$checkoutdir/${links[$i]}" "$HOME/$i"
+  ln -s "$checkout_dir/${links[$i]}" "$HOME/$i"
   echo -e " [${COLOR_FG_GREEN}OK${COLOR_RESET}]"
 done

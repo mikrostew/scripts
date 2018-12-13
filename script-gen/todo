@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 # Show any TODOs from comments in source code
 
-@arg_optional 'in_dir' 'Directory to grep for TODOs in (defaults to current dir)'
+@arg_optional 'in_dir' 'Directory to grep for TODOs in' '.'
 
 @import_var { COLOR_RESET, COLOR_FG_BOLD_BLUE } from .bash_colors
 
 @uses_cmds grep wc tr spinner
-
-in_dir="${in_dir:-.}" # default to current directory
 
 # possible comment styles
 hash_comments='#'         # Python, Bash, Ruby, Perl

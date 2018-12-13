@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 # Create links for dotfiles
 
-@arg_optional 'checkout_dir' 'The directory where the repo is checked out (defaults to $HOME/dotfiles)'
+@arg_optional 'checkout_dir' 'The directory where the repo is checked out' '$HOME/dotfiles'
 
 @import_var { COLOR_FG_YELLOW, COLOR_FG_BOLD_BLUE, COLOR_FG_GREEN, COLOR_RESET } from .bash_colors
 
 @uses_cmds readlink
-
-# where the repo is checked out
-checkoutdir="${checkout_dir:-$HOME/dotfiles}"
 
 # use bash 4.x associative arrays
 declare -A links
@@ -50,7 +47,7 @@ fi
 # create the links
 for i in "${!links[@]}"
 do
-  echo -n "$HOME/$i => $checkoutdir/${links[$i]}"
+  echo -n "$HOME/$i => $checkout_dir/${links[$i]}"
   if [ -L "$HOME/$i" ]
   then
     echo -e " ${COLOR_FG_YELLOW}(symlink already exists, skipping)${COLOR_RESET}"
@@ -61,6 +58,6 @@ do
     echo -ne " ${COLOR_FG_BOLD_BLUE}(file exists, renamed to '$HOME/$i-old')${COLOR_RESET}"
     mv "$HOME/$i" "$HOME/$i-old"
   fi
-  ln -s "$checkoutdir/${links[$i]}" "$HOME/$i"
+  ln -s "$checkout_dir/${links[$i]}" "$HOME/$i"
   echo -e " [${COLOR_FG_GREEN}OK${COLOR_RESET}]"
 done

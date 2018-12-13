@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/todo, and run './generate-scripts.sh'
 ###########################################################################
-#c7b60448e44f2b9c4532a4205e1ed414
+#2a33cc647b5ba9d4a31a588949baa4fa
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -32,7 +32,7 @@ show_help_msg() {
   echo '  -h               Show this help message'
   echo ''
   echo 'Arguments:'
-  echo '  in_dir           (optional) Directory to grep for TODOs in (defaults to current dir)'
+  echo '  in_dir           (optional) Directory to grep for TODOs in (defaults to ".")'
 }
 while getopts ":h" opt
 do
@@ -61,8 +61,7 @@ combined_return=$(( combined_return + $? ))
 requirement_check tr "search 'how to install tr'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-in_dir="${1}"
-in_dir="${in_dir:-.}" # default to current directory
+in_dir="${1:-.}"
 hash_comments='#'         # Python, Bash, Ruby, Perl
 slash_comments='//'       # C/C++, Javascript, Java, PHP
 dquote_comments='"'       # vim script

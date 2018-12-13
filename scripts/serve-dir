@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/serve-dir, and run './generate-scripts.sh'
 ###########################################################################
-#8a9a5b8636d72aad697e81948156ba63
+#5024868bea91608721fc3987a5d5d5de
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -32,7 +32,7 @@ show_help_msg() {
   echo '  -h               Show this help message'
   echo ''
   echo 'Arguments:'
-  echo '  port             (optional) The port to serve from'
+  echo '  port             (optional) The port to serve from (defaults to "8080")'
 }
 while getopts ":h" opt
 do
@@ -59,8 +59,7 @@ combined_return=$(( combined_return + $? ))
 requirement_check awk "search 'how to install awk'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-port="${1}"
-port="${port:-8080}"
+port="${1:-8080}"
 address="$(ifconfig | awk '/inet / && $2 != "127.0.0.1"{print $2}')"
 echo -e "Current directory: ${COLOR_FG_BOLD_BLUE}$PWD${COLOR_RESET}"
 echo -e "Serving at ${COLOR_FG_BOLD_BLUE}$address:$port${COLOR_RESET}"

@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/min_version_check, and run './generate-scripts.sh'
 ###########################################################################
-#a7dc2331f81ad065d63d6c484a7747d8
+#09a898bdb29b3924efe556e4e5ea0b85
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -34,7 +34,7 @@ show_help_msg() {
   echo '  version_specifier   Semver range to match against'
   echo '  install_cmd         Command the user can run to install the executable'
   echo '  version_cmd         How to get the version of the executable (NOTE: will be eval-ed)'
-  echo '  install_path        (optional) Path to the executable to use instead of `which` (NOTE: will be eval-ed)'
+  echo '  install_path        (optional) Path to the executable to use instead of `which` (NOTE: will be eval-ed) (defaults to "")'
   echo '  executable_name     Executable that is being checked'
 }
 while getopts ":h" opt
@@ -62,7 +62,7 @@ executable_name="${1:?Missing argument 'executable_name'}"
 version_specifier="${2:?Missing argument 'version_specifier'}"
 version_cmd="${3:?Missing argument 'version_cmd'}"
 install_cmd="${4:?Missing argument 'install_cmd'}"
-install_path="${5}"
+install_path="${5:-}"
 normalize_version() {
   if [[ "$1" =~ ^[0-9]+$ ]]; then
     echo "$1.0.0"

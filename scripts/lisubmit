@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lisubmit, and run './generate-scripts.sh'
 ###########################################################################
-#8e39c52bfb32dd9faeee76400d393f81
+#d59b070616ff623777f2a78737c3b056
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -202,7 +202,7 @@ show_help_msg() {
   echo ''
   echo 'Arguments:'
   echo '  commit_msg              Message for the commit'
-  echo '  commit_msg_extra_line   (optional) Optional extra line for more details and/or overrides'
+  echo '  commit_msg_extra_line   (optional) Optional extra line for more details and/or overrides (defaults to "")'
 }
 while getopts ":h" opt
 do
@@ -232,7 +232,7 @@ requirement_check curl "search 'how to install curl'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 commit_msg="${1:?Missing argument 'commit_msg'}"
-commit_msg_extra_line="${2}"
+commit_msg_extra_line="${2:-}"
 in_mint_submit_repo() {
   if [ -f "$PWD/product-spec.json" ]; then
     submit_def="$(cat $PWD/product-spec.json | jq '.build.commands.submit')"
