@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-# create a new RB from the local changes, or update existing review
+# Create a new RB from the local changes, or update existing review
 
-# how to use this:
-#  $ lireview
-#  (then follow the prompts)
+@arg_optional 'input_description' 'Description of the changes'
 
 @import { echo_ack, echo_info } from .bash_shared_functions
 @import { do_git, git_review_board_id, current_git_branch } from .bash_git
@@ -26,7 +24,6 @@ then
 
   echo_info "RB $review_id already exists for this branch - updating..."
   # if there is an argument supplied, use that for the description
-  input_description="$1"
   echo -n "Description of these changes [$input_description]: "
   read diff_description
   if [ -z "$diff_description" ]
@@ -40,11 +37,9 @@ else
 
   echo_info "No RB for this branch - creating one..."
   # if there is an argument supplied, use that for the description
-  if [ -n "$1" ]
+  if [ -z "$input_description" ]
   then
-    input_description="$1"
-  else
-    # otherwise use the commit message
+    # no input description, so use the commit message
     input_description="$(git log -1 --pretty=%B)"
   fi
   echo -n "Description of these changes [$input_description]: "

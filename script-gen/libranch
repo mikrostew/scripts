@@ -1,21 +1,9 @@
 #!/usr/bin/env bash
-# create a new branch that tracks origin/master (for LinkedIn workflow)
+# Create a new branch that tracks origin/master (for LinkedIn workflow)
 
-# usage:
-#  libranch <branch-name>
+@arg 'new_branch_name' 'Name of the new branch'
 
-@import echo_err from .bash_shared_functions
 @import { do_git, in_git_repo, on_git_branch } from .bash_git
-
-# arguments
-new_branch_name="$1"
-
-if [ -z "$new_branch_name" ]
-then
-  echo_err "ERROR: Missing branch name"
-  echo_err "Usage:"
-  echo_err "  ${0##*/} <new-branch-name>"
-fi
 
 # create new branch (that tracks origin/master)
 if in_git_repo && on_git_branch 'master'

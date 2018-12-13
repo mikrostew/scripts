@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# show the number of logical and physical CPUs on this machine
-
+# Show the number of logical and physical CPUs on this machine
 # (adapted from https://stackoverflow.com/a/23378780/)
 
 @uses_cmds sysctl/OSX lscpu/Linux egrep wc sort

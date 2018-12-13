@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# verify the links to the dotfiles haven't changed
+# Verify the links to the dotfiles haven't changed
+
+@arg_optional 'checkout_dir' 'The directory where the repo is checked out (defaults to $HOME/dotfiles)'
 
 @import echo_err from .bash_shared_functions
 
 @uses_cmds readlink
 
 # optionally input the directory where the repo is checked out
-checkoutdir="${1:-$HOME/dotfiles}"
+checkoutdir="${checkout_dir:-$HOME/dotfiles}"
 
 # use bash 4.x associative arrays
 declare -A links
@@ -60,3 +62,4 @@ do
     echo_err "symlink '$HOME/$i => $checkoutdir/${links[$i]}' does not exist!"
   fi
 done
+

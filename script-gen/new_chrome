@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# opens new Chrome window
+# Opens new Chrome window
 
 # to set this up to run as hotkey Ctrl-⌥ -⌘ -C (Control-Option-Command-C)
 # (instructions adapted from https://apple.stackexchange.com/a/276839)

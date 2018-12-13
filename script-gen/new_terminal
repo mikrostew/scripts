@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# opens new iTerm2 window
+# Opens new iTerm2 window
 
 # to set this up to run as hotkey Ctrl-⌥ -⌘ -T (Control-Option-Command-T)
 # (instructions adapted from https://apple.stackexchange.com/a/276839)

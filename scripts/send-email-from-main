@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/send-email-from-main, and run './generate-scripts.sh'
 ###########################################################################
-#30bc17d36e37b55bd87897b6de1c20c4
+#196507e81e55a371a1896c6a48686191
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -23,13 +23,42 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "send-email-from-main - Send email from main email address, using SMTP"
+  echo 'Usage: send-email-from-main [options] to_email subject message'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+  echo ''
+  echo 'Arguments:'
+  echo '  to_email         Address to send the email to'
+  echo '  subject          Email subject line'
+  echo '  message          Email message contents'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check sendEmail "search 'how to install sendEmail'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-to_email="${1:?First arg is the to: email address}"
-subject="${2:?Second arg is the subject}"
-message="${3:?Third arg is the message}"
+to_email="${1:?Missing argument 'to_email'}"
+subject="${2:?Missing argument 'subject'}"
+message="${3:?Missing argument 'message'}"
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 user="$($GET_API_TOKEN email-main-user)"
 pass="$($GET_API_TOKEN email-main-pass)"

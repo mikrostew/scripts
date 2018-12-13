@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# clean dirs and files in a MP (for LinkedIn workflow)
+# Clean dirs and files in a MP (for LinkedIn workflow)
 
 # how to use this:
 #  $ liclean

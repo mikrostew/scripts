@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# show the open tab URLs from Chrome
+# Show the open tab URLs from Chrome
 # (adapted from https://stackoverflow.com/a/49678861/)
 
 @uses_cmds strings grep sort uniq

@@ -3,6 +3,36 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/cargo-watch, and run './generate-scripts.sh'
 ###########################################################################
-#76a79672708ac6c3bea14e321634bae8
+#25279ea409bfd569d139009ecdf4c247
 
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
+show_help_msg() {
+  echo "cargo-watch - A shim so I don't have to add cargo-watch to my path"
+  echo 'Usage: cargo-watch [options]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 command "$HOME/src/cargo-watch/target/debug/cargo-watch" "$@"

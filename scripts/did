@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/did, and run './generate-scripts.sh'
 ###########################################################################
-#e5298eca4f1ab768f9330069cd212865
+#c875795543c5a554b5537ef59d8cbf83
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -41,6 +41,30 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "did - Appends to a very simple did.txt file"
+  echo 'Usage: did [options]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check vim "search 'how to install vim'"
 combined_return=$(( combined_return + $? ))

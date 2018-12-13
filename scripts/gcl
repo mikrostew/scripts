@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/gcl, and run './generate-scripts.sh'
 ###########################################################################
-#6edff4bbab26213496a3592167c49bb2
+#29643913e88e80e5bf0482e3abb52849
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -58,6 +58,30 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "gcl - Checkout git branch from list of branches (Git Checkout from List)"
+  echo 'Usage: gcl [options]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check git "search 'how to install git'"
 combined_return=$(( combined_return + $? ))

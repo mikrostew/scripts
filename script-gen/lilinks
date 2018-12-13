@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# presents a menu to open various URLs and things for linkedin daily stuff
+# Presents a menu to open various URLs and things for linkedin daily stuff
 
 @import { echo_info } from .bash_shared_functions
 

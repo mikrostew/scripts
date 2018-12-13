@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# count lines of code for the input files
+# Count lines of code for the input files
 
 @import echo_err from .bash_shared_functions
 
 @uses_cmds sed grep
 
+# TODO: specify to generated getopts stuff that something should be passed in
 if [ "$#" -eq 0 ]
 then
   echo_err "No input files given!"

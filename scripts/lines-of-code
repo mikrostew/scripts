@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lines-of-code, and run './generate-scripts.sh'
 ###########################################################################
-#98acd83540c88e9e9d24285d4acdc471
+#17a3c9c0f75220c40ee2c288a8d7ad7b
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -23,6 +23,30 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "lines-of-code - Count lines of code for the input files"
+  echo 'Usage: lines-of-code [options]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check grep "search 'how to install grep'"
 combined_return=$(( combined_return + $? ))

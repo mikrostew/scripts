@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# send email from outlook address, using SMTP
+# Send email from outlook address, using SMTP
+
+@arg 'to_email' 'Address to send the email to'
+@arg 'subject' 'Email subject line'
+@arg 'message' 'Email message contents'
 
 @uses_cmds sendEmail
-
-to_email="${1:?First arg is the to: email address}"
-subject="${2:?Second arg is the subject}"
-email_contents="${3:?Third arg is the email contents}"
 
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 from_addr="$($GET_API_TOKEN outlook-email)"

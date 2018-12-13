@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# send email from API email address, using SMTP
+# Send email from API email address, using SMTP
+
+@arg 'to_email' 'Address to send the email to'
+@arg 'subject' 'Email subject line'
+@arg 'message' 'Email message contents'
 
 @uses_cmds sendEmail
-
-to_email="${1:?First arg is the to: email address}"
-subject="${2:?Second arg is the subject}"
-message="${3:?Third arg is the message}"
 
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 user="$($GET_API_TOKEN email-api-user)"

@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-# serve the files in the current directory
+# Serve the files in the current directory
 # (from https://stackoverflow.com/a/7105609)
+
+@arg_optional 'port' 'The port to serve from'
 
 @import_var { COLOR_RESET, COLOR_FG_BOLD_BLUE } from .bash_colors
 
 @uses_cmds ifconfig awk ruby
 
-# argument(s)
-port="${1:-8080}"
+# TODO: would be nice to have default args for optionals
+port="${port:-8080}"
 
 address="$(ifconfig | awk '/inet / && $2 != "127.0.0.1"{print $2}')"
 echo -e "Current directory: ${COLOR_FG_BOLD_BLUE}$PWD${COLOR_RESET}"

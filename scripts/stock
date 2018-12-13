@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/stock, and run './generate-scripts.sh'
 ###########################################################################
-#4c45da2e258bff25936c6841ceb593f0
+#140076020b158e6a4d600a39d9b658fb
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -23,6 +23,33 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "stock - Open the browser with info on the input stock"
+  echo 'Usage: stock [options] stock_symbol'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+  echo ''
+  echo 'Arguments:'
+  echo '  stock_symbol     The symbol to use to look up the stock'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 if [ "$(uname -s)" == "Linux" ]; then
   requirement_check xdg-open "search 'how to install xdg-open/Linux'"
@@ -33,8 +60,7 @@ if [ "$(uname -s)" == "Darwin" ]; then
   combined_return=$(( combined_return + $? ))
 fi
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-err_no_symbol="$(echo -e "${COLOR_FG_RED}Error: No stock symbol provided${COLOR_RESET}")"
-stock_symbol="${1:?$err_no_symbol}"
+stock_symbol="${1:?Missing argument 'stock_symbol'}"
 stock_url="https://finance.yahoo.com/quote/$stock_symbol/"
 if [ "$(uname -s)" == "Linux" ]
 then

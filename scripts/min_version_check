@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/min_version_check, and run './generate-scripts.sh'
 ###########################################################################
-#22878af6e7f595f9af1318fa775facac
+#a7dc2331f81ad065d63d6c484a7747d8
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -23,10 +23,46 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "min_version_check - Check minimum version, and print out the result"
+  echo 'Usage: min_version_check [options] executable_name version_specifier version_cmd install_cmd [install_path]'
+  echo ''
+  echo 'Options:'
+  echo '  -h                  Show this help message'
+  echo ''
+  echo 'Arguments:'
+  echo '  version_specifier   Semver range to match against'
+  echo '  install_cmd         Command the user can run to install the executable'
+  echo '  version_cmd         How to get the version of the executable (NOTE: will be eval-ed)'
+  echo '  install_path        (optional) Path to the executable to use instead of `which` (NOTE: will be eval-ed)'
+  echo '  executable_name     Executable that is being checked'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check semver "search 'how to install semver'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+executable_name="${1:?Missing argument 'executable_name'}"
+version_specifier="${2:?Missing argument 'version_specifier'}"
+version_cmd="${3:?Missing argument 'version_cmd'}"
+install_cmd="${4:?Missing argument 'install_cmd'}"
+install_path="${5}"
 normalize_version() {
   if [[ "$1" =~ ^[0-9]+$ ]]; then
     echo "$1.0.0"
@@ -41,23 +77,23 @@ normalize_version() {
 meets_version() {
   semver --range "$2" "$1" >/dev/null
 }
-if [ -n "$5" ]; then
-  install_path=$(eval "$5")
+if [ -n "$install_path" ]; then
+  install_path=$(eval "$install_path")
 else
-  install_path=$(which "$1")
+  install_path=$(which "$executable_name")
 fi
 if [ -z "$install_path" ]; then
-  echo -e "$1 : ${COLOR_FG_RED}not installed (want $2), install with '${4:-(unknown command)}'${COLOR_RESET}"
+  echo -e "$executable_name : ${COLOR_FG_RED}not installed (want $version_specifier), install with '${install_cmd:-(unknown command)}'${COLOR_RESET}"
   exit 1
 fi
-current_version=$(eval "$3")
+current_version=$(eval "$version_cmd")
 if [ -n "$current_version" ]; then
-  if meets_version "$(normalize_version $current_version)" "$2"; then
+  if meets_version "$(normalize_version $current_version)" "$version_specifier"; then
     exit 0
   else
-    echo -e "$1 : ${COLOR_FG_RED}found $current_version (want $2)${COLOR_RESET} ($install_path)"
+    echo -e "$executable_name : ${COLOR_FG_RED}found $current_version (want $version_specifier)${COLOR_RESET} ($install_path)"
   fi
 else
-  echo -e "$1 : ${COLOR_FG_RED}unknown version (want $2)${COLOR_RESET} ($install_path)"
+  echo -e "$executable_name : ${COLOR_FG_RED}unknown version (want $version_specifier)${COLOR_RESET} ($install_path)"
 fi
 exit 1 # if it hasn't already exited, it didn't meet the version

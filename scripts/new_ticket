@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/new_ticket, and run './generate-scripts.sh'
 ###########################################################################
-#7342232d70117d470524e0e3ddabbd6e
+#74bb88dbf016006c2feb52640b18617d
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -28,6 +28,30 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "new_ticket - Pastes a template into Description field when creating a new Jira ticket"
+  echo 'Usage: new_ticket [options]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check osascript "search 'how to install osascript'"
 combined_return=$(( combined_return + $? ))

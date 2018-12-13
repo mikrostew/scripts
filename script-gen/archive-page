@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# download a webpage and all its requisites using wget
+# Download a webpage and all its requisites using wget
+
+@arg 'page_url' 'URL of the page to download'
+
+@import do_cmd from .bash_shared_functions
 
 @uses_cmds wget
-
-page_url="${1:?No URL entered}"
 
 # explanation of the options:
 # --wait=1 - wait 1 second between retrievals, to ease the load on the server
@@ -12,5 +14,5 @@ page_url="${1:?No URL entered}"
 # --page-requisites - download all the files required to display the page
 # --user-agent="" - don't send the user-agent header
 
-wget --wait=1 --random-wait --convert-links --page-requisites --user-agent="" "$page_url"
+do_cmd wget --wait=1 --random-wait --convert-links --page-requisites --user-agent="" "$page_url"
 

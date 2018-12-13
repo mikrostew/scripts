@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/rmlf, and run './generate-scripts.sh'
 ###########################################################################
-#23409ab54733bad43a2955b25220e3ec
+#4d9e31a13be16f8e7b265043b83db904
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -11,21 +11,32 @@ echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
-num_arguments_ok ()
-{
-    local expected_args=("${!1}");
-    local num_args="$2";
-    local expected_num_args="${#expected_args[@]}";
-    if [ "$expected_num_args" -ne "$num_args" ]; then
-        echo_err "Come on! This is how to use this:";
-        echo_err "";
-        echo_err "  ${FUNCNAME[1]} ${expected_args[*]}";
-        return -1;
-    fi;
-    return 0
+show_help_msg() {
+  echo "rmlf - Remove any trailing newlines from the input file"
+  echo 'Usage: rmlf [options] input_file'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+  echo ''
+  echo 'Arguments:'
+  echo '  input_file       The file to remove the trailing newlines from'
 }
-arguments=('<filename>')
-if num_arguments_ok arguments[@] "$#"
-then
-  printf %s "$(< $1)" > $1
-fi
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+input_file="${1:?Missing argument 'input_file'}"
+printf %s "$(< $input_file)" > $input_file

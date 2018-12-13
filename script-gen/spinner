@@ -10,7 +10,6 @@
 #  $ spinner -m "grepping files..." $!
 #  ⠼ grepping files...
 
-# generate the args for this:
 @arg_optional 'm:' 'spin_msg' 'Text to display along with the spinner animation'
 @arg 'cmd_pid' 'PID of the long-running command'
 

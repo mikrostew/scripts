@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# opens new: iTerm2 window, Chrome window, and Sticky note
+# Opens new: iTerm2 window, Chrome window, and Sticky note
 
 # to set this up to run as hotkey Ctrl-⌥ -⌘ -D (Control-Option-Command-D)
 # (instructions adapted from https://apple.stackexchange.com/a/276839)

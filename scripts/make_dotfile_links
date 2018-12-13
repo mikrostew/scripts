@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/make_dotfile_links, and run './generate-scripts.sh'
 ###########################################################################
-#4dabc649f0589fb07144b9a7e3ffc7bc
+#cd25b0ddfc9956dbc7d59c744c5e290b
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -26,11 +26,39 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "make_dotfile_links - Create links for dotfiles"
+  echo 'Usage: make_dotfile_links [options] [checkout_dir]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+  echo ''
+  echo 'Arguments:'
+  echo '  checkout_dir     (optional) The directory where the repo is checked out (defaults to $HOME/dotfiles)'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check readlink "search 'how to install readlink'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-checkoutdir="${1:-$HOME/dotfiles}"
+checkout_dir="${1}"
+checkoutdir="${checkout_dir:-$HOME/dotfiles}"
 declare -A links
 links[".vimrc"]=".vimrc"
 links[".vim"]=".vim"

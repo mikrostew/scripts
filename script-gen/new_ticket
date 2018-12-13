@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pastes template into Description field when creating a new Jira ticket
+# Pastes a template into Description field when creating a new Jira ticket
 
 @import echo_info from .bash_shared_functions
 

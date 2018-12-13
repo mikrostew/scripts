@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/spinner, and run './generate-scripts.sh'
 ###########################################################################
-#fa6de014b843bf063168be161c3540a5
+#5dd3214d9d0f9e4535f9a79035e0cabc
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -12,7 +12,7 @@ echo_err ()
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
-  echo 'spinner - Show a busy spinner while the input PID is running'
+  echo "spinner - Show a busy spinner while the input PID is running"
   echo 'Usage: spinner [options] cmd_pid'
   echo ''
   echo 'Options:'

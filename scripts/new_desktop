@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/new_desktop, and run './generate-scripts.sh'
 ###########################################################################
-#aa6bfce02d9aea0950141120bb6b2155
+#8d824e6fafd47ad9c26845a76f786d05
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -23,6 +23,30 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "new_desktop - Opens new: iTerm2 window, Chrome window, and Sticky note"
+  echo 'Usage: new_desktop [options]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check osascript "search 'how to install osascript'"
 combined_return=$(( combined_return + $? ))

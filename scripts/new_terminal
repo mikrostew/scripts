@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/new_terminal, and run './generate-scripts.sh'
 ###########################################################################
-#06273e321c4b76bc2a494348b0fb3343
+#c4a59a690ed62766d00ef06149de1f10
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -23,6 +23,30 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "new_terminal - Opens new iTerm2 window"
+  echo 'Usage: new_terminal [options]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check osascript "search 'how to install osascript'"
 combined_return=$(( combined_return + $? ))

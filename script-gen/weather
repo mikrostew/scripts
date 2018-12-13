@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# get current weather by zip code
-# using OpenWeatherMap API - http://openweathermap.org/api
+# Get current weather by zip code
+# uses OpenWeatherMap API - http://openweathermap.org/api
 
 @import_var { COLOR_RESET, COLOR_FG_BOLD_BLUE } from .bash_colors
 

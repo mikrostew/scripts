@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# squash commits, rebase, merge, and submit, for LI workflow
+# Squash commits, rebase, merge, and submit, for LI workflow
 
-# how to use this:
-#  $ lisubmit
-#  (then answer the prompts)
+@arg 'commit_msg' 'Message for the commit'
+@arg_optional 'commit_msg_extra_line' 'Optional extra line for more details and/or overrides'
 
 @import { echo_err, echo_info, echo_fail_banner, echo_success_banner, do_cmd } from .bash_shared_functions
 
@@ -23,15 +22,6 @@ in_mint_submit_repo() {
   fi
 }
 
-show_usage() {
-  echo_err "Usage:"
-  echo_err "  ${0##*/} <commit-msg> [, <commit-msg-extra-line>]"
-}
-
-# arguments
-input_msg="$1"
-input_msg_extra_line="$2" # optional
-
 branch_name="$(current_git_branch)"
 
 review_id="$(git_review_board_id $branch_name)"
@@ -40,16 +30,16 @@ review_id="$(git_review_board_id $branch_name)"
 echo_info "Submitting RB $review_id"
 
 review_title="$(get_li_rb_title $review_id)"
-if [ -z "$input_msg" ]
+if [ -z "$commit_msg" ]
 then
   # use the title from the RB
-  input_msg="$review_title"
+  commit_msg="$review_title"
 fi
 
 # prompt for things
-echo -n "Commit message [$input_msg]: "
+echo -n "Commit message [$commit_msg]: "
 read commit_msg
-if [ -z "$commit_msg" ]; then commit_msg="$input_msg"; fi
+if [ -z "$commit_msg" ]; then commit_msg="$commit_msg"; fi
 
 echo "Commit message 2nd line, for overrides"
 echo "These should only be used by oncall, or for immediate response situations:"
@@ -62,9 +52,9 @@ echo "  PCLOVERRIDE           - fix compatibility test that is failing in PCL"
 echo "  EOLVALIDATIONOVERRIDE - commit is blocked by out of date dependency"
 echo "  TRUNKBLOCKERFIX       - override trunk lock"
 echo "  CHERRYPICKOVERRIDE    - commit a change to hotfix branch but not master"
-echo -n "[$input_msg_extra_line]: "
-read commit_msg_extra_line
-if [ -z "$commit_msg_extra_line" ]; then commit_msg_extra_line="$input_msg_extra_line"; fi
+echo -n "[$commit_msg_extra_line]: "
+read commit_msg_extra
+if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; fi
 
 
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes

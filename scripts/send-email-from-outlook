@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/send-email-from-outlook, and run './generate-scripts.sh'
 ###########################################################################
-#cf9871617b7b5881481168533bb0ba80
+#e4bba3f27c526eaca8cfd9a76ad3c7fb
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -23,13 +23,42 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "send-email-from-outlook - Send email from outlook address, using SMTP"
+  echo 'Usage: send-email-from-outlook [options] to_email subject message'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+  echo ''
+  echo 'Arguments:'
+  echo '  to_email         Address to send the email to'
+  echo '  subject          Email subject line'
+  echo '  message          Email message contents'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check sendEmail "search 'how to install sendEmail'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-to_email="${1:?First arg is the to: email address}"
-subject="${2:?Second arg is the subject}"
-email_contents="${3:?Third arg is the email contents}"
+to_email="${1:?Missing argument 'to_email'}"
+subject="${2:?Missing argument 'subject'}"
+message="${3:?Missing argument 'message'}"
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 from_addr="$($GET_API_TOKEN outlook-email)"
 user="$($GET_API_TOKEN outlook-user)"

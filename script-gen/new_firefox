@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# opens new Firefox window
+# Opens new Firefox window
 
 # to set this up to run as hotkey Ctrl-⌥ -⌘ -F (Control-Option-Command-F)
 # (instructions adapted from https://apple.stackexchange.com/a/276839)

@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/dir-sizes, and run './generate-scripts.sh'
 ###########################################################################
-#8b2e246ee7f37a69b54ad49a522c3a3b
+#839bf4643ab921a0af62758a2d873ffa
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -23,6 +23,30 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "dir-sizes - Show the sizes of the input dirs, sorted largest to smallest"
+  echo 'Usage: dir-sizes [options]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check du "search 'how to install du'"
 combined_return=$(( combined_return + $? ))

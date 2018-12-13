@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Create links for dotfiles
 
+@arg_optional 'checkout_dir' 'The directory where the repo is checked out (defaults to $HOME/dotfiles)'
+
 @import_var { COLOR_FG_YELLOW, COLOR_FG_BOLD_BLUE, COLOR_FG_GREEN, COLOR_RESET } from .bash_colors
 
 @uses_cmds readlink
 
-# optionally input the directory where the repo is checked out
-checkoutdir="${1:-$HOME/dotfiles}"
+# where the repo is checked out
+checkoutdir="${checkout_dir:-$HOME/dotfiles}"
 
 # use bash 4.x associative arrays
 declare -A links

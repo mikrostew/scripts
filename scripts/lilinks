@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lilinks, and run './generate-scripts.sh'
 ###########################################################################
-#e74f6fc032f003842c5922e0cb4e9ec8
+#e4f41d2a012a79b72c6abd4720a45bd7
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -28,6 +28,30 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "lilinks - Presents a menu to open various URLs and things for linkedin daily stuff"
+  echo 'Usage: lilinks [options]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 if [ "$(uname -s)" == "Linux" ]; then
   requirement_check xdg-open "search 'how to install xdg-open/Linux'"

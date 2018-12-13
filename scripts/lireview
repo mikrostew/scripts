@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lireview, and run './generate-scripts.sh'
 ###########################################################################
-#61574a5b69634e37534e961918a85689
+#89eefd592eaf5bef61ad401a93756046
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -62,6 +62,33 @@ requirement_check ()
         return 0;
     fi
 }
+show_help_msg() {
+  echo "lireview - Create a new RB from the local changes, or update existing review"
+  echo 'Usage: lireview [options] [input_description]'
+  echo ''
+  echo 'Options:'
+  echo '  -h                  Show this help message'
+  echo ''
+  echo 'Arguments:'
+  echo '  input_description   (optional) Description of the changes'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check jq "search 'how to install jq'"
 combined_return=$(( combined_return + $? ))
@@ -70,13 +97,13 @@ combined_return=$(( combined_return + $? ))
 requirement_check expect "search 'how to install expect'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+input_description="${1}"
 ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
 branch_name=$(current_git_branch)
 review_id="$(git_review_board_id $branch_name)"
 if [ -n "$review_id" ]
 then
   echo_info "RB $review_id already exists for this branch - updating..."
-  input_description="$1"
   echo -n "Description of these changes [$input_description]: "
   read diff_description
   if [ -z "$diff_description" ]
@@ -86,10 +113,8 @@ then
   do_git review update --open --diff-description "$diff_description"
 else
   echo_info "No RB for this branch - creating one..."
-  if [ -n "$1" ]
+  if [ -z "$input_description" ]
   then
-    input_description="$1"
-  else
     input_description="$(git log -1 --pretty=%B)"
   fi
   echo -n "Description of these changes [$input_description]: "

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# show running processes, sorted by CPU usage
+# Show running processes, sorted by CPU usage
 
 @import do_cmd from .bash_shared_functions
 

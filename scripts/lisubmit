@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lisubmit, and run './generate-scripts.sh'
 ###########################################################################
-#018dd05a6fb2be4d7c360d637a57e670
+#8e39c52bfb32dd9faeee76400d393f81
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -193,6 +193,34 @@ squash_commits ()
     fi;
     return 0
 }
+show_help_msg() {
+  echo "lisubmit - Squash commits, rebase, merge, and submit, for LI workflow"
+  echo 'Usage: lisubmit [options] commit_msg [commit_msg_extra_line]'
+  echo ''
+  echo 'Options:'
+  echo '  -h                      Show this help message'
+  echo ''
+  echo 'Arguments:'
+  echo '  commit_msg              Message for the commit'
+  echo '  commit_msg_extra_line   (optional) Optional extra line for more details and/or overrides'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 combined_return=0
 requirement_check jq "search 'how to install jq'"
 combined_return=$(( combined_return + $? ))
@@ -203,6 +231,8 @@ combined_return=$(( combined_return + $? ))
 requirement_check curl "search 'how to install curl'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+commit_msg="${1:?Missing argument 'commit_msg'}"
+commit_msg_extra_line="${2}"
 in_mint_submit_repo() {
   if [ -f "$PWD/product-spec.json" ]; then
     submit_def="$(cat $PWD/product-spec.json | jq '.build.commands.submit')"
@@ -212,12 +242,6 @@ in_mint_submit_repo() {
     return
   fi
 }
-show_usage() {
-  echo_err "Usage:"
-  echo_err "  ${0##*/} <commit-msg> [, <commit-msg-extra-line>]"
-}
-input_msg="$1"
-input_msg_extra_line="$2" # optional
 branch_name="$(current_git_branch)"
 review_id="$(git_review_board_id $branch_name)"
 exit_code="$?"
@@ -228,13 +252,13 @@ then
 fi
 echo_info "Submitting RB $review_id"
 review_title="$(get_li_rb_title $review_id)"
-if [ -z "$input_msg" ]
+if [ -z "$commit_msg" ]
 then
-  input_msg="$review_title"
+  commit_msg="$review_title"
 fi
-echo -n "Commit message [$input_msg]: "
+echo -n "Commit message [$commit_msg]: "
 read commit_msg
-if [ -z "$commit_msg" ]; then commit_msg="$input_msg"; fi
+if [ -z "$commit_msg" ]; then commit_msg="$commit_msg"; fi
 echo "Commit message 2nd line, for overrides"
 echo "These should only be used by oncall, or for immediate response situations:"
 echo "  ACLOVERRIDE           - cannot get an ACL owner to ship within your SLA"
@@ -246,9 +270,9 @@ echo "  PCLOVERRIDE           - fix compatibility test that is failing in PCL"
 echo "  EOLVALIDATIONOVERRIDE - commit is blocked by out of date dependency"
 echo "  TRUNKBLOCKERFIX       - override trunk lock"
 echo "  CHERRYPICKOVERRIDE    - commit a change to hotfix branch but not master"
-echo -n "[$input_msg_extra_line]: "
-read commit_msg_extra_line
-if [ -z "$commit_msg_extra_line" ]; then commit_msg_extra_line="$input_msg_extra_line"; fi
+echo -n "[$commit_msg_extra_line]: "
+read commit_msg_extra
+if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; fi
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
   squash_branch "$commit_msg" "$commit_msg_extra_line"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# git - checkout branch from list of branches (Git Checkout from List)
+# Checkout git branch from list of branches (Git Checkout from List)
 
 @import { all_git_branches, in_git_repo, do_git } from .bash_git
 @import { echo_info } from .bash_shared_functions
