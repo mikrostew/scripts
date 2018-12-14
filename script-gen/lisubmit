@@ -82,12 +82,8 @@ then
   # apply the RB to the commit
   # if this fails, means I don't have the necessary ACLs (for git submit repos)
   do_git review dcommit -r "$review_id"
-  if [ "$?" -ne 0 ]; then
-    # dcommit failed, probably missing a shipit from ACL
-    echo_err "Dang it! 'git review dcommit' failed, undoing the merge"
-    git_undo_merge "$branch_name"
-    exit 1
-  fi
+  # if dcommit failed, probably missing a shipit from ACL
+  @EXIT_IF_CMD_ERROR "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
 
   # check product-spec.json for 'mint submit'
   if in_mint_submit_repo; then

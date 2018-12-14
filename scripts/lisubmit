@@ -3,13 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lisubmit, and run './generate-scripts.sh'
 ###########################################################################
-#d59b070616ff623777f2a78737c3b056
+#3c6c3747ab8e9ecaac61ef9b87e3d724
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-DOTFILES_DIR='/Users/mistewar/dotfiles'
+DOTFILES_DIR='/Users/mikrostew/dotfiles'
 based_on_master_or_origin ()
 {
     local tracking_branch="$(git rev-parse --abbrev-ref --symbolic-full-name $1@{u} 2>/dev/null)";
@@ -294,10 +294,12 @@ then
     read -p "Press any key to continue... " -n1 -s # DEBUG
   fi
   do_git review dcommit -r "$review_id"
-  if [ "$?" -ne 0 ]; then
-    echo_err "Dang it! 'git review dcommit' failed, undoing the merge"
+  exit_code="$?"
+  if [ "$exit_code" -ne 0 ]
+  then
+    echo -e "${COLOR_FG_RED}Dang it! 'git review dcommit' failed, undoing the merge${COLOR_RESET}" >&2
     git_undo_merge "$branch_name"
-    exit 1
+    exit "$exit_code"
   fi
   if in_mint_submit_repo; then
     echo_info "supports mint submit? YES"
