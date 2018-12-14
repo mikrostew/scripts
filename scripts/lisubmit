@@ -3,13 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lisubmit, and run './generate-scripts.sh'
 ###########################################################################
-#3c6c3747ab8e9ecaac61ef9b87e3d724
+#9ac9977f9d5adecf74f1627fb54564d0
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-DOTFILES_DIR='/Users/mikrostew/dotfiles'
+DOTFILES_DIR="$HOME/dotfiles"
 based_on_master_or_origin ()
 {
     local tracking_branch="$(git rev-parse --abbrev-ref --symbolic-full-name $1@{u} 2>/dev/null)";
