@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lisubmit, and run './generate-scripts.sh'
 ###########################################################################
-#9ac9977f9d5adecf74f1627fb54564d0
+#da0051091bb14e7887985c6da357fd51
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -121,10 +121,6 @@ git_undo_merge ()
 {
     do_git reset --merge ORIG_HEAD && do_git checkout "$1"
 }
-gmt ()
-{
-    do_git mergetool --tool=opendiff
-}
 gpr ()
 {
     local branch_name=$(current_git_branch);
@@ -222,7 +218,11 @@ do
 done
 shift $((OPTIND-1))
 combined_return=0
+requirement_check gram "search 'how to install gram'"
+combined_return=$(( combined_return + $? ))
 requirement_check jq "search 'how to install jq'"
+combined_return=$(( combined_return + $? ))
+requirement_check gmm "search 'how to install gmm'"
 combined_return=$(( combined_return + $? ))
 requirement_check find "search 'how to install find'"
 combined_return=$(( combined_return + $? ))
@@ -282,16 +282,19 @@ then
     echo -e "${COLOR_FG_RED}Dang it! squashing failed (TODO: auto recovery here?)${COLOR_RESET}" >&2
     exit "$exit_code"
   fi
-  do_git pull --rebase origin master && do_git checkout master && do_git pull --rebase
-  while [ "$?" -ne 0 ]; do
-    read -p "Press any key to continue... " -n1 -s # DEBUG
-    gmt && do_git rebase --continue
-  done
-  do_git merge "$branch_name"
-  if [ "$?" -ne 0 ]; then
-    echo_err "Dang it! merge failed - good luck"
-    gmt
-    read -p "Press any key to continue... " -n1 -s # DEBUG
+  gram
+  exit_code="$?"
+  if [ "$exit_code" -ne 0 ]
+  then
+    echo -e "${COLOR_FG_RED}Failed to rebase against master${COLOR_RESET}" >&2
+    exit "$exit_code"
+  fi
+  gmm
+  exit_code="$?"
+  if [ "$exit_code" -ne 0 ]
+  then
+    echo -e "${COLOR_FG_RED}Merge into master failed - good luck${COLOR_RESET}" >&2
+    exit "$exit_code"
   fi
   do_git review dcommit -r "$review_id"
   exit_code="$?"

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# [git] Rebase current branch against master (Git Rebase Against Master)
+
+@import { in_git_repo, not_on_git_branch, no_uncommitted_changes, current_git_branch, do_git, gpr, gmt, grmorig } from .bash_git
+@import { echo_info } from .bash_shared_functions
+
+
+if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
+then
+  local branch_name=$(current_git_branch)
+  local need_to_remove_orig_files='no'
+
+  do_git checkout master && gpr
+  @EXIT_IF_CMD_ERROR "Failed to pull and rebase master" 'do_git checkout "$branch_name"'
+
+  do_git checkout "$branch_name" && do_git rebase master
+  while [ "$?" -ne 0 ]; do
+    # TODO: would be nice to have @WAIT_FOR_KEYPRESS (something like that)
+    read -p "Press any key to continue... " -n1 -s # DEBUG
+    need_to_remove_orig_files='yes'
+    # TODO: if I fix conflicts so there have been no changes, need to do `git rebase --skip` here
+    # (have to detect that from the output of `git rebase --continue`)
+    gmt && do_git rebase --continue
+    # TODO: how to detect that I should abort?
+  done
+
+  # delete any *.orig files leftover from merge conflicts
+  if [ "$need_to_remove_orig_files" == 'yes' ]; then
+    echo_info "Cleaning up .orig files from merge conflicts..."
+    grmorig
+  fi
+fi
+
