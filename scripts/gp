@@ -1,18 +1,13 @@
 #!/usr/bin/env bash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/gcl, and run './generate-scripts.sh'
+# the file script-gen/gp, and run './generate-scripts.sh'
 ###########################################################################
-#440d229c14f3d2f3a90a97819a04d9cf
+#a53839f644bff34c0b7b18c171c05c50
 
-COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-all_git_branches ()
-{
-    echo $(git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||')
-}
 do_cmd ()
 {
     local cmd_args="";
@@ -38,14 +33,6 @@ echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
-echo_info ()
-{
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
-}
-in_git_repo ()
-{
-    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
-}
 requirement_check ()
 {
     local cmd="$1";
@@ -59,8 +46,8 @@ requirement_check ()
     fi
 }
 show_help_msg() {
-  echo "gcl - [git] Checkout git branch from list of branches (Git Checkout from List)"
-  echo 'Usage: gcl [options]'
+  echo "gp - [git] Push changes (Git Push)"
+  echo 'Usage: gp [options]'
   echo ''
   echo 'Options:'
   echo '  -h               Show this help message'
@@ -85,24 +72,5 @@ shift $((OPTIND-1))
 combined_return=0
 requirement_check git "search 'how to install git'"
 combined_return=$(( combined_return + $? ))
-requirement_check sed "search 'how to install sed'"
-combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-if in_git_repo
-then
-  all_branches=( $(all_git_branches | sort) )
-  num_branches="${#all_branches[@]}"
-  for((i=0; i<$num_branches; i++))
-  do
-    echo -e "[$(( i + 1 ))] ${all_branches[$i]}"
-  done
-  echo -n "Branch number: "
-  read branch_num
-  if [ -n "$branch_num" ] && (( "$branch_num" <= "$num_branches" ))
-  then
-    (( branch_index = branch_num - 1 ))
-    do_git checkout "${all_branches[$branch_index]}"
-  else
-    echo_info "no branch selected"
-  fi
-fi
+do_git push

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# [git] Force-push changes (Git Push Force)
+
+@import do_git from .bash_git
+
+# using --force-with-lease in case someone else has pushed to my branch unbeknownst to me
+do_git push --force-with-lease
+

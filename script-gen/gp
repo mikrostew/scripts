@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# [git] Push changes (Git Push)
+
+@import do_git from .bash_git
+
+do_git push
+

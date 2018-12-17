@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/gmm, and run './generate-scripts.sh'
 ###########################################################################
-#bca0294cbdf07d332eb56d5af6524681
+#79c7e22a5c32db73e54fb82f19b96268
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'

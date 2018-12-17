@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/gcl, and run './generate-scripts.sh'
+# the file script-gen/gpr, and run './generate-scripts.sh'
 ###########################################################################
-#440d229c14f3d2f3a90a97819a04d9cf
+#a7ed0381b28987dd10989e703bcd8ace
 
-COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-all_git_branches ()
+current_git_branch ()
 {
-    echo $(git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||')
+    echo "$(git rev-parse --abbrev-ref HEAD)"
 }
 do_cmd ()
 {
@@ -38,14 +37,6 @@ echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
-echo_info ()
-{
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
-}
-in_git_repo ()
-{
-    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
-}
 requirement_check ()
 {
     local cmd="$1";
@@ -59,8 +50,8 @@ requirement_check ()
     fi
 }
 show_help_msg() {
-  echo "gcl - [git] Checkout git branch from list of branches (Git Checkout from List)"
-  echo 'Usage: gcl [options]'
+  echo "gpr - [git] Pull changes from origin and rebase local changes (Git Pull Rebase)"
+  echo 'Usage: gpr [options]'
   echo ''
   echo 'Options:'
   echo '  -h               Show this help message'
@@ -85,24 +76,6 @@ shift $((OPTIND-1))
 combined_return=0
 requirement_check git "search 'how to install git'"
 combined_return=$(( combined_return + $? ))
-requirement_check sed "search 'how to install sed'"
-combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-if in_git_repo
-then
-  all_branches=( $(all_git_branches | sort) )
-  num_branches="${#all_branches[@]}"
-  for((i=0; i<$num_branches; i++))
-  do
-    echo -e "[$(( i + 1 ))] ${all_branches[$i]}"
-  done
-  echo -n "Branch number: "
-  read branch_num
-  if [ -n "$branch_num" ] && (( "$branch_num" <= "$num_branches" ))
-  then
-    (( branch_index = branch_num - 1 ))
-    do_git checkout "${all_branches[$branch_index]}"
-  else
-    echo_info "no branch selected"
-  fi
-fi
+branch_name=$(current_git_branch)
+do_git fetch --all --prune && do_git rebase "origin/$branch_name"

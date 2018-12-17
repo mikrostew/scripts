@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lireview, and run './generate-scripts.sh'
 ###########################################################################
-#15de627f3a8f3748d121f420a77a9fb0
+#e551ac4d250e883cfe927bed4815af35
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
