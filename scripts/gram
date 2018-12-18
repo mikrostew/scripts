@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/gram, and run './generate-scripts.sh'
 ###########################################################################
-#efe592ada6a0948ae2fd8a66e3e6c53e
+#18258b6d3860e61d5b2791c00e2e0207
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'

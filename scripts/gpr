@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/gpr, and run './generate-scripts.sh'
 ###########################################################################
-#a7ed0381b28987dd10989e703bcd8ace
+#71a635467a3510536d7c3a23fc5bbe92
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'

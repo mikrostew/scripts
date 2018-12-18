@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/gp, and run './generate-scripts.sh'
+# the file script-gen/gundo, and run './generate-scripts.sh'
 ###########################################################################
-#88a059eb12fdda5727e50d0c9b017e53
+#f9b6268650b8425318a4f9d44719c743
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -33,6 +33,10 @@ echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
+in_git_repo ()
+{
+    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
+}
 requirement_check ()
 {
     local cmd="$1";
@@ -46,8 +50,8 @@ requirement_check ()
     fi
 }
 show_help_msg() {
-  echo "gp - [git] Push changes (Git Push)"
-  echo 'Usage: gp [options]'
+  echo "gundo - [git] Undo the last commit (Git UNDO)"
+  echo 'Usage: gundo [options]'
   echo ''
   echo 'Options:'
   echo '  -h               Show this help message'
@@ -73,4 +77,10 @@ combined_return=0
 requirement_check git "search 'how to install git'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-do_git push
+if in_git_repo
+then
+  last_commit="$(git log -1 --pretty=%B)"
+  git_dir="$(git rev-parse --show-toplevel)/.git"
+  do_git reset --soft HEAD~1
+  echo "$last_commit" > "$git_dir/GITGUI_MSG"
+fi

@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/gcl, and run './generate-scripts.sh'
 ###########################################################################
-#440d229c14f3d2f3a90a97819a04d9cf
+#9d0cd426534fc0d5ca94f6a12d79494b
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
