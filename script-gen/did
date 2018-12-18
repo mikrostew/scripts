@@ -6,6 +6,8 @@
 
 @uses_cmds vim
 
+did_file="$HOME/Dropbox/doc/did.txt"
+
 # all backslashes have to be escaped because '%' in vim means current file
-do_cmd vim +'r!date +"\%Y-\%m-\%d \%H:\%M:\%S \%A"' +'normal o' +'normal ggo-  ' +startinsert "$HOME/Dropbox/doc/did.txt"
+do_cmd vim +'r!date +"\%Y-\%m-\%d \%H:\%M:\%S \%A"' +'normal o' +'normal ggo-  ' +startinsert "$did_file"
 
