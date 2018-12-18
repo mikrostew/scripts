@@ -8,8 +8,8 @@
 
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
-  local branch_name=$(current_git_branch)
-  local need_to_remove_orig_files='no'
+  branch_name=$(current_git_branch)
+  need_to_remove_orig_files='no'
 
   do_git checkout master && gpr
   @EXIT_IF_CMD_ERROR "Failed to pull and rebase master" 'do_git checkout "$branch_name"'

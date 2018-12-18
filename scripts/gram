@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/gram, and run './generate-scripts.sh'
 ###########################################################################
-#80a1ccac58dde20dd3e55bfc678e9f98
+#efe592ada6a0948ae2fd8a66e3e6c53e
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -106,8 +106,8 @@ combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
-  local branch_name=$(current_git_branch)
-  local need_to_remove_orig_files='no'
+  branch_name=$(current_git_branch)
+  need_to_remove_orig_files='no'
   do_git checkout master && gpr
   exit_code="$?"
   if [ "$exit_code" -ne 0 ]
