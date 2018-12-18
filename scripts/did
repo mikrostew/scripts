@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/did, and run './generate-scripts.sh'
 ###########################################################################
-#c875795543c5a554b5537ef59d8cbf83
+#6eebee99a65fd486643621466b183b19
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -69,4 +69,4 @@ combined_return=0
 requirement_check vim "search 'how to install vim'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-do_cmd vim +'r!date' +'normal o' +'normal ggo-  ' +startinsert "$HOME/Dropbox/doc/did.txt"
+do_cmd vim +'r!date +"\%Y-\%m-\%d \%H:\%M:\%S \%A"' +'normal o' +'normal ggo-  ' +startinsert "$HOME/Dropbox/doc/did.txt"
