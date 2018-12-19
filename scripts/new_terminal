@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/new_terminal, and run './generate-scripts.sh'
 ###########################################################################
-#c4a59a690ed62766d00ef06149de1f10
+#213d3e6c6755527b93a8f53a829c82af
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -52,11 +52,3 @@ requirement_check osascript "search 'how to install osascript'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 osascript -e 'tell application "iTerm2" to create window with default profile'
-bounds=$(osascript -e 'tell application "iTerm2" to get bounds of front window' | sed 's/,//g')
-bounds_array=( $bounds )
-start_x=${bounds_array[0]}
-start_y=${bounds_array[1]}
-new_width=$(($start_x + 1200))
-new_height=$(($start_y + 800))
-new_bounds="{ $start_x, $start_y, $new_width, $new_height }"
-osascript -e "tell application \"iTerm2\" to set bounds of front window to $new_bounds"
