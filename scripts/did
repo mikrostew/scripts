@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/did, and run './generate-scripts.sh'
 ###########################################################################
-#5e4cd2c41cda94c098be857356e0bd99
+#95b655e5199fa4cb0a4c7eeea7b48a0f
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -54,4 +54,4 @@ if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 did_file="$HOME/Dropbox/doc/did.txt"
 vim +'r!date +"\%Y-\%m-\%d \%H:\%M:\%S \%A"' +'normal o' +'normal ggo-  ' +startinsert "$did_file"
 echo ""
-sed '/^$/ q' "$did_file"
+sed -n -e '/^$/ q' -e 'p' "$did_file"
