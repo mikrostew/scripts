@@ -5,7 +5,7 @@
 
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
-  local branch_name=$(current_git_branch)
+  branch_name=$(current_git_branch)
   do_git checkout master && do_git merge "$branch_name"
   # TODO: error recovery to fix merge conflicts
   # if [ "$?" -ne 0 ]; then
