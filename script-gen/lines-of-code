@@ -16,9 +16,9 @@ fi
 valid_files=( $(echo "$@" | sed -E 's/[^[:space:]]+.swp//g') )
 
 all_files="$(cat ${valid_files[*]})"
-all_files_no_blank="$(echo "$all_files" | sed '/^[[:space:]]*$/d')"
+all_files_no_blank="$(echo "$all_files" | sed '/^[[:space:]]*$/ d')"
 # strips comment lines starting with '#' and '//'
-all_files_no_comments="$(echo "$all_files_no_blank" | sed '/^[[:space:]]*#/d' | sed '/^[[:space:]]*\/\//d')"
+all_files_no_comments="$(echo "$all_files_no_blank" | sed '/^[[:space:]]*#/ d' | sed '/^[[:space:]]*\/\// d')"
 
 # count lines for each (from https://stackoverflow.com/a/42399738)
 num_lines="$(echo -n "$all_files" | grep -c '^' )"

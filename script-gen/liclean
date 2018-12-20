@@ -47,7 +47,7 @@ if in_linkedin_mp; then
     # try to determine the tmpdir used by node
     # using node in the MP:
     # (have to filter out the junk printed by just)
-    using_just="$(just node -e 'console.log(require("os").tmpdir())' | sed -e '/^[[:space:]]*#/d')"
+    using_just="$(just node -e 'console.log(require("os").tmpdir())' | sed -e '/^[[:space:]]*#/ d')"
     # using system node:
     using_system="$(node -e 'console.log(require("os").tmpdir())' 2>/dev/null)"
     if [ -n "$using_just" ]; then

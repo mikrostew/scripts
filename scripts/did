@@ -3,28 +3,10 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/did, and run './generate-scripts.sh'
 ###########################################################################
-#696a4abb8fc0d2beb7ad815a8e86504f
+#5e4cd2c41cda94c098be857356e0bd99
 
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
@@ -72,4 +54,4 @@ if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 did_file="$HOME/Dropbox/doc/did.txt"
 vim +'r!date +"\%Y-\%m-\%d \%H:\%M:\%S \%A"' +'normal o' +'normal ggo-  ' +startinsert "$did_file"
 echo ""
-sed '/^$/q' "$did_file"
+sed '/^$/ q' "$did_file"

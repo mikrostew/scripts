@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lines-of-code, and run './generate-scripts.sh'
 ###########################################################################
-#17a3c9c0f75220c40ee2c288a8d7ad7b
+#bd8cb244204ba021adb3896f7fce4ffe
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -60,8 +60,8 @@ then
 fi
 valid_files=( $(echo "$@" | sed -E 's/[^[:space:]]+.swp//g') )
 all_files="$(cat ${valid_files[*]})"
-all_files_no_blank="$(echo "$all_files" | sed '/^[[:space:]]*$/d')"
-all_files_no_comments="$(echo "$all_files_no_blank" | sed '/^[[:space:]]*#/d' | sed '/^[[:space:]]*\/\//d')"
+all_files_no_blank="$(echo "$all_files" | sed '/^[[:space:]]*$/ d')"
+all_files_no_comments="$(echo "$all_files_no_blank" | sed '/^[[:space:]]*#/ d' | sed '/^[[:space:]]*\/\// d')"
 num_lines="$(echo -n "$all_files" | grep -c '^' )"
 num_lines_no_blank="$(echo -n "$all_files_no_blank" | grep -c '^' )"
 num_lines_no_comments="$(echo -n "$all_files_no_comments" | grep -c '^' )"

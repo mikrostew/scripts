@@ -2,8 +2,6 @@
 # Appends to a very simple did.txt file
 # (adapted from https://theptrk.com/2018/07/11/did-txt-file/)
 
-@import do_cmd from .bash_shared_functions
-
 @uses_cmds vim
 
 did_file="$HOME/Dropbox/doc/did.txt"
@@ -13,5 +11,5 @@ vim +'r!date +"\%Y-\%m-\%d \%H:\%M:\%S \%A"' +'normal o' +'normal ggo-  ' +start
 
 # then show what I just added to that file - print up to the first blank line in the file
 echo ""
-sed '/^$/q' "$did_file"
+sed '/^$/ q' "$did_file"
 

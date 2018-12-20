@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/liclean, and run './generate-scripts.sh'
 ###########################################################################
-#209de6d7d6cb9308995ac5d0821c8ef9
+#46019ef6340b30151e5a496e9bd4cef1
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -67,7 +67,7 @@ if in_linkedin_mp; then
   if [ -n "$TMPDIR" ]; then
     disk_cache_dir="$TMPDIR/$username"
   else
-    using_just="$(just node -e 'console.log(require("os").tmpdir())' | sed -e '/^[[:space:]]*#/d')"
+    using_just="$(just node -e 'console.log(require("os").tmpdir())' | sed -e '/^[[:space:]]*#/ d')"
     using_system="$(node -e 'console.log(require("os").tmpdir())' 2>/dev/null)"
     if [ -n "$using_just" ]; then
       disk_cache_dir="$using_just/$username"
