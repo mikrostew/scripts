@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lisubmit, and run './generate-scripts.sh'
 ###########################################################################
-#a182191721ba73e60fc65d2f4a78edd6
+#b721dad8b633759e885f02d26e6fffe7
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -154,34 +154,11 @@ squash_branch ()
     echo -n "Confirm squashing $num_commits_on_branch commits [Y/n]: ";
     read confirm;
     if [ -z "$confirm" ] || [ "$confirm" == "Y" ] || [ "$confirm" == "y" ]; then
-        squash_commits "$num_commits_on_branch" "$1" "$2";
+        squash-commits "$num_commits_on_branch" "$1" "$2";
     else
         echo "Not squashing";
         return -1;
     fi
-}
-squash_commits ()
-{
-    if [ -n "$1" ] && [ "$1" -gt 0 ]; then
-        if [ -n "$2" ]; then
-            if [ -n "$3" ]; then
-                do_git reset --soft HEAD~${1} && do_git commit -m "$2" -m "$3";
-            else
-                do_git reset --soft HEAD~${1} && do_git commit -m "$2";
-            fi;
-            if [ "$?" -ne 0 ]; then
-                echo_err "Dang it! Squashing commits failed somehow";
-                return 1;
-            fi;
-        else
-            echo_err "Come on! You gotta have a commit message";
-            return 1;
-        fi;
-    else
-        echo_err "-_- No changes to squash";
-        return 1;
-    fi;
-    return 0
 }
 show_help_msg() {
   echo "lisubmit - Squash commits, rebase, merge, and submit, for LI workflow"
@@ -221,6 +198,8 @@ combined_return=$(( combined_return + $? ))
 requirement_check find "search 'how to install find'"
 combined_return=$(( combined_return + $? ))
 requirement_check gpr "search 'how to install gpr'"
+combined_return=$(( combined_return + $? ))
+requirement_check squash-commits "search 'how to install squash-commits'"
 combined_return=$(( combined_return + $? ))
 requirement_check git "search 'how to install git'"
 combined_return=$(( combined_return + $? ))
