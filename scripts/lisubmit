@@ -3,32 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file script-gen/lisubmit, and run './generate-scripts.sh'
 ###########################################################################
-#b721dad8b633759e885f02d26e6fffe7
+#ce5491eeef18b0f95f45b9eb89e38da4
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 DOTFILES_DIR="$HOME/dotfiles"
-based_on_master_or_origin ()
-{
-    local tracking_branch="$(git rev-parse --abbrev-ref --symbolic-full-name $1@{u} 2>/dev/null)";
-    if [ "$tracking_branch" == "origin/master" ]; then
-        echo "origin/master";
-    else
-        echo "master";
-    fi
-}
-commit_diff_on_branch ()
-{
-    local git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)";
-    if [ "$?" -eq 0 ] && [ -n "$git_rev_list_origin" ]; then
-        local git_origin_arr=($git_rev_list_origin);
-        echo "${git_origin_arr[0]}";
-    else
-        echo "0";
-    fi
-}
 current_git_branch ()
 {
     echo "$(git rev-parse --abbrev-ref HEAD)"
@@ -145,21 +126,6 @@ requirement_check ()
         return 0;
     fi
 }
-squash_branch ()
-{
-    local branch_name=$(current_git_branch);
-    local based_on=$(based_on_master_or_origin $branch_name);
-    local num_commits_on_branch="$(commit_diff_on_branch $branch_name $based_on)";
-    echo_info "$num_commits_on_branch change(s) between '$branch_name' and '$based_on'";
-    echo -n "Confirm squashing $num_commits_on_branch commits [Y/n]: ";
-    read confirm;
-    if [ -z "$confirm" ] || [ "$confirm" == "Y" ] || [ "$confirm" == "y" ]; then
-        squash-commits "$num_commits_on_branch" "$1" "$2";
-    else
-        echo "Not squashing";
-        return -1;
-    fi
-}
 show_help_msg() {
   echo "lisubmit - Squash commits, rebase, merge, and submit, for LI workflow"
   echo 'Usage: lisubmit [options] commit_msg [commit_msg_extra_line]'
@@ -199,9 +165,9 @@ requirement_check find "search 'how to install find'"
 combined_return=$(( combined_return + $? ))
 requirement_check gpr "search 'how to install gpr'"
 combined_return=$(( combined_return + $? ))
-requirement_check squash-commits "search 'how to install squash-commits'"
-combined_return=$(( combined_return + $? ))
 requirement_check git "search 'how to install git'"
+combined_return=$(( combined_return + $? ))
+requirement_check squash-branch "search 'how to install squash-branch'"
 combined_return=$(( combined_return + $? ))
 requirement_check curl "search 'how to install curl'"
 combined_return=$(( combined_return + $? ))
@@ -250,7 +216,7 @@ read commit_msg_extra
 if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; fi
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
-  squash_branch "$commit_msg" "$commit_msg_extra_line"
+  squash-branch "$commit_msg" "$commit_msg_extra_line"
   exit_code="$?"
   if [ "$exit_code" -ne 0 ]
   then

@@ -6,9 +6,9 @@
 
 @import { echo_info, echo_fail_banner, echo_success_banner, do_cmd } from .bash_shared_functions
 
-@import { do_git, current_git_branch, git_review_board_id, git_undo_merge, in_git_repo, no_uncommitted_changes, not_on_git_branch, squash_branch, get_li_rb_title } from .bash_git
+@import { do_git, current_git_branch, git_review_board_id, git_undo_merge, in_git_repo, no_uncommitted_changes, not_on_git_branch, get_li_rb_title } from .bash_git
 
-@uses_cmds jq gram gmm gpr
+@uses_cmds jq gram gmm gpr squash-branch
 
 in_mint_submit_repo() {
   if [ -f "$PWD/product-spec.json" ]; then
@@ -60,7 +60,7 @@ if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; f
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
   # squash changes on this branch
-  squash_branch "$commit_msg" "$commit_msg_extra_line"
+  squash-branch "$commit_msg" "$commit_msg_extra_line"
   @EXIT_IF_CMD_ERROR "Dang it! squashing failed (TODO: auto recovery here?)"
 
   # rebase current branch against master
