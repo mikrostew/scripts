@@ -3,9 +3,9 @@
 # (adapted from https://stackoverflow.com/questions/501407/is-there-a-git-merge-dry-run-option)
 
 @import { in_git_repo, not_on_git_branch, current_git_branch } from .bash_git
-@import_var { COLOR_FG_BOLD_BLUE, COLOR_FG_BOLD_RED, COLOR_FG_BOLD_YELLOW, COLOR_RESET } from .bash_colors
+@import_var { COLOR_FG_BOLD_BLUE, COLOR_FG_BOLD_RED, COLOR_RESET } from .bash_colors
 
-@uses_cmds git
+@uses_cmds git sed
 
 # What I've already done that worked:
 #
@@ -25,36 +25,15 @@ then
   merge_tree_output="$(git merge-tree $merge_base master "$branch_name")"
   @EXIT_IF_CMD_ERROR 'Error running git merge-tree' 'echo "Output was: $merge_tree_output"'
 
-  # echo "$merge_tree_output"
-
-  # example output:
-  #
-  # changed in both
-  #   base   100644 97c2b223dd2ec4050f688c44a5a63dbac8cb76e0 somefile.txt
-  #   our    100644 2bff907c2b68432c828a3b5e6bccd2ed26d80435 somefile.txt
-  #   their  100644 25e698ced56dcd5c2d843b0f1cf26eea0adfa2d8 somefile.txt
-  # @@ -1,5 +1,9 @@
-  #  this is line one
-  #  this is line two
-  # +<<<<<<< .our
-  #  this is nothing like line three at all
-  # +=======
-  # +this is something like line 3
-  # +>>>>>>> .their
-  #  this is line four
-  #  this is line five
-
-  # colorize the printout to show the conflict lines
+  # colorize the printout to highlight the conflict lines
 
   # have to interpret the color codes before using them in sed
   blue="$(echo -e $COLOR_FG_BOLD_BLUE)"
   red="$(echo -e $COLOR_FG_BOLD_RED)"
-  yellow="$(echo -e $COLOR_FG_BOLD_YELLOW)"
   reset="$(echo -e $COLOR_RESET)"
 
   sed -n '
     /^changed in both$/ {
-      s/.*/'"$yellow"'&'"$reset"'/
       # print that out and read in the next line, which should be "base"
       p; n
       # print that out and read in the next line, which should be "our"
@@ -68,32 +47,12 @@ then
       # add a newline, and print that out
       G; p
     }
-    /+<<<<<<< .our/,/+=======/ {
+    /+<<<<<<< .our/,/+>>>>>>> .their/ {
+      # highlight in blue and annotate
+      /+<<<<<<< .our/ s/.*/'"$blue"'& (master)'"$reset"'/
       # print out this delimiter in yellow
-      /+<<<<<<< .our/ {
-        s/.*/'"$yellow"'&'"$reset"'/
-        p
-      }
-      # the rest of this, up to the equals, should in blue like "our" above
-      /+=======/ !{
-        # do not reprint the other delimiter :)
-        /+<<<<<<< .our/ !{
-          s/.*/'"$blue"'&'"$reset"'/
-          p
-        }
-      }
-    }
-    /+=======/,/+>>>>>>> .their/ {
-      # print out this delimiter in yellow
-      /+=======/ s/.*/'"$yellow"'&'"$reset"'/
-      # the rest of this, up to the "their", should in red like "their" above
-      /+>>>>>>> .their/ ! s/.*/'"$red"'&'"$reset"'/
-      # print out this delimiter in yellow
-      /+>>>>>>> .their/ {
-        s/.*/'"$yellow"'&'"$reset"'/
-        # and add a newline
-        G
-      }
+      # highlight in red, annotate, and add a newline
+      /+>>>>>>> .their/ { s/.*/'"$red"'& ('"$branch_name"')'"$reset"'/; G; }
       p
     }
   ' <<< "$merge_tree_output"
