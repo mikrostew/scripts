@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/gmm, and run './generate-scripts.sh'
+# the file /Users/mistewar/dotfiles/script-gen/gmm, and run 'generate-scripts.sh'
 ###########################################################################
-#020197d2edb4182ab6df90218cdd3318
+#74d7f77b36cccc10fbc1554dba20b6a6
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -36,6 +36,10 @@ do_git ()
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
+gmt ()
+{
+    do_git mergetool --tool=opendiff
 }
 in_git_repo ()
 {
@@ -93,4 +97,10 @@ if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
   branch_name=$(current_git_branch)
   do_git checkout master && do_git merge "$branch_name"
+  if [ "$?" -ne 0 ]
+  then
+    echo_err "Dang it! merge failed - good luck"
+    read -p "Press any key to start merge resolution... " -n1 -s
+    gmt
+  fi
 fi
