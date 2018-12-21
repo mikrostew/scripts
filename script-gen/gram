@@ -16,8 +16,7 @@ then
 
   do_git checkout "$branch_name" && do_git rebase master
   while [ "$?" -ne 0 ]; do
-    # TODO: would be nice to have @WAIT_FOR_KEYPRESS (something like that)
-    read -p "Press any key to continue... " -n1 -s # DEBUG
+    @WAIT_FOR_KEYPRESS 'Press any key to continue... '
     need_to_remove_orig_files='yes'
     # TODO: if I fix conflicts so there have been no changes, need to do `git rebase --skip` here
     # (have to detect that from the output of `git rebase --continue`)
