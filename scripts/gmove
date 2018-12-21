@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file /Users/mistewar/dotfiles/script-gen/gmove, and run 'generate-scripts.sh'
+###########################################################################
+#bd6bb1de429d7541c008c88ac7f738cb
+
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+commit_diff_on_branch ()
+{
+    local git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)";
+    if [ "$?" -eq 0 ] && [ -n "$git_rev_list_origin" ]; then
+        local git_origin_arr=($git_rev_list_origin);
+        echo "${git_origin_arr[0]}";
+    else
+        echo "0";
+    fi
+}
+current_git_branch ()
+{
+    echo "$(git rev-parse --abbrev-ref HEAD)"
+}
+do_cmd ()
+{
+    local cmd_args="";
+    for arg in "$@";
+    do
+        case "$arg" in
+            *\ *)
+                cmd_args="$cmd_args \"$arg\""
+            ;;
+            *)
+                cmd_args="$cmd_args $arg"
+            ;;
+        esac;
+    done;
+    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
+    command "$@"
+}
+do_git ()
+{
+    do_cmd git "$@"
+}
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
+echo_info ()
+{
+    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+}
+in_git_repo ()
+{
+    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
+}
+on_git_branch ()
+{
+    [ "$(current_git_branch)" != "$1" ] && echo_err ">_<  Must be on branch '$1' for this" && return -1 || return 0
+}
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
+}
+show_help_msg() {
+  echo "gmove - [git] Move recent commits from master to a new branch (Git MOVE)"
+  echo 'Usage: gmove [options] new_branch_name'
+  echo ''
+  echo 'Options:'
+  echo '  -h                Show this help message'
+  echo ''
+  echo 'Arguments:'
+  echo '  new_branch_name   Name of the new branch to move the commits to'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+combined_return=0
+requirement_check git "search 'how to install git'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+new_branch_name="${1:?Missing argument 'new_branch_name'}"
+if in_git_repo && on_git_branch 'master'
+then
+  num_commits="$(commit_diff_on_branch 'master' 'origin/master')"
+  if [ "$num_commits" == "0" ]
+  then
+    echo_info "No commits to move"
+    exit 1
+  fi
+  echo_info "${num_commits} commit(s) will be moved to branch '$new_branch_name'"
+  echo -n "Confirm moving these commits [Y/n]: "
+  read confirm
+  if [ -z "$confirm" ] || [ "$confirm" == "Y" ] || [ "$confirm" == "y" ]
+  then
+    do_git checkout -b "$new_branch_name" && do_git branch -f master HEAD~${num_commits} && do_git branch -u origin/master "$new_branch_name"
+  else
+    echo_info "Not moving commits"
+  fi
+fi

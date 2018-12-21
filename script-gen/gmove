@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# [git] Move recent commits from master to a new branch (Git MOVE)
+
+@arg 'new_branch_name' 'Name of the new branch to move the commits to'
+
+@import { in_git_repo, on_git_branch, commit_diff_on_branch, do_git } from .bash_git
+@import echo_info from .bash_shared_functions
+
+if in_git_repo && on_git_branch 'master'
+then
+  num_commits="$(commit_diff_on_branch 'master' 'origin/master')"
+  if [ "$num_commits" == "0" ]
+  then
+    echo_info "No commits to move"
+    exit 1
+  fi
+  echo_info "${num_commits} commit(s) will be moved to branch '$new_branch_name'"
+  echo -n "Confirm moving these commits [Y/n]: "
+  read confirm
+  if [ -z "$confirm" ] || [ "$confirm" == "Y" ] || [ "$confirm" == "y" ]
+  then
+    # (see http://stackoverflow.com/a/22654961 for details)
+    do_git checkout -b "$new_branch_name" && do_git branch -f master HEAD~${num_commits} && do_git branch -u origin/master "$new_branch_name"
+  else
+    echo_info "Not moving commits"
+  fi
+fi
+

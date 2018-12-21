@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# [git] Show last commit info (Git LAST)
+
+@import do_git from .bash_git
+
+do_git log -n1 --pretty=fuller
+
