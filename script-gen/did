@@ -6,8 +6,17 @@
 
 did_file="$HOME/Dropbox/doc/did.txt"
 
-# all backslashes have to be escaped because '%' in vim means current file
-vim +'r!date +"\%Y-\%m-\%d \%H:\%M:\%S \%A"' +'normal o' +'normal ggo-  ' +startinsert "$did_file"
+if [ -n "$1" ]
+then
+  # write the message from the command line
+  timestamp="$(date +"%Y-%m-%d %H:%M:%S %A")"
+  message="$1"
+  echo -e "$timestamp\n- $message\n\n$(cat $did_file)" > "$did_file"
+else
+  # no message input, do this in vim
+  # all backslashes have to be escaped because '%' in vim means current file
+  vim +'r!date +"\%Y-\%m-\%d \%H:\%M:\%S \%A"' +'normal o' +'normal ggo-  ' +startinsert "$did_file"
+fi
 
 # then show what I just added to that file - print everything up to the first blank line in the file
 echo ""

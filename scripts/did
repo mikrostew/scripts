@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/did, and run './generate-scripts.sh'
+# the file /Users/mikrostew/dotfiles/script-gen/did, and run 'generate-scripts.sh'
 ###########################################################################
-#95b655e5199fa4cb0a4c7eeea7b48a0f
+#20d1b62d9cefdafe174ba3ca30d283a4
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -52,6 +52,13 @@ requirement_check vim "search 'how to install vim'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 did_file="$HOME/Dropbox/doc/did.txt"
-vim +'r!date +"\%Y-\%m-\%d \%H:\%M:\%S \%A"' +'normal o' +'normal ggo-  ' +startinsert "$did_file"
+if [ -n "$1" ]
+then
+  timestamp="$(date +"%Y-%m-%d %H:%M:%S %A")"
+  message="$1"
+  echo -e "$timestamp\n- $message\n\n$(cat $did_file)" > "$did_file"
+else
+  vim +'r!date +"\%Y-\%m-\%d \%H:\%M:\%S \%A"' +'normal o' +'normal ggo-  ' +startinsert "$did_file"
+fi
 echo ""
 sed -n -e '/^$/ q' -e 'p' "$did_file"
