@@ -52,6 +52,7 @@ echo "  PCLOVERRIDE           - fix compatibility test that is failing in PCL"
 echo "  EOLVALIDATIONOVERRIDE - commit is blocked by out of date dependency"
 echo "  TRUNKBLOCKERFIX       - override trunk lock"
 echo "  CHERRYPICKOVERRIDE    - commit a change to hotfix branch but not master"
+echo "  DIFF_VERIFY_OVERRIDE  - change has diffs from last ship-it and a reviewer is not available"
 echo -n "[$commit_msg_extra_line]: "
 read commit_msg_extra
 if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; fi
