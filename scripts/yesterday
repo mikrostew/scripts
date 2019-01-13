@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/yesterday, and run './generate-scripts.sh'
+# the file /Users/mikrostew/dotfiles/script-gen/yesterday, and run 'generate-scripts.sh'
 ###########################################################################
-#e2f20f37170c3f2be65b0140a33ced23
+#4b6d484f746773140b6495d815b64abd
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -57,11 +57,11 @@ yesterday_date="$(gdate -d '1 day ago' +"%Y-%m-%d")"
 echo "Items from yesterday, $yesterday_date:"
 did_file="$HOME/Dropbox/doc/did.txt"
 sed -n '
-/^$/ b para
-H
-$ b para
-b
-:para
-x
-/'$yesterday_date'/ p
+  /^$/ b para
+  H
+  $ b para
+  b
+  :para
+  x
+  /'$yesterday_date'/ p
 ' "$did_file"
