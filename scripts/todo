@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/todo, and run './generate-scripts.sh'
+# the file /Users/mikrostew/dotfiles/script-gen/todo, and run 'generate-scripts.sh'
 ###########################################################################
-#2a33cc647b5ba9d4a31a588949baa4fa
+#23518082cdd79647fa50c46a764a60d4
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -68,6 +68,7 @@ dquote_comments='"'       # vim script
 html_comments='<!--'      # HTML, XML
 slash_block_comments='/*' # C/C++, CSS, Java
 dash_comments='--'        # SQL
+no_comments=''            # not in a comment (for markdown and some other files)
 exec 3< <(grep \
   -nrIF \
   --color=always \
@@ -82,6 +83,7 @@ exec 3< <(grep \
   -e "$html_comments TODO" \
   -e "$slash_block_comments TODO" \
   -e "$dash_comments TODO" \
+  -e "${no_comments}TODO:" \
   "$in_dir" \
   2>/dev/null \
 )

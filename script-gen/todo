@@ -14,6 +14,7 @@ dquote_comments='"'       # vim script
 html_comments='<!--'      # HTML, XML
 slash_block_comments='/*' # C/C++, CSS, Java
 dash_comments='--'        # SQL
+no_comments=''            # not in a comment (for markdown and some other files)
 
 # use process substitution to capture the output asynchronously
 # (from https://stackoverflow.com/a/20018118/)
@@ -31,6 +32,7 @@ exec 3< <(grep \
   -e "$html_comments TODO" \
   -e "$slash_block_comments TODO" \
   -e "$dash_comments TODO" \
+  -e "${no_comments}TODO:" \
   "$in_dir" \
   2>/dev/null \
 )
