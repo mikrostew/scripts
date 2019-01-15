@@ -39,8 +39,13 @@ exec 3< <(grep \
 spinner -m "grepping files..." $!
 
 matched_lines="$(cat <&3)"
-
-num_lines="$(echo "$matched_lines" | wc -l | tr -d '[:space:]')"
+# if grep output is empty it will still count as one line (because of echo), so avoid that
+if [ -n "$matched_lines" ]
+then
+  num_lines="$(echo "$matched_lines" | wc -l | tr -d '[:space:]')"
+else
+  num_lines=0
+fi
 
 echo "$matched_lines"
 echo -e "${COLOR_FG_BOLD_BLUE}total: $num_lines${COLOR_RESET}"

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file /Users/mikrostew/dotfiles/script-gen/todo, and run 'generate-scripts.sh'
+# the file /Users/mistewar/dotfiles/script-gen/todo, and run 'generate-scripts.sh'
 ###########################################################################
-#23518082cdd79647fa50c46a764a60d4
+#05980d50cff946ca6d7a336da62686b5
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -89,6 +89,11 @@ exec 3< <(grep \
 )
 spinner -m "grepping files..." $!
 matched_lines="$(cat <&3)"
-num_lines="$(echo "$matched_lines" | wc -l | tr -d '[:space:]')"
+if [ -n "$matched_lines" ]
+then
+  num_lines="$(echo "$matched_lines" | wc -l | tr -d '[:space:]')"
+else
+  num_lines=0
+fi
 echo "$matched_lines"
 echo -e "${COLOR_FG_BOLD_BLUE}total: $num_lines${COLOR_RESET}"
