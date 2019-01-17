@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/lisubmit, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/lisubmit, and run 'generate-scripts.sh'
 ###########################################################################
-#ce5491eeef18b0f95f45b9eb89e38da4
+#6167a514be0701ab2d3c8eabe84fc039
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -172,7 +172,7 @@ combined_return=$(( combined_return + $? ))
 requirement_check curl "search 'how to install curl'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-commit_msg="${1:?Missing argument 'commit_msg'}"
+commit_msg="${1:?Missing argument \'commit_msg\'}"
 commit_msg_extra_line="${2:-}"
 in_mint_submit_repo() {
   if [ -f "$PWD/product-spec.json" ]; then
@@ -211,6 +211,7 @@ echo "  PCLOVERRIDE           - fix compatibility test that is failing in PCL"
 echo "  EOLVALIDATIONOVERRIDE - commit is blocked by out of date dependency"
 echo "  TRUNKBLOCKERFIX       - override trunk lock"
 echo "  CHERRYPICKOVERRIDE    - commit a change to hotfix branch but not master"
+echo "  DIFF_VERIFY_OVERRIDE  - change has diffs from last ship-it and a reviewer is not available"
 echo -n "[$commit_msg_extra_line]: "
 read commit_msg_extra
 if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; fi

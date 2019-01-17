@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file /Users/mistewar/dotfiles/script-gen/ginit, and run 'generate-scripts.sh'
+# the file ~/dotfiles/script-gen/ginit, and run 'generate-scripts.sh'
 ###########################################################################
 #4c5d03d74d7877e9b719c88de73a0bdf
 

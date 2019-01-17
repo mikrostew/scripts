@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file /Users/mikrostew/dotfiles/script-gen/yesterday, and run 'generate-scripts.sh'
+# the file ~/dotfiles/script-gen/yesterday, and run 'generate-scripts.sh'
 ###########################################################################
 #4b6d484f746773140b6495d815b64abd
 

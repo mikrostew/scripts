@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/send-email-from-outlook, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/send-email-from-outlook, and run 'generate-scripts.sh'
 ###########################################################################
-#e4bba3f27c526eaca8cfd9a76ad3c7fb
+#901bf7b4e0365ba84e48a90a95b483c6
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -56,9 +56,9 @@ combined_return=0
 requirement_check sendEmail "search 'how to install sendEmail'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-to_email="${1:?Missing argument 'to_email'}"
-subject="${2:?Missing argument 'subject'}"
-message="${3:?Missing argument 'message'}"
+to_email="${1:?Missing argument \'to_email\'}"
+subject="${2:?Missing argument \'subject\'}"
+message="${3:?Missing argument \'message\'}"
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 from_addr="$($GET_API_TOKEN outlook-email)"
 user="$($GET_API_TOKEN outlook-user)"

@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/send-email-from-api, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/send-email-from-api, and run 'generate-scripts.sh'
 ###########################################################################
-#e305a7f5e0fa6a0b213afdb8d234e67d
+#8b3ba0d46b6fbaddae4b04e66cf2d4f8
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -56,9 +56,9 @@ combined_return=0
 requirement_check sendEmail "search 'how to install sendEmail'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-to_email="${1:?Missing argument 'to_email'}"
-subject="${2:?Missing argument 'subject'}"
-message="${3:?Missing argument 'message'}"
+to_email="${1:?Missing argument \'to_email\'}"
+subject="${2:?Missing argument \'subject\'}"
+message="${3:?Missing argument \'message\'}"
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 user="$($GET_API_TOKEN email-api-user)"
 pass="$($GET_API_TOKEN email-api-pass)"

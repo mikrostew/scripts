@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/gpf, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/gpf, and run 'generate-scripts.sh'
 ###########################################################################
-#118750756cc2368b2107186e5f2a7bbb
+#ec6616710f17dac36377c6092f094533
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'

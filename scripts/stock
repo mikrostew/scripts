@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/stock, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/stock, and run 'generate-scripts.sh'
 ###########################################################################
-#140076020b158e6a4d600a39d9b658fb
+#a59beb2f525cabf28ca0caebd172b2ed
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -60,7 +60,7 @@ if [ "$(uname -s)" == "Darwin" ]; then
   combined_return=$(( combined_return + $? ))
 fi
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-stock_symbol="${1:?Missing argument 'stock_symbol'}"
+stock_symbol="${1:?Missing argument \'stock_symbol\'}"
 stock_url="https://finance.yahoo.com/quote/$stock_symbol/"
 if [ "$(uname -s)" == "Linux" ]
 then

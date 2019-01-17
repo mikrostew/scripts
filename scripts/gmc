@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/gmc, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/gmc, and run 'generate-scripts.sh'
 ###########################################################################
-#9719335989ee8eb44ab079532f39a79a
+#198e8cec04b74fa6f5c290089f516dcc
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_BOLD_RED='\033[1;31m'

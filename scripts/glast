@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file /Users/mistewar/dotfiles/script-gen/glast, and run 'generate-scripts.sh'
+# the file ~/dotfiles/script-gen/glast, and run 'generate-scripts.sh'
 ###########################################################################
-#b697b6a10b2fbaa2bacc055e71df8f30
+#f926653310fe3b9db692b0406638c5ce
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'

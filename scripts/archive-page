@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/archive-page, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/archive-page, and run 'generate-scripts.sh'
 ###########################################################################
-#cae49cd59f81b1cd9dd13718550ef8ce
+#36121ae6ec7b85ef8845daaa80719a96
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -72,5 +72,5 @@ combined_return=0
 requirement_check wget "search 'how to install wget'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-page_url="${1:?Missing argument 'page_url'}"
+page_url="${1:?Missing argument \'page_url\'}"
 do_cmd wget --wait=1 --random-wait --convert-links --page-requisites --user-agent="" "$page_url"

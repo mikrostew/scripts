@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/squash-branch, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/squash-branch, and run 'generate-scripts.sh'
 ###########################################################################
-#47c4d086c43b29523be02ee259389958
+#cbd2a8318a1b165ac556ba703c8c2092
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -85,7 +85,7 @@ combined_return=$(( combined_return + $? ))
 requirement_check git "search 'how to install git'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-commit_msg="${1:?Missing argument 'commit_msg'}"
+commit_msg="${1:?Missing argument \'commit_msg\'}"
 commit_msg_extra_line="${2:-}"
 branch_name=$(current_git_branch)
 based_on=$(based_on_master_or_origin $branch_name)

@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/rmlf, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/rmlf, and run 'generate-scripts.sh'
 ###########################################################################
-#4d9e31a13be16f8e7b265043b83db904
+#4013d4517cf404cc36966d8acf91b5ae
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -38,5 +38,5 @@ do
   esac
 done
 shift $((OPTIND-1))
-input_file="${1:?Missing argument 'input_file'}"
+input_file="${1:?Missing argument \'input_file\'}"
 printf %s "$(< $input_file)" > $input_file

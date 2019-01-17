@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file /Users/mistewar/dotfiles/script-gen/gram, and run 'generate-scripts.sh'
+# the file ~/dotfiles/script-gen/gram, and run 'generate-scripts.sh'
 ###########################################################################
 #23100929d4cc7866305d8f4050629a15
 

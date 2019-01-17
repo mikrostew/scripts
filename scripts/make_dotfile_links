@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/make_dotfile_links, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/make_dotfile_links, and run 'generate-scripts.sh'
 ###########################################################################
 #0ab26416653f6187d7685666eb5ca26e
 

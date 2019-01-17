@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/chrome-tabs, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/chrome-tabs, and run 'generate-scripts.sh'
 ###########################################################################
 #9ad1d779cbb09a5e03c22cfae062ae8a
 

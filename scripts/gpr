@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/gpr, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/gpr, and run 'generate-scripts.sh'
 ###########################################################################
-#71a635467a3510536d7c3a23fc5bbe92
+#74faf2b41524caf91a2558fa0d1c15dc
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'

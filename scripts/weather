@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/weather, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/weather, and run 'generate-scripts.sh'
 ###########################################################################
 #7cb209ef2bb2a089aea4c457c57a2c32
 

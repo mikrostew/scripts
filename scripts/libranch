@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/libranch, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/libranch, and run 'generate-scripts.sh'
 ###########################################################################
-#8264e1018a63447ca32ff55ca0913c2d
+#081e56da734534b3ece7bed446b3eccf
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -88,7 +88,7 @@ combined_return=0
 requirement_check git "search 'how to install git'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-new_branch_name="${1:?Missing argument 'new_branch_name'}"
+new_branch_name="${1:?Missing argument \'new_branch_name\'}"
 if in_git_repo && on_git_branch 'master'
 then
   do_git checkout -b "$new_branch_name" origin/master

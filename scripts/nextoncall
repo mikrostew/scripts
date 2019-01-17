@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/nextoncall, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/nextoncall, and run 'generate-scripts.sh'
 ###########################################################################
 #c895f7000bcf9c970bca7ff757cf9ed0
 

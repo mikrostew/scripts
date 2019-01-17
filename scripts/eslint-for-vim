@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/eslint-for-vim, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/eslint-for-vim, and run 'generate-scripts.sh'
 ###########################################################################
 #e23055188e685266fc7c6d2502bad59e
 

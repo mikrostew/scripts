@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/spinner, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/spinner, and run 'generate-scripts.sh'
 ###########################################################################
-#5dd3214d9d0f9e4535f9a79035e0cabc
+#e457d96030394219a70aec38223ddd20
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -42,7 +42,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-cmd_pid="${1:?Missing argument 'cmd_pid'}"
+cmd_pid="${1:?Missing argument \'cmd_pid\'}"
 spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
 num_chars=${#spin_chars}
 total_length=$(( 2 + ${#spin_msg} ))

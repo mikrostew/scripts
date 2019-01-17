@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/new_ticket, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/new_ticket, and run 'generate-scripts.sh'
 ###########################################################################
 #74bb88dbf016006c2feb52640b18617d
 

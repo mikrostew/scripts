@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/gfc, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/gfc, and run 'generate-scripts.sh'
 ###########################################################################
-#cab544daf8cc53194b8ffa8bdd4fadee
+#418bd1ebf045d5b480b916e6171347c8
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -104,7 +104,7 @@ combined_return=$(( combined_return + $? ))
 requirement_check curl "search 'how to install curl'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-repo_url="${1:?Missing argument 'repo_url'}"
+repo_url="${1:?Missing argument \'repo_url\'}"
 my_username="mikrostew"
 repo_info=( $(git_parse_repo_url $repo_url) )
 username=${repo_info[0]}

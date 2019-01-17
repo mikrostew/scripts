@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file /Users/mistewar/dotfiles/script-gen/gmove, and run 'generate-scripts.sh'
+# the file ~/dotfiles/script-gen/gmove, and run 'generate-scripts.sh'
 ###########################################################################
-#bd6bb1de429d7541c008c88ac7f738cb
+#41d00aa82ebbfec093e918b2e47d3f81
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -103,7 +103,7 @@ combined_return=0
 requirement_check git "search 'how to install git'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-new_branch_name="${1:?Missing argument 'new_branch_name'}"
+new_branch_name="${1:?Missing argument \'new_branch_name\'}"
 if in_git_repo && on_git_branch 'master'
 then
   num_commits="$(commit_diff_on_branch 'master' 'origin/master')"

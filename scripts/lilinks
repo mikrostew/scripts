@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/lilinks, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/lilinks, and run 'generate-scripts.sh'
 ###########################################################################
 #ff8756ba502abca802e04db68ba50fdb
 

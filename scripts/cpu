@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/cpu, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/cpu, and run 'generate-scripts.sh'
 ###########################################################################
 #57fa0899dd6d2f0996adf275928fa942
 

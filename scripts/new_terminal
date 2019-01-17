@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 ###########################################################################
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file script-gen/new_terminal, and run './generate-scripts.sh'
+# the file ~/dotfiles/script-gen/new_terminal, and run 'generate-scripts.sh'
 ###########################################################################
 #213d3e6c6755527b93a8f53a829c82af
 
