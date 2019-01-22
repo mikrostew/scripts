@@ -3,7 +3,7 @@
 
 @import do_cmd from .bash_shared_functions
 
-if ?PLATFORM_IS_MAC?
+if system_is_darwin?
 then
   do_cmd top -F -R -o cpu
 else
