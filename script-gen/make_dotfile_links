@@ -34,11 +34,11 @@ links[".bundle"]=".bundle"
 links[".rubocop.yml"]=".rubocop.yml"
 
 # platform-specific
-if ?PLATFORM_IS_MAC?
+if system_is_darwin?
 then
   # ssh
   links[".ssh/config"]=".ssh-config-mac"
-elif ?PLATFORM_IS_LINUX
+elif system_is_linux?
 then
   # ssh
   links[".ssh/config"]=".ssh-config-linux"

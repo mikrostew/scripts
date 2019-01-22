@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/make_dotfile_links, and run 'generate-scripts.sh'
 ###########################################################################
-#0ab26416653f6187d7685666eb5ca26e
+#7c70d8d64aa7f952148845916c0d5f4a
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -68,10 +68,10 @@ links[".gitignore"]=".gitignore"
 links[".tmux.conf"]=".tmux.conf"
 links[".bundle"]=".bundle"
 links[".rubocop.yml"]=".rubocop.yml"
-if [ "$(uname -s)" == "Darwin" ]
+if system_is_darwin?
 then
   links[".ssh/config"]=".ssh-config-mac"
-elif ?PLATFORM_IS_LINUX
+elif system_is_linux?
 then
   links[".ssh/config"]=".ssh-config-linux"
 fi

@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/stock, and run 'generate-scripts.sh'
 ###########################################################################
-#a59beb2f525cabf28ca0caebd172b2ed
+#4ae643ac0bc4114e3a130f186e8199af
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -62,10 +62,10 @@ fi
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 stock_symbol="${1:?Missing argument \'stock_symbol\'}"
 stock_url="https://finance.yahoo.com/quote/$stock_symbol/"
-if [ "$(uname -s)" == "Linux" ]
+if system_is_linux?
 then
   xdg-open "$stock_url"
-elif [ "$(uname -s)" == "Darwin" ]
+elif system_is_darwin?
 then
   open "$stock_url"
 fi

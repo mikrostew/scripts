@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/lilinks, and run 'generate-scripts.sh'
 ###########################################################################
-#ff8756ba502abca802e04db68ba50fdb
+#9f9dfb6844f4eae47241020a11d54193
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -68,10 +68,10 @@ menu_items['Floor Plans']='floor_plans'
 menu_items['Review Boards']='review_boards'
 menu_items['Coding Music']='coding_music'
 open_url() {
-  if [ "$(uname -s)" == "Darwin" ]
+  if system_is_darwin?
   then
     open "$1"
-  elif [ "$(uname -s)" == "Linux" ]
+  elif system_is_linux?
   then
     xdg-open "$1"
   fi

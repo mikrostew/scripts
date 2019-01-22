@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/cpus, and run 'generate-scripts.sh'
 ###########################################################################
-#0f5be27359930a5b995b1da79ff3db0d
+#e051eed856fe5dc9edd6001cffb4ada2
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -63,11 +63,11 @@ combined_return=$(( combined_return + $? ))
 requirement_check sort "search 'how to install sort'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
-if [ "$(uname -s)" == "Darwin" ]
+if system_is_darwin?
 then
   echo "logical CPUs:  $(sysctl -n hw.logicalcpu_max) max ($(sysctl -n hw.logicalcpu) available)"
   echo "physical CPUs: $(sysctl -n hw.physicalcpu_max) max ($(sysctl -n hw.physicalcpu) available)"
-elif [ "$(uname -s)" == "Linux" ]
+elif system_is_linux?
 then
   echo "logical CPUs:  $(lscpu -p | egrep -v '^#' | wc -l)"
   echo "physical CPUs: $(lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l)"
