@@ -3,13 +3,47 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/squash-commits, and run 'generate-scripts.sh'
 ###########################################################################
-#18a6e43b03daa14920c6ad422eb2e06f
+#63f166bc1bc243b5e686632baca5d826
 
+COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+do_cmd ()
+{
+    local cmd_args="";
+    for arg in "$@";
+    do
+        case "$arg" in
+            *\ *)
+                cmd_args="$cmd_args \"$arg\""
+            ;;
+            *)
+                cmd_args="$cmd_args $arg"
+            ;;
+        esac;
+    done;
+    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
+    command "$@"
+}
+do_git ()
+{
+    do_cmd git "$@"
+}
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
+requirement_check ()
+{
+    local cmd="$1";
+    local how_to_install="$2";
+    if [ ! $(command -v $cmd) ]; then
+        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
+        echo_err "To install: $how_to_install";
+        return 1;
+    else
+        return 0;
+    fi
 }
 show_help_msg() {
   echo "squash-commits - [git] Squash the input number of commits on the current branch"
@@ -40,10 +74,13 @@ do
   esac
 done
 shift $((OPTIND-1))
+combined_return=0
+requirement_check git "search 'how to install git'"
+combined_return=$(( combined_return + $? ))
+if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 num_commits="${1:?Missing argument \'num_commits\'}"
 commit_msg="${2:?Missing argument \'commit_msg\'}"
 commit_msg_extra_line="${3:-}"
-@uses_funcs do_git
 if [ -n "$commit_msg_extra_line" ]; then
   do_git reset --soft HEAD~$num_commits && do_git commit -m "$commit_msg" -m "$commit_msg_extra_line"
 else

@@ -5,7 +5,7 @@
 @arg 'commit_msg' 'Commit message'
 @arg_optional 'commit_msg_extra_line' 'Extra line for more info, overrides, etc.'
 
-@uses_funcs do_git
+@import do_git from .bash_git
 
 # "squashes" commits by combining them into a single commit
 if [ -n "$commit_msg_extra_line" ]; then
