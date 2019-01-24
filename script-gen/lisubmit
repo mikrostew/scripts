@@ -25,7 +25,7 @@ in_mint_submit_repo() {
 branch_name="$(current_git_branch)"
 
 review_id="$(git_review_board_id $branch_name)"
-@EXIT_IF_CMD_ERROR "Dang it! Getting the review board ID failed"
+@exit_on_error "Dang it! Getting the review board ID failed"
 
 echo_info "Submitting RB $review_id"
 
@@ -62,21 +62,21 @@ if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
   # squash changes on this branch
   squash-branch "$commit_msg" "$commit_msg_extra_line"
-  @EXIT_IF_CMD_ERROR "Dang it! squashing failed (TODO: auto recovery here?)"
+  @exit_on_error "Dang it! squashing failed (TODO: auto recovery here?)"
 
   # rebase current branch against master
   gram
-  @EXIT_IF_CMD_ERROR "Failed to rebase against master"
+  @exit_on_error "Failed to rebase against master"
 
   # merge into master
   gmm
-  @EXIT_IF_CMD_ERROR "Merge into master failed - good luck"
+  @exit_on_error "Merge into master failed - good luck"
 
   # apply the RB to the commit
   # if this fails, means I don't have the necessary ACLs (for git submit repos)
   do_git review dcommit -r "$review_id"
   # if dcommit failed, probably missing a shipit from ACL
-  @EXIT_IF_CMD_ERROR "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
+  @exit_on_error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
 
   # check product-spec.json for 'mint submit'
   if in_mint_submit_repo; then

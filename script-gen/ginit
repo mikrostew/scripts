@@ -25,7 +25,7 @@ curl_pid="$!"
 spinner -m "Querying $github_license_api for license info..." $curl_pid
 licenses_info="$(cat <&3)"
 wait $curl_pid
-@EXIT_IF_CMD_ERROR 'API call failed' 'echo "JSON output: $licenses_info"'
+@exit_on_error 'API call failed' 'echo "JSON output: $licenses_info"'
 
 # put license info into arrays
 readarray -t license_names <<< "$(echo "$licenses_info" | jq -r '.[] | .name')"
@@ -76,7 +76,7 @@ then
   spinner -m "Getting text of $license_name from $license_url..." $curl_pid
   license_info="$(cat <&3)"
   wait $curl_pid
-  @EXIT_IF_CMD_ERROR 'API call failed' 'echo "JSON output: $license_info"'
+  @exit_on_error 'API call failed' 'echo "JSON output: $license_info"'
 
   # save the license text in the LICENSE file
   echo "$license_info" | jq -r '.body' | sed -e "s/\[year\]/$current_year/" -e "s/\[fullname\]/$my_name/" > LICENSE

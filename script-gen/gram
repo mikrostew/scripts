@@ -12,7 +12,7 @@ then
   need_to_remove_orig_files='no'
 
   do_git checkout master && gpr
-  @EXIT_IF_CMD_ERROR "Failed to pull and rebase master" 'do_git checkout "$branch_name"'
+  @exit_on_error "Failed to pull and rebase master" 'do_git checkout "$branch_name"'
 
   do_git checkout "$branch_name" && do_git rebase master
   while [ "$?" -ne 0 ]; do

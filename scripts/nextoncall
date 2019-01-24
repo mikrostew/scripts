@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/nextoncall, and run 'generate-scripts.sh'
 ###########################################################################
-#c895f7000bcf9c970bca7ff757cf9ed0
+#339c27cfb02073688806070dc9bb7873
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -57,19 +57,9 @@ requirement_check curl "search 'how to install curl'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 data="$(curl -sS https://oncall.prod.linkedin.com/api/v0/users/$(whoami)/upcoming)"
-exit_code="$?"
-if [ "$exit_code" -ne 0 ]
-then
-  echo -e "${COLOR_FG_RED}Error running curl${COLOR_RESET}" >&2
-  exit "$exit_code"
-fi
+@exit_on_error "Error running curl"
 json_data="$(echo "$data" | jq -r '.[]|"\(.team) \(.role) \(.start)"')"
-exit_code="$?"
-if [ "$exit_code" -ne 0 ]
-then
-  echo -e "${COLOR_FG_RED}Error running jq${COLOR_RESET}" >&2
-  exit "$exit_code"
-fi
+@exit_on_error "Error running jq"
 while read team role ts
 do
   formatted_time="$(echo $ts | e2d)"

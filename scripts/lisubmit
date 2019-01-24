@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/lisubmit, and run 'generate-scripts.sh'
 ###########################################################################
-#6167a514be0701ab2d3c8eabe84fc039
+#2e670dc825f7b5d0e72b6f299c1aa3d1
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -185,12 +185,7 @@ in_mint_submit_repo() {
 }
 branch_name="$(current_git_branch)"
 review_id="$(git_review_board_id $branch_name)"
-exit_code="$?"
-if [ "$exit_code" -ne 0 ]
-then
-  echo -e "${COLOR_FG_RED}Dang it! Getting the review board ID failed${COLOR_RESET}" >&2
-  exit "$exit_code"
-fi
+@exit_on_error "Dang it! Getting the review board ID failed"
 echo_info "Submitting RB $review_id"
 review_title="$(get_li_rb_title $review_id)"
 if [ -z "$commit_msg" ]
@@ -218,34 +213,13 @@ if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; f
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
   squash-branch "$commit_msg" "$commit_msg_extra_line"
-  exit_code="$?"
-  if [ "$exit_code" -ne 0 ]
-  then
-    echo -e "${COLOR_FG_RED}Dang it! squashing failed (TODO: auto recovery here?)${COLOR_RESET}" >&2
-    exit "$exit_code"
-  fi
+  @exit_on_error "Dang it! squashing failed (TODO: auto recovery here?)"
   gram
-  exit_code="$?"
-  if [ "$exit_code" -ne 0 ]
-  then
-    echo -e "${COLOR_FG_RED}Failed to rebase against master${COLOR_RESET}" >&2
-    exit "$exit_code"
-  fi
+  @exit_on_error "Failed to rebase against master"
   gmm
-  exit_code="$?"
-  if [ "$exit_code" -ne 0 ]
-  then
-    echo -e "${COLOR_FG_RED}Merge into master failed - good luck${COLOR_RESET}" >&2
-    exit "$exit_code"
-  fi
+  @exit_on_error "Merge into master failed - good luck"
   do_git review dcommit -r "$review_id"
-  exit_code="$?"
-  if [ "$exit_code" -ne 0 ]
-  then
-    echo -e "${COLOR_FG_RED}Dang it! 'git review dcommit' failed, undoing the merge${COLOR_RESET}" >&2
-    git_undo_merge "$branch_name"
-    exit "$exit_code"
-  fi
+  @exit_on_error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
   if in_mint_submit_repo; then
     echo_info "supports mint submit? YES"
     do_cmd mint submit

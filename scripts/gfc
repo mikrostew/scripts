@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gfc, and run 'generate-scripts.sh'
 ###########################################################################
-#418bd1ebf045d5b480b916e6171347c8
+#8eaaa6a10b0177291ca717bdb5755971
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -112,13 +112,7 @@ repo_name=${repo_info[1]}
 api_token="$($HOME/Dropbox/secret/get-api-token github-fork-token)"
 echo_ack "(curl -X POST -u '$my_username:XXXXX' 'https://api.github.com/repos/$username/$repo_name/forks')"
 output="$(curl -X POST -u "$my_username:$api_token" "https://api.github.com/repos/$username/$repo_name/forks")"
-exit_code="$?"
-if [ "$exit_code" -ne 0 ]
-then
-  echo -e "${COLOR_FG_RED}API call to fork the repository failed${COLOR_RESET}" >&2
-  echo "JSON output: $output"
-  exit "$exit_code"
-fi
+@exit_on_error 'API call to fork the repository failed' 'echo "JSON output: $output"'
 echo_info "Waiting 10 seconds for github to create the fork..."
 sleep 10
 ssh_url="$(echo $output | jq --raw-output '.ssh_url')"
@@ -128,12 +122,7 @@ then
   echo_info "Waiting 10 more seconds and retrying once..."
   sleep 10
   do_git clone "$ssh_url" "$repo_name"
-  exit_code="$?"
-  if [ "$exit_code" -ne 0 ]
-  then
-    echo -e "${COLOR_FG_RED}Failed to clone the repository - check if https://github.com/$my_username/$repo_name exists${COLOR_RESET}" >&2
-    exit "$exit_code"
-  fi
+  @exit_on_error 'Failed to clone the repository - check if https://github.com/$my_username/$repo_name exists'
 fi
 cd "$repo_name" && do_git remote add upstream "$repo_url"
 do_git remote -v

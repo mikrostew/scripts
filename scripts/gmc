@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gmc, and run 'generate-scripts.sh'
 ###########################################################################
-#198e8cec04b74fa6f5c290089f516dcc
+#6e23e642359021f8960efa5e87fb1550
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_BOLD_RED='\033[1;31m'
@@ -71,21 +71,9 @@ if in_git_repo && not_on_git_branch 'master'
 then
   branch_name="$(current_git_branch)"
   merge_base="$(git merge-base master "$branch_name")"
-  exit_code="$?"
-  if [ "$exit_code" -ne 0 ]
-  then
-    echo -e "${COLOR_FG_RED}Error running git merge-base${COLOR_RESET}" >&2
-    echo "Output was: $merge_base"
-    exit "$exit_code"
-  fi
+  @exit_on_error 'Error running git merge-base' 'echo "Output was: $merge_base"'
   merge_tree_output="$(git merge-tree $merge_base master "$branch_name")"
-  exit_code="$?"
-  if [ "$exit_code" -ne 0 ]
-  then
-    echo -e "${COLOR_FG_RED}Error running git merge-tree${COLOR_RESET}" >&2
-    echo "Output was: $merge_tree_output"
-    exit "$exit_code"
-  fi
+  @exit_on_error 'Error running git merge-tree' 'echo "Output was: $merge_tree_output"'
   blue="$(echo -e $COLOR_FG_BOLD_BLUE)"
   red="$(echo -e $COLOR_FG_BOLD_RED)"
   reset="$(echo -e $COLOR_RESET)"

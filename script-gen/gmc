@@ -20,10 +20,10 @@ then
   branch_name="$(current_git_branch)"
 
   merge_base="$(git merge-base master "$branch_name")"
-  @EXIT_IF_CMD_ERROR 'Error running git merge-base' 'echo "Output was: $merge_base"'
+  @exit_on_error 'Error running git merge-base' 'echo "Output was: $merge_base"'
 
   merge_tree_output="$(git merge-tree $merge_base master "$branch_name")"
-  @EXIT_IF_CMD_ERROR 'Error running git merge-tree' 'echo "Output was: $merge_tree_output"'
+  @exit_on_error 'Error running git merge-tree' 'echo "Output was: $merge_tree_output"'
 
   # colorize the printout to highlight the conflict lines
 

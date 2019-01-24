@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/ginit, and run 'generate-scripts.sh'
 ###########################################################################
-#4c5d03d74d7877e9b719c88de73a0bdf
+#66d257892d9958d5aa240166b5c52678
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -102,13 +102,7 @@ curl_pid="$!"
 spinner -m "Querying $github_license_api for license info..." $curl_pid
 licenses_info="$(cat <&3)"
 wait $curl_pid
-exit_code="$?"
-if [ "$exit_code" -ne 0 ]
-then
-  echo -e "${COLOR_FG_RED}API call failed${COLOR_RESET}" >&2
-  echo "JSON output: $licenses_info"
-  exit "$exit_code"
-fi
+@exit_on_error 'API call failed' 'echo "JSON output: $licenses_info"'
 readarray -t license_names <<< "$(echo "$licenses_info" | jq -r '.[] | .name')"
 readarray -t license_urls <<< "$(echo "$licenses_info" | jq -r '.[] | .url')"
 num_licenses="${#license_names[@]}"
@@ -140,13 +134,7 @@ then
   spinner -m "Getting text of $license_name from $license_url..." $curl_pid
   license_info="$(cat <&3)"
   wait $curl_pid
-  exit_code="$?"
-  if [ "$exit_code" -ne 0 ]
-  then
-    echo -e "${COLOR_FG_RED}API call failed${COLOR_RESET}" >&2
-    echo "JSON output: $license_info"
-    exit "$exit_code"
-  fi
+  @exit_on_error 'API call failed' 'echo "JSON output: $license_info"'
   echo "$license_info" | jq -r '.body' | sed -e "s/\[year\]/$current_year/" -e "s/\[fullname\]/$my_name/" > LICENSE
   do_git add LICENSE
 else
