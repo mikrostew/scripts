@@ -12,7 +12,7 @@ then
   if [ "$?" -ne 0 ]
   then
     echo_err "Dang it! merge failed - good luck"
-    @WAIT_FOR_KEYPRESS "Press any key to start merge resolution... "
+    @wait_for_keypress "Press any key to start merge resolution... "
     gmt
   fi
 fi

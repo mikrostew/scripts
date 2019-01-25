@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gram, and run 'generate-scripts.sh'
 ###########################################################################
-#f3e8264023002aeaf2ed3904b5035fa9
+#8f8415e3bb0e320c4db876c29cb21b55
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -112,7 +112,7 @@ then
   @exit_on_error "Failed to pull and rebase master" 'do_git checkout "$branch_name"'
   do_git checkout "$branch_name" && do_git rebase master
   while [ "$?" -ne 0 ]; do
-    read -p 'Press any key to continue... ' -n1 -s
+    @wait_for_keypress 'Press any key to continue... '
     need_to_remove_orig_files='yes'
     gmt && do_git rebase --continue
   done

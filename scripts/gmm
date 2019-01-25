@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gmm, and run 'generate-scripts.sh'
 ###########################################################################
-#74d7f77b36cccc10fbc1554dba20b6a6
+#6d377007f1c39ec39bcc4cf163c88f95
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -100,7 +100,7 @@ then
   if [ "$?" -ne 0 ]
   then
     echo_err "Dang it! merge failed - good luck"
-    read -p "Press any key to start merge resolution... " -n1 -s
+    @wait_for_keypress "Press any key to start merge resolution... "
     gmt
   fi
 fi
