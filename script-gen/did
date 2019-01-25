@@ -2,7 +2,7 @@
 # Appends to a very simple did.txt file
 # (adapted from https://theptrk.com/2018/07/11/did-txt-file/)
 
-@uses_cmds vim
+@uses_cmds vim sed
 
 did_file="$HOME/Dropbox/doc/did.txt"
 timestamp="$(date +"%Y-%m-%d %H:%M:%S %A")"

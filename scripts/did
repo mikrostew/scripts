@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/did, and run 'generate-scripts.sh'
 ###########################################################################
-#f70bc2ffa3d5039952adbd4df9243671
+#6252528cb6ace24f767abc1a524c03d2
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -49,6 +49,8 @@ done
 shift $((OPTIND-1))
 combined_return=0
 requirement_check vim "search 'how to install vim'"
+combined_return=$(( combined_return + $? ))
+requirement_check sed "search 'how to install sed'"
 combined_return=$(( combined_return + $? ))
 if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 did_file="$HOME/Dropbox/doc/did.txt"
