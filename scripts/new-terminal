@@ -44,7 +44,14 @@
 #
 # Now you should be able to run this keyboard shortcut from anywhere
 
-# open an iTerm2 window
-
-osascript -e 'tell application "iTerm2" to create window with default profile'
+# check if iterm2 is running - if not, we need to start it
+pgrep -a iTerm2
+if [ "$?" -eq 0 ]
+then
+  # iTerm2 alread running - open a new window
+  osascript -e 'tell application "iTerm" to create window with default profile'
+else
+  # iTerm2 not running - have to start it
+  osascript -e 'tell application "Iterm" to activate'
+fi
 
