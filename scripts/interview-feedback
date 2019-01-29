@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# formats the interview feedback nicely for hirein
+
+# make sure Chrome window has focus
+osascript -e 'tell application "Google Chrome" to activate'
+
+echo "Populating interview feedback text..."
+
+# emulate keystrokes to type the formatted text into the field
+# TODO: do I need delays for any of this - doesn't seem like it at the moment...
+  osascript <<EOF
+tell application "System Events"
+  keystroke "b" using command down
+  keystroke "Intros and Resume"
+  keystroke "b" using command down
+  keystroke ": X minutes" & return
+  keystroke "TODO" & return
+
+  keystroke "b" using command down
+  keystroke "Question1"
+  keystroke "b" using command down
+  keystroke ": X minutes" & return
+  keystroke "TODO" & return
+
+  keystroke "b" using command down
+  keystroke "Question2"
+  keystroke "b" using command down
+  keystroke ": X minutes" & return
+  keystroke "TODO" & return
+
+  keystroke "b" using command down
+  keystroke "Good"
+  keystroke "b" using command down
+  keystroke ":" & return
+  keystroke "- TODO" & return
+
+  keystroke "b" using command down
+  keystroke "Fair"
+  keystroke "b" using command down
+  keystroke ":" & return
+  keystroke "- TODO" & return
+
+  keystroke "b" using command down
+  keystroke "Poor"
+  keystroke "b" using command down
+  keystroke ":" & return
+  keystroke "- TODO" & return
+
+  keystroke "b" using command down
+  keystroke "Overall"
+  keystroke "b" using command down
+  keystroke ":" & return
+  keystroke "TODO"
+end tell
+EOF
