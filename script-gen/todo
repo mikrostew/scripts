@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Show any TODOs from comments in source code
 
+# TODO: need a way to specify "all remaining args", so I can grep multiple dirs
 @arg_optional 'in_dir' 'Directory to grep for TODOs in' '.'
 
 @import_var { COLOR_RESET, COLOR_FG_BOLD_BLUE } from .bash_colors

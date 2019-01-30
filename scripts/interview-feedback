@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # formats the interview feedback nicely for hirein
 
+# this is a good reference for using osascript:
+# https://eastmanreference.com/how-to-automate-your-keyboard-in-mac-os-x-with-applescript
+
 # make sure Chrome window has focus
 osascript -e 'tell application "Google Chrome" to activate'
 
