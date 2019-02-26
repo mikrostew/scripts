@@ -19,14 +19,9 @@ no_comments=''            # not in a comment (for markdown and some other files)
 
 # use process substitution to capture the output asynchronously
 # (from https://stackoverflow.com/a/20018118/)
-exec 3< <(grep \
-  -nrIF \
+exec 3< <(git grep \
+  -nIF \
   --color=always \
-  --exclude-dir bower_components \
-  --exclude-dir node_modules \
-  --exclude-dir target \
-  --exclude-dir .git \
-  --exclude-dir .vim \
   -e "$hash_comments TODO" \
   -e "$slash_comments TODO" \
   -e "$dquote_comments TODO" \

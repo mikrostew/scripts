@@ -48,14 +48,9 @@ html_comments='<!--'      # HTML, XML
 slash_block_comments='/*' # C/C++, CSS, Java
 dash_comments='--'        # SQL
 no_comments=''            # not in a comment (for markdown and some other files)
-exec 3< <(grep \
-  -nrIF \
+exec 3< <(git grep \
+  -nIF \
   --color=always \
-  --exclude-dir bower_components \
-  --exclude-dir node_modules \
-  --exclude-dir target \
-  --exclude-dir .git \
-  --exclude-dir .vim \
   -e "$hash_comments TODO" \
   -e "$slash_comments TODO" \
   -e "$dquote_comments TODO" \
