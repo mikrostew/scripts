@@ -3,12 +3,13 @@
 
 @arg_optional 'input_description' 'Description of the changes'
 
-@import { echo_ack, echo_info } from .bash_shared_functions
+@import { echo_info } from .bash_shared_functions
 @import { do_git, git_review_board_id, current_git_branch } from .bash_git
 
-@uses_cmds jq expect git
+@uses_cmds jq git
 
 # SETTINGS
+# TODO: display this list before running 'git review create'?
 ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
 
 branch_name=$(current_git_branch)
@@ -49,20 +50,9 @@ else
     rb_description="$input_description"
   fi
 
-  # TODO: prompt for more things, with defaults?
+  # previously this was using expect, but sometimes I have to login, and it hangs
+  do_git review create --owners-only --open --description "$rb_description"
 
-  # because do_git function does not work inside spawn, just echo that here
-  echo_ack "( git review create --owners-only --open --description '$rb_description' )"
-  # use `expect` to automatically answer the prompts, which look like this:
-  expect <<EndOfGitReviewExpect
-    set timeout 60
-    spawn git review create --owners-only --open --description "$rb_description"
-    # regex matches across newlines
-    expect -re "^Recommended reviewers.*Additional reviewers.*"
-    send "$ADDITIONAL_USERS_GROUPS\n"
-    # allow command to run to completion
-    expect eof
-EndOfGitReviewExpect
   # use `git review create --help` to figure out how to add other options
 fi
 

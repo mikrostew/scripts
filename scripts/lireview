@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/lireview, and run 'generate-scripts.sh'
 ###########################################################################
-#6f904cfd2946497cd5089d1e62eed677
+#7efcb2a1b6e55f956a018aad434ccdcc
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -34,10 +34,6 @@ do_git ()
 {
     do_cmd git "$@"
 }
-echo_ack ()
-{
-    echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
-}
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
@@ -49,18 +45,6 @@ echo_info ()
 git_review_board_id ()
 {
     echo "$(git config --get branch.$1.reviewid)"
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "lireview - Create a new RB from the local changes, or update existing review"
@@ -89,15 +73,8 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check jq "search 'how to install jq'"
-combined_return=$(( combined_return + $? ))
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-requirement_check expect "search 'how to install expect'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 input_description="${1:-}"
+@uses_cmds jq git
 ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
 branch_name=$(current_git_branch)
 review_id="$(git_review_board_id $branch_name)"
@@ -123,12 +100,5 @@ else
   then
     rb_description="$input_description"
   fi
-  echo_ack "( git review create --owners-only --open --description '$rb_description' )"
-  expect <<EndOfGitReviewExpect
-    set timeout 60
-    spawn git review create --owners-only --open --description "$rb_description"
-    expect -re "^Recommended reviewers.*Additional reviewers.*"
-    send "$ADDITIONAL_USERS_GROUPS\n"
-    expect eof
-EndOfGitReviewExpect
+  do_git review create --owners-only --open --description "$rb_description"
 fi
