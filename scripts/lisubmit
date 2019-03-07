@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/lisubmit, and run 'generate-scripts.sh'
 ###########################################################################
-#2e670dc825f7b5d0e72b6f299c1aa3d1
+#4fca2018d0740c98430e28e949f5553b
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -114,18 +114,6 @@ not_on_git_branch ()
 {
     [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
 }
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
-}
 show_help_msg() {
   echo "lisubmit - Squash commits, rebase, merge, and submit, for LI workflow"
   echo 'Usage: lisubmit [options] commit_msg [commit_msg_extra_line]'
@@ -154,26 +142,9 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check gram "search 'how to install gram'"
-combined_return=$(( combined_return + $? ))
-requirement_check jq "search 'how to install jq'"
-combined_return=$(( combined_return + $? ))
-requirement_check gmm "search 'how to install gmm'"
-combined_return=$(( combined_return + $? ))
-requirement_check find "search 'how to install find'"
-combined_return=$(( combined_return + $? ))
-requirement_check gpr "search 'how to install gpr'"
-combined_return=$(( combined_return + $? ))
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-requirement_check squash-branch "search 'how to install squash-branch'"
-combined_return=$(( combined_return + $? ))
-requirement_check curl "search 'how to install curl'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 commit_msg="${1:?Missing argument \'commit_msg\'}"
 commit_msg_extra_line="${2:-}"
+@uses_cmds jq gram gmm gpr squash-branch
 in_mint_submit_repo() {
   if [ -f "$PWD/product-spec.json" ]; then
     submit_def="$(cat $PWD/product-spec.json | jq '.build.commands.submit')"
@@ -210,14 +181,10 @@ echo "  DIFF_VERIFY_OVERRIDE  - change has diffs from last ship-it and a reviewe
 echo -n "[$commit_msg_extra_line]: "
 read commit_msg_extra
 if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; fi
-if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
+if in_git_repo && no_uncommitted_changes
 then
-  squash-branch "$commit_msg" "$commit_msg_extra_line"
-  @exit_on_error "Dang it! squashing failed (TODO: auto recovery here?)"
-  gram
-  @exit_on_error "Failed to rebase against master"
-  gmm
-  @exit_on_error "Merge into master failed - good luck"
+  gpr
+  @exit_on_error "Failed to pull and rebase master"
   do_git review dcommit -r "$review_id"
   @exit_on_error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
   if in_mint_submit_repo; then
