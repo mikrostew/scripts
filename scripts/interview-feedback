@@ -10,7 +10,7 @@ osascript -e 'tell application "Google Chrome" to activate'
 echo "Populating interview feedback text..."
 
 # emulate keystrokes to type the formatted text into the field
-# TODO: do I need delays for any of this - doesn't seem like it at the moment...
+# TODO: do I need delays for any of this? doesn't seem like it at the moment...
   osascript <<EOF
 tell application "System Events"
   keystroke "b" using command down

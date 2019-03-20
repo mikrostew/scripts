@@ -3,25 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/min-version-check, and run 'generate-scripts.sh'
 ###########################################################################
-#91b339fc87aab7be64362e5446faddb5
+#ae13640c7291edbb57b7233fbe98dd60
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "min-version-check - Check minimum version, and print out the result"
@@ -54,10 +42,6 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check semver "search 'how to install semver'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 executable_name="${1:?Missing argument \'executable_name\'}"
 version_specifier="${2:?Missing argument \'version_specifier\'}"
 version_cmd="${3:?Missing argument \'version_cmd\'}"
@@ -86,14 +70,4 @@ if [ -z "$install_path" ]; then
   echo -e "$executable_name : ${COLOR_FG_RED}not installed (want $version_specifier), install with '${install_cmd:-(unknown command)}'${COLOR_RESET}"
   exit 1
 fi
-current_version=$(eval "$version_cmd")
-if [ -n "$current_version" ]; then
-  if meets_version "$(normalize_version $current_version)" "$version_specifier"; then
-    exit 0
-  else
-    echo -e "$executable_name : ${COLOR_FG_RED}found $current_version (want $version_specifier)${COLOR_RESET} ($install_path)"
-  fi
-else
-  echo -e "$executable_name : ${COLOR_FG_RED}unknown version (want $version_specifier)${COLOR_RESET} ($install_path)"
-fi
-exit 1 # if it hasn't already exited, it didn't meet the version
+exit 0
