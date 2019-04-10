@@ -20,13 +20,19 @@ tell application "System Events"
   keystroke "TODO" & return
 
   keystroke "b" using command down
-  keystroke "Question1"
+  keystroke "Brace Matching (link in notes)"
   keystroke "b" using command down
   keystroke ": X minutes" & return
   keystroke "TODO" & return
 
   keystroke "b" using command down
-  keystroke "Question2"
+  keystroke "Max Contiguous Subsequence"
+  keystroke "b" using command down
+  keystroke ": X minutes" & return
+  keystroke "TODO" & return
+
+  keystroke "b" using command down
+  keystroke "Function Time (link in notes)"
   keystroke "b" using command down
   keystroke ": X minutes" & return
   keystroke "TODO" & return
