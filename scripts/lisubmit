@@ -115,13 +115,13 @@ not_on_git_branch ()
 
 show_help_msg() {
   echo "lisubmit - Squash commits, rebase, merge, and submit, for LI workflow"
-  echo 'Usage: lisubmit [options] commit_msg [commit_msg_extra_line]'
+  echo 'Usage: lisubmit [options] [commit_msg] [commit_msg_extra_line]'
   echo ''
   echo 'Options:'
   echo '  -h                      Show this help message'
   echo ''
   echo 'Arguments:'
-  echo '  commit_msg              Message for the commit'
+  echo '  commit_msg              (optional) Message for the commit'
   echo '  commit_msg_extra_line   (optional) Optional extra line for more details and/or overrides (defaults to "")'
 }
 
@@ -142,7 +142,8 @@ do
   esac
 done
 shift $((OPTIND-1))
-commit_msg="${1:?Missing argument \'commit_msg\'}"
+# both arguments are optional
+commit_msg="${1:-}"
 commit_msg_extra_line="${2:-}"
 
 @uses_cmds jq gram gmm gpr squash-branch
@@ -161,7 +162,7 @@ branch_name="$(current_git_branch)"
 review_id="$(git_review_board_id $branch_name)"
 @exit_on_error "Dang it! Getting the review board ID failed"
 
-echo_info "Submitting RB $review_id"
+echo_info "Submitting RB $review_id..."
 review_title="$(get_li_rb_title $review_id)"
 
 if [ -z "$commit_msg" ]
