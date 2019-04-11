@@ -172,8 +172,11 @@ fi
 
 # prompt for things
 echo -n "Commit message [$commit_msg]: "
-read commit_msg
-if [ -z "$commit_msg" ]; then commit_msg="$commit_msg"; fi
+read read_commit_msg
+if [ -n "$read_commit_msg" ]
+then
+  commit_msg="$read_commit_msg"
+fi
 
 echo "Commit message 2nd line, for overrides"
 echo "These should only be used by oncall, or for immediate response situations:"
@@ -193,14 +196,15 @@ if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; f
 
 if in_git_repo && no_uncommitted_changes
 then
+  echo_info "commit message: $commit_msg"
+  echo_info "(extra line)  : $commit_msg_extra_line"
+  echo_info ""
+  # squash changes on this branch
+  squash-branch "$commit_msg" "$commit_msg_extra_line"
+  @exit_on_error "Dang it! squashing failed (TODO: auto recovery here?)"
 
   if not_on_git_branch 'master'
   then
-    # TODO: don't need this anymore?
-    # # squash changes on this branch
-    # squash-branch "$commit_msg" "$commit_msg_extra_line"
-    # @exit_on_error "Dang it! squashing failed (TODO: auto recovery here?)"
-
     # rebase current branch against master
     gram
     @exit_on_error "Failed to rebase against master"
