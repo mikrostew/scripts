@@ -1,15 +1,13 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/lisubmit, and run 'generate-scripts.sh'
-###########################################################################
-#4fca2018d0740c98430e28e949f5553b
+# Squash commits, rebase, merge, and submit, for LI workflow
 
+# TODO: add comments back in from the file in script-gen
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 DOTFILES_DIR="$HOME/dotfiles"
+
 current_git_branch ()
 {
     echo "$(git rev-parse --abbrev-ref HEAD)"
@@ -114,6 +112,7 @@ not_on_git_branch ()
 {
     [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
 }
+
 show_help_msg() {
   echo "lisubmit - Squash commits, rebase, merge, and submit, for LI workflow"
   echo 'Usage: lisubmit [options] commit_msg [commit_msg_extra_line]'
@@ -125,6 +124,7 @@ show_help_msg() {
   echo '  commit_msg              Message for the commit'
   echo '  commit_msg_extra_line   (optional) Optional extra line for more details and/or overrides (defaults to "")'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -144,7 +144,9 @@ done
 shift $((OPTIND-1))
 commit_msg="${1:?Missing argument \'commit_msg\'}"
 commit_msg_extra_line="${2:-}"
+
 @uses_cmds jq gram gmm gpr squash-branch
+
 in_mint_submit_repo() {
   if [ -f "$PWD/product-spec.json" ]; then
     submit_def="$(cat $PWD/product-spec.json | jq '.build.commands.submit')"
@@ -154,18 +156,25 @@ in_mint_submit_repo() {
     return
   fi
 }
+
 branch_name="$(current_git_branch)"
 review_id="$(git_review_board_id $branch_name)"
 @exit_on_error "Dang it! Getting the review board ID failed"
+
 echo_info "Submitting RB $review_id"
 review_title="$(get_li_rb_title $review_id)"
+
 if [ -z "$commit_msg" ]
 then
+  # no message provided, use the title from the RB
   commit_msg="$review_title"
 fi
+
+# prompt for things
 echo -n "Commit message [$commit_msg]: "
 read commit_msg
 if [ -z "$commit_msg" ]; then commit_msg="$commit_msg"; fi
+
 echo "Commit message 2nd line, for overrides"
 echo "These should only be used by oncall, or for immediate response situations:"
 echo "  ACLOVERRIDE           - cannot get an ACL owner to ship within your SLA"
@@ -181,26 +190,53 @@ echo "  DIFF_VERIFY_OVERRIDE  - change has diffs from last ship-it and a reviewe
 echo -n "[$commit_msg_extra_line]: "
 read commit_msg_extra
 if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; fi
+
 if in_git_repo && no_uncommitted_changes
 then
+
+  if not_on_git_branch 'master'
+  then
+    # TODO: don't need this anymore?
+    # # squash changes on this branch
+    # squash-branch "$commit_msg" "$commit_msg_extra_line"
+    # @exit_on_error "Dang it! squashing failed (TODO: auto recovery here?)"
+
+    # rebase current branch against master
+    gram
+    @exit_on_error "Failed to rebase against master"
+    # merge into master
+    gmm
+    @exit_on_error "Merge into master failed - good luck"
+  fi
+
   gpr
   @exit_on_error "Failed to pull and rebase master"
+
+  # apply the RB to the commit
+  # if this fails, means I don't have the necessary ACLs (for git submit repos)
   do_git review dcommit -r "$review_id"
+  # if dcommit failed, probably missing a shipit from ACL
   @exit_on_error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
+
+  # check product-spec.json for 'mint submit'
   if in_mint_submit_repo; then
     echo_info "supports mint submit? YES"
+    # mint submit
     do_cmd mint submit
     if [ "$?" -ne 0 ];then
       echo_fail_banner
     else
       echo_success_banner
     fi
+    # mint submit is async, so for now undo the merge in case I have to resubmit
     echo_info "Undoing the merge so I can keep working..."
     git_undo_merge "$branch_name"
   else
     echo_info "supports mint submit? NO"
+    # git submit
     do_git submit
     if [ "$?" -ne 0 ]; then
+      # submit failed, could be precommit, or ACL check, or whatever
       echo_fail_banner
       echo_info "Undoing the merge..."
       git_undo_merge "$branch_name"
@@ -208,6 +244,8 @@ then
     fi
     echo_success_banner
     echo_info "Pulling changes into master..."
+    # rebase to pick up the change
     gpr
+    # and done!
   fi
 fi
