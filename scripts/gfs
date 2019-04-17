@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gfs, and run 'generate-scripts.sh'
 ###########################################################################
-#cc26c805207d750e477db05e8d357ae7
+#dc1c4bec23daf8584ef0722d76261a06
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -46,7 +46,7 @@ on_symbolic_ref ()
     git symbolic-ref HEAD
 }
 show_help_msg() {
-  echo "gfs - [git] Sync current branch to the upstream fork (Git Fork Sync)"
+  echo "gfs - [git] Sync master branch to the upstream fork (Git Fork Sync)"
   echo 'Usage: gfs [options]'
   echo ''
   echo 'Options:'
@@ -72,7 +72,15 @@ shift $((OPTIND-1))
 if in_git_repo && on_symbolic_ref
 then
   branch_name=$(current_git_branch)
+  if [ "$branch_name" != "master" ]
+  then
+    do_git checkout master
+  fi
   do_git fetch upstream
   @exit_on_error "" "echo_err \"Error: Looks like 'upstream' is not setup - use 'git remote add upstream <repo>' to set it\""
-  do_git merge "upstream/$branch_name" && do_git push
+  do_git merge "upstream/master" && do_git push
+  if [ "$branch_name" != "master" ]
+  then
+    do_git checkout "$branch_name"
+  fi
 fi
