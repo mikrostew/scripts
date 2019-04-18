@@ -1,0 +1,101 @@
+#!/usr/bin/env badash
+###########################################################################
+# DO NOT EDIT! This script was auto-generated. To update this script, edit
+# the file ~/dotfiles/script-gen/gbd, and run 'generate-scripts.sh'
+###########################################################################
+#66403e7fce13eb4c8139afced70a9bf7
+
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+all_git_branches ()
+{
+    git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||'
+}
+do_cmd ()
+{
+    local cmd_args="";
+    for arg in "$@";
+    do
+        case "$arg" in
+            *\ *)
+                cmd_args="$cmd_args \"$arg\""
+            ;;
+            *)
+                cmd_args="$cmd_args $arg"
+            ;;
+        esac;
+    done;
+    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
+    command "$@"
+}
+do_git ()
+{
+    do_cmd git "$@"
+}
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
+echo_info ()
+{
+    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+}
+in_git_repo ()
+{
+    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
+}
+show_help_msg() {
+  echo "gbd - [git] Delete git branch from list of branches (Git Branch Delete)"
+  echo 'Usage: gbd [options]'
+  echo ''
+  echo 'Options:'
+  echo '  -h               Show this help message'
+}
+while getopts ":h" opt
+do
+  case $opt in
+    h)
+      show_help_msg && exit 0
+      ;;
+    \?)
+      echo_err "$0: invalid option '-$OPTARG'"
+      exit 1
+      ;;
+    :)
+      echo_err "$0: option '-$OPTARG' requires an argument"
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+@uses_cmds sed, git
+if in_git_repo
+then
+  all_branches=( $(all_git_branches | sed '/^master$/d' | sort) )
+  num_branches="${#all_branches[@]}"
+  all_merged=( $(git branch --merged master | sed -e 's/^\* //' -e 's/^  //') )
+  num_merged="${#all_merged[@]}"
+  declare -A merge_status
+  for((i=0; i<$num_merged; i++))
+  do
+    name="${all_merged[$i]}"
+    merge_status[$name]="(merged)"
+  done
+  for((i=0; i<$num_branches; i++))
+  do
+    branch_name="${all_branches[$i]}"
+    echo -e "[$(( i + 1 ))] $branch_name ${merge_status[$branch_name]}"
+  done
+  echo -n "Branch to delete: "
+  read branch_num
+  echo ""
+  if [ -n "$branch_num" ] && (( "$branch_num" <= "$num_branches" ))
+  then
+    (( branch_index = branch_num - 1 ))
+    do_git branch -d "${all_branches[$branch_index]}"
+  else
+    echo_info "no branch selected"
+  fi
+fi
