@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gcl, and run 'generate-scripts.sh'
 ###########################################################################
-#6abc89105ad4e0d6828a19ec843a4468
+#e7b8ed335d7f1aa59718f00dca325378
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -11,7 +11,7 @@ COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 all_git_branches ()
 {
-    echo $(git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||')
+    git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||'
 }
 do_cmd ()
 {
@@ -46,18 +46,6 @@ in_git_repo ()
 {
     git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
 }
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
-}
 show_help_msg() {
   echo "gcl - [git] Checkout git branch from list of branches (Git Checkout from List)"
   echo 'Usage: gcl [options]'
@@ -82,12 +70,6 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-requirement_check sed "search 'how to install sed'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 if in_git_repo
 then
   all_branches=( $(all_git_branches | sort) )
