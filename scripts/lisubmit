@@ -179,17 +179,20 @@ then
   commit_msg="$read_commit_msg"
 fi
 
+# from the "how to override your commit like a pro" gdoc
 echo "Commit message 2nd line, for overrides"
 echo "These should only be used by oncall, or for immediate response situations:"
-echo "  ACLOVERRIDE           - cannot get an ACL owner to ship within your SLA"
-echo "  PCVALIDATIONOVERRIDE  - unblock trunk with a non-functional change (fixing ACL, extending whitelist)"
-echo "  LIXOVERDUEOVERRIDE    - if precommit is being blocked by an overdue lix"
-echo "  DISABLEDTESTOVERRIDE  - bypass enforcement of disabled tests per pillar"
-echo "  I18NOVERRIDE          - bypass i18n validation in precommit"
-echo "  PCLOVERRIDE           - fix compatibility test that is failing in PCL"
-echo "  EOLVALIDATIONOVERRIDE - commit is blocked by out of date dependency"
-echo "  TRUNKBLOCKERFIX       - override trunk lock"
+echo ""
+echo "  ACLOVERRIDE           - cannot get an ACL owner to ship within your SLA (sends email to bypassed ACLs)"
+echo "  PCVALIDATIONOVERRIDE  - unblock trunk with a non-functional change (fixing ACL, extending whitelist) - CAUTION!!! this can block trunk"
+echo "  PCLOVERRIDE           - for compatibility test that is failing in PCL"
+echo "  TRUNKBLOCKERFIX       - override trunk lock (consult infra first)"
+echo "  EOLVALIDATIONOVERRIDE - commit is blocked by out of date dependency (fix forward when possible)"
 echo "  CHERRYPICKOVERRIDE    - commit a change to hotfix branch but not master"
+echo "v-web specific:"
+echo "  I18NOVERRIDE          - bypass i18n validation in precommit (doesn't override precommit altogether)"
+echo "  LIXOVERDUEOVERRIDE    - if precommit is being blocked by an overdue lix (doesn't override precommit altogether)"
+echo "  DISABLEDTESTOVERRIDE  - bypass enforcement of disabled tests per pillar (doesn't override precommit altogether)"
 echo "  DIFF_VERIFY_OVERRIDE  - change has diffs from last ship-it and a reviewer is not available"
 echo -n "[$commit_msg_extra_line]: "
 read commit_msg_extra
