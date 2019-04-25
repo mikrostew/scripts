@@ -11,6 +11,11 @@ then
   # all branches, not including master
   all_branches=( $(all_git_branches | sed '/^master$/d' | sort) )
   num_branches="${#all_branches[@]}"
+  if [ "$num_branches" -eq 0 ]
+  then
+    echo_info "master is the only branch, nothing to delete"
+    exit 0
+  fi
 
   # all branches that have been merged (strip out leading asterisk and whitespace
   all_merged=( $(git branch --merged master | sed -e 's/^\* //' -e 's/^  //') )

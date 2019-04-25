@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gbd, and run 'generate-scripts.sh'
 ###########################################################################
-#66403e7fce13eb4c8139afced70a9bf7
+#d78e542e5ef53a2bf2569e55d500bceb
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -75,6 +75,11 @@ if in_git_repo
 then
   all_branches=( $(all_git_branches | sed '/^master$/d' | sort) )
   num_branches="${#all_branches[@]}"
+  if [ "$num_branches" -eq 0 ]
+  then
+    echo_info "master is the only branch, nothing to delete"
+    exit 0
+  fi
   all_merged=( $(git branch --merged master | sed -e 's/^\* //' -e 's/^  //') )
   num_merged="${#all_merged[@]}"
   declare -A merge_status
