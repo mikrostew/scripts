@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/todo, and run 'generate-scripts.sh'
 ###########################################################################
-#9aeb7d80082ec59857547d72d2208ee4
+#875f59e816da2a65895899755a1099fd
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'

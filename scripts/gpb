@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gpb, and run 'generate-scripts.sh'
 ###########################################################################
-#3e5f39cd30733b4f2cb4db57c2da8809
+#37fb7bf159e5110a3ee21bacc58cc2e0
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -41,18 +41,6 @@ in_git_repo ()
 {
     git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
 }
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
-}
 show_help_msg() {
   echo "gpb - [git] Push current local branch to origin, and set upstream (Git Push Branch)"
   echo 'Usage: gpb [options]'
@@ -77,10 +65,6 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 if in_git_repo
 then
   branch_name=$(current_git_branch)

@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gundo, and run 'generate-scripts.sh'
 ###########################################################################
-#6b0884039668774c7cfd9e0d8691309b
+#f6b8f1a76f96276ae7cce9cb75a7ab44
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -37,18 +37,6 @@ in_git_repo ()
 {
     git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
 }
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
-}
 show_help_msg() {
   echo "gundo - [git] Undo the last commit (Git UNDO)"
   echo 'Usage: gundo [options]'
@@ -73,10 +61,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+@uses_cmds git
 if in_git_repo
 then
   last_commit="$(git log -1 --pretty=%B)"

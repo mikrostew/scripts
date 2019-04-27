@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gpf, and run 'generate-scripts.sh'
 ###########################################################################
-#ec6616710f17dac36377c6092f094533
+#0ea18c57731acbf93f0d732d9bf9660b
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -33,18 +33,6 @@ echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
-}
 show_help_msg() {
   echo "gpf - [git] Force-push changes (Git Push Force)"
   echo 'Usage: gpf [options]'
@@ -69,8 +57,4 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 do_git push --force-with-lease

@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/squash-branch, and run 'generate-scripts.sh'
 ###########################################################################
-#cbd2a8318a1b165ac556ba703c8c2092
+#fb1855f3be1c8803e3b984a54b024bfd
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -39,18 +39,6 @@ echo_info ()
 {
     echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
 }
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
-}
 show_help_msg() {
   echo "squash-branch - [git] Squash commits in current branch into a single commit"
   echo 'Usage: squash-branch [options] commit_msg [commit_msg_extra_line]'
@@ -79,14 +67,9 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check squash-commits "search 'how to install squash-commits'"
-combined_return=$(( combined_return + $? ))
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 commit_msg="${1:?Missing argument \'commit_msg\'}"
 commit_msg_extra_line="${2:-}"
+@uses_cmds squash-commits
 branch_name=$(current_git_branch)
 based_on=$(based_on_master_or_origin $branch_name)
 num_commits_on_branch="$(commit_diff_on_branch $branch_name $based_on)"

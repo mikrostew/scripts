@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gpr, and run 'generate-scripts.sh'
 ###########################################################################
-#74faf2b41524caf91a2558fa0d1c15dc
+#4d4ada3c88ee7ff0e7b8c3e47da69014
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -37,18 +37,6 @@ echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
-}
 show_help_msg() {
   echo "gpr - [git] Pull changes from origin and rebase local changes (Git Pull Rebase)"
   echo 'Usage: gpr [options]'
@@ -73,9 +61,5 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 branch_name=$(current_git_branch)
 do_git fetch --all --prune && do_git rebase "origin/$branch_name"

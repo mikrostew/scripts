@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gfc, and run 'generate-scripts.sh'
 ###########################################################################
-#8eaaa6a10b0177291ca717bdb5755971
+#357bee15fa1907a6cac944b87c7d3089
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -57,18 +57,6 @@ git_parse_repo_url ()
         fi;
     fi
 }
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
-}
 show_help_msg() {
   echo "gfc - [git] Fork a repo from github and clone locally (Git Fork & Clone)"
   echo 'Usage: gfc [options] repo_url'
@@ -96,15 +84,8 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check jq "search 'how to install jq'"
-combined_return=$(( combined_return + $? ))
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-requirement_check curl "search 'how to install curl'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 repo_url="${1:?Missing argument \'repo_url\'}"
+@uses_cmds curl jq
 my_username="mikrostew"
 repo_info=( $(git_parse_repo_url $repo_url) )
 username=${repo_info[0]}

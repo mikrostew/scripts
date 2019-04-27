@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/libranch, and run 'generate-scripts.sh'
 ###########################################################################
-#081e56da734534b3ece7bed446b3eccf
+#218a3263a567a96b7b523d9a7564460e
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -45,18 +45,6 @@ on_git_branch ()
 {
     [ "$(current_git_branch)" != "$1" ] && echo_err ">_<  Must be on branch '$1' for this" && return -1 || return 0
 }
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
-}
 show_help_msg() {
   echo "libranch - Create a new branch that tracks origin/master (for LinkedIn workflow)"
   echo 'Usage: libranch [options] new_branch_name'
@@ -84,10 +72,6 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 new_branch_name="${1:?Missing argument \'new_branch_name\'}"
 if in_git_repo && on_git_branch 'master'
 then

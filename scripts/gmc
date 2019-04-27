@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gmc, and run 'generate-scripts.sh'
 ###########################################################################
-#6e23e642359021f8960efa5e87fb1550
+#0973b752dbfd6023f4460fe02da26ffe
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_BOLD_RED='\033[1;31m'
@@ -24,18 +24,6 @@ in_git_repo ()
 not_on_git_branch ()
 {
     [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "gmc - [git] Check if this branch is OK to merge, or it there are any conflicts with master (Git Merge Check)"
@@ -61,12 +49,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check git "search 'how to install git'"
-combined_return=$(( combined_return + $? ))
-requirement_check sed "search 'how to install sed'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+@uses_cmds git sed
 if in_git_repo && not_on_git_branch 'master'
 then
   branch_name="$(current_git_branch)"

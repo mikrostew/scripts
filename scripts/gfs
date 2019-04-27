@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/gfs, and run 'generate-scripts.sh'
 ###########################################################################
-#dc1c4bec23daf8584ef0722d76261a06
+#2b0533c3c6d3bf902a53276a216abd97
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
