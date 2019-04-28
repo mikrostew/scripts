@@ -3,25 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/yesterday, and run 'generate-scripts.sh'
 ###########################################################################
-#4b6d484f746773140b6495d815b64abd
+#2fbf561fb7f1c97dab4c486bb185005a
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "yesterday "
@@ -47,12 +35,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check gdate "search 'how to install gdate'"
-combined_return=$(( combined_return + $? ))
-requirement_check sed "search 'how to install sed'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+@uses_cmds gdate sed
 yesterday_date="$(gdate -d '1 day ago' +"%Y-%m-%d")"
 echo "Items from yesterday, $yesterday_date:"
 did_file="$HOME/Dropbox/doc/did.txt"

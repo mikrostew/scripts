@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/new_ticket, and run 'generate-scripts.sh'
 ###########################################################################
-#74bb88dbf016006c2feb52640b18617d
+#6981835966565ac3c5fbe2a88468bf6c
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -15,18 +15,6 @@ echo_err ()
 echo_info ()
 {
     echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "new_ticket - Pastes a template into Description field when creating a new Jira ticket"
@@ -52,10 +40,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check osascript "search 'how to install osascript'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+@uses_cmds osascript
 join() {
   local IFS="/"
   echo "$*"

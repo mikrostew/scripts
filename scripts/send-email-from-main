@@ -3,25 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/send-email-from-main, and run 'generate-scripts.sh'
 ###########################################################################
-#6ede7fbf7b0fda8474da3a01ff486f82
+#08b621e53ce33dabaeaaffe57f0e903b
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "send-email-from-main - Send email from main email address, using SMTP"
@@ -52,13 +40,10 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check sendEmail "search 'how to install sendEmail'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 to_email="${1:?Missing argument \'to_email\'}"
 subject="${2:?Missing argument \'subject\'}"
 message="${3:?Missing argument \'message\'}"
+@uses_cmds sendEmail
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 user="$($GET_API_TOKEN email-main-user)"
 pass="$($GET_API_TOKEN email-main-pass)"

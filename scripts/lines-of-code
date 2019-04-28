@@ -3,25 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/lines-of-code, and run 'generate-scripts.sh'
 ###########################################################################
-#bd8cb244204ba021adb3896f7fce4ffe
+#966eb36baea92cdd35ab4fa890eb2044
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "lines-of-code - Count lines of code for the input files"
@@ -47,12 +35,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check grep "search 'how to install grep'"
-combined_return=$(( combined_return + $? ))
-requirement_check sed "search 'how to install sed'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+@uses_cmds sed grep
 if [ "$#" -eq 0 ]
 then
   echo_err "No input files given!"

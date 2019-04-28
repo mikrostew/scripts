@@ -3,25 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/new_chrome, and run 'generate-scripts.sh'
 ###########################################################################
-#47379d50dd2be0b130ed1612bf9ec087
+#15dd5b4ebe45557c19b147b98b2bab15
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "new_chrome - Opens new Chrome window"
@@ -47,12 +35,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check osascript "search 'how to install osascript'"
-combined_return=$(( combined_return + $? ))
-requirement_check pbpaste "search 'how to install pbpaste'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+@uses_cmds pbpaste osascript
 clipboard_contents="$(pbpaste)"
 if [[ "$clipboard_contents" =~ ^http ]]
 then

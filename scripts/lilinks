@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/lilinks, and run 'generate-scripts.sh'
 ###########################################################################
-#9f9dfb6844f4eae47241020a11d54193
+#60490a2d033c0a86c25349a30cab9db4
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -15,18 +15,6 @@ echo_err ()
 echo_info ()
 {
     echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "lilinks - Presents a menu to open various URLs and things for linkedin daily stuff"
@@ -52,16 +40,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-if [ "$(uname -s)" == "Linux" ]; then
-  requirement_check xdg-open "search 'how to install xdg-open/Linux'"
-  combined_return=$(( combined_return + $? ))
-fi
-if [ "$(uname -s)" == "Darwin" ]; then
-  requirement_check open "search 'how to install open/OSX'"
-  combined_return=$(( combined_return + $? ))
-fi
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+@uses_cmds open/Darwin xdg-open/Linux
 declare -A menu_items
 menu_items['Cafe Menus']='cafe_menus'
 menu_items['Floor Plans']='floor_plans'

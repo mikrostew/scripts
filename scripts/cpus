@@ -3,25 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/cpus, and run 'generate-scripts.sh'
 ###########################################################################
-#e051eed856fe5dc9edd6001cffb4ada2
+#d75e4c43510167347d8ce6c56714d839
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "cpus - Show the number of logical and physical CPUs on this machine"
@@ -47,22 +35,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-if [ "$(uname -s)" == "Darwin" ]; then
-  requirement_check sysctl "search 'how to install sysctl/OSX'"
-  combined_return=$(( combined_return + $? ))
-fi
-requirement_check wc "search 'how to install wc'"
-combined_return=$(( combined_return + $? ))
-if [ "$(uname -s)" == "Linux" ]; then
-  requirement_check lscpu "search 'how to install lscpu/Linux'"
-  combined_return=$(( combined_return + $? ))
-fi
-requirement_check egrep "search 'how to install egrep'"
-combined_return=$(( combined_return + $? ))
-requirement_check sort "search 'how to install sort'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+@uses_cmds sysctl/Darwin lscpu/Linux egrep wc sort
 if system_is_darwin?
 then
   echo "logical CPUs:  $(sysctl -n hw.logicalcpu_max) max ($(sysctl -n hw.logicalcpu) available)"

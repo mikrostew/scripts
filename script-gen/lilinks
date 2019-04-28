@@ -3,7 +3,7 @@
 
 @import { echo_info } from .bash_shared_functions
 
-@uses_cmds open/OSX xdg-open/Linux
+@uses_cmds open/Darwin xdg-open/Linux
 
 # all the possible menu options, mapped to function names
 declare -A menu_items

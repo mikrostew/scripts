@@ -3,25 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/chrome-tabs, and run 'generate-scripts.sh'
 ###########################################################################
-#9ad1d779cbb09a5e03c22cfae062ae8a
+#e2a1b36f2567daaf857ab5b05396233d
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "chrome-tabs - Show the open tab URLs from Chrome"
@@ -47,14 +35,5 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check uniq "search 'how to install uniq'"
-combined_return=$(( combined_return + $? ))
-requirement_check grep "search 'how to install grep'"
-combined_return=$(( combined_return + $? ))
-requirement_check sort "search 'how to install sort'"
-combined_return=$(( combined_return + $? ))
-requirement_check strings "search 'how to install strings'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+@uses_cmds strings grep sort uniq
 strings "$HOME/Library/Application Support/Google/Chrome/Default/Current Session" | grep -E '^https?://' | sort | uniq

@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/make_dotfile_links, and run 'generate-scripts.sh'
 ###########################################################################
-#7c70d8d64aa7f952148845916c0d5f4a
+#30aaa49b9f2a8f618dcacf3bdcdb31dc
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -13,18 +13,6 @@ COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "make_dotfile_links - Create links for dotfiles"
@@ -53,11 +41,8 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check readlink "search 'how to install readlink'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 checkout_dir="${1:-$HOME/dotfiles}"
+@uses_cmds readlink
 declare -A links
 links[".vimrc"]=".vimrc"
 links[".vim"]=".vim"

@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/weather, and run 'generate-scripts.sh'
 ###########################################################################
-#7cb209ef2bb2a089aea4c457c57a2c32
+#eaa93855f612d5c345bf0b41bb2fe8d4
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -11,18 +11,6 @@ COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "weather - Get current weather by zip code"
@@ -48,16 +36,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check bc "search 'how to install bc'"
-combined_return=$(( combined_return + $? ))
-requirement_check jq "search 'how to install jq'"
-combined_return=$(( combined_return + $? ))
-requirement_check xargs "search 'how to install xargs'"
-combined_return=$(( combined_return + $? ))
-requirement_check curl "search 'how to install curl'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
+@uses_cmds curl jq bc xargs
 zip_codes=( 94015 94043 94105 )
 for zip in ${zip_codes[*]}; do
   api_key="$($HOME/Dropbox/secret/get-api-token open-weather-map)"

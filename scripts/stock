@@ -3,25 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/stock, and run 'generate-scripts.sh'
 ###########################################################################
-#4ae643ac0bc4114e3a130f186e8199af
+#d8c470b5c6a4f66d3ed55cc0236f7611
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "stock - Open the browser with info on the input stock"
@@ -50,17 +38,8 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-if [ "$(uname -s)" == "Linux" ]; then
-  requirement_check xdg-open "search 'how to install xdg-open/Linux'"
-  combined_return=$(( combined_return + $? ))
-fi
-if [ "$(uname -s)" == "Darwin" ]; then
-  requirement_check open "search 'how to install open/OSX'"
-  combined_return=$(( combined_return + $? ))
-fi
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 stock_symbol="${1:?Missing argument \'stock_symbol\'}"
+@uses_cmds open/Darwin xdg-open/Linux
 stock_url="https://finance.yahoo.com/quote/$stock_symbol/"
 if system_is_linux?
 then

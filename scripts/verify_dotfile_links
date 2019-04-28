@@ -3,25 +3,13 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/verify_dotfile_links, and run 'generate-scripts.sh'
 ###########################################################################
-#b6444d92937e509fbd945ab6a504644e
+#53fde1add7112ab98f08e8955d56196e
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
-requirement_check ()
-{
-    local cmd="$1";
-    local how_to_install="$2";
-    if [ ! $(command -v $cmd) ]; then
-        echo_err "[ERROR] Command '$cmd' is required for this script, but not installed";
-        echo_err "To install: $how_to_install";
-        return 1;
-    else
-        return 0;
-    fi
 }
 show_help_msg() {
   echo "verify_dotfile_links - Verify the links to the dotfiles haven't changed"
@@ -50,11 +38,8 @@ do
   esac
 done
 shift $((OPTIND-1))
-combined_return=0
-requirement_check readlink "search 'how to install readlink'"
-combined_return=$(( combined_return + $? ))
-if [ "$combined_return" != 0 ]; then exit $combined_return; fi
 checkout_dir="${1:-$HOME/dotfiles}"
+@uses_cmds readlink
 declare -A links
 links[".vimrc"]=".vimrc"
 links[".vim"]=".vim"
