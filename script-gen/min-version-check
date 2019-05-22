@@ -9,8 +9,7 @@
 
 @import_var { COLOR_FG_RED, COLOR_RESET } from .bash_colors
 
-# TODO: re-install semver somehow
-#@uses_cmds semver
+@uses_cmds semver
 
 # convert versions to X.X.X format
 normalize_version() {
@@ -45,18 +44,15 @@ if [ -z "$install_path" ]; then
   exit 1
 fi
 # check the minimum version
-# TODO: re-enable this
-# current_version=$(eval "$version_cmd")
-# if [ -n "$current_version" ]; then
-#   if meets_version "$(normalize_version $current_version)" "$version_specifier"; then
-#     # don't print anything for this
-#     exit 0
-#   else
-#     echo -e "$executable_name : ${COLOR_FG_RED}found $current_version (want $version_specifier)${COLOR_RESET} ($install_path)"
-#   fi
-# else
-#   echo -e "$executable_name : ${COLOR_FG_RED}unknown version (want $version_specifier)${COLOR_RESET} ($install_path)"
-# fi
-# exit 1 # if it hasn't already exited, it didn't meet the version
-exit 0
-
+current_version=$(eval "$version_cmd")
+if [ -n "$current_version" ]; then
+  if meets_version "$(normalize_version $current_version)" "$version_specifier"; then
+    # don't print anything for this
+    exit 0
+  else
+    echo -e "$executable_name : ${COLOR_FG_RED}found $current_version (want $version_specifier)${COLOR_RESET} ($install_path)"
+  fi
+else
+  echo -e "$executable_name : ${COLOR_FG_RED}unknown version (want $version_specifier)${COLOR_RESET} ($install_path)"
+fi
+exit 1 # if it hasn't already exited, it didn't meet the version
