@@ -23,9 +23,3 @@ echo ""
 # once it hits a blank line quit (without printing the blank line)
 # otherwise print the non-blank line
 sed -n -e '/^$/ q' -e 'p' "$did_file"
-
-
-# what I would like to be able to do:
-#
-# if let msg = argv[1] {
-# TODO...
