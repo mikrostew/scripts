@@ -19,20 +19,42 @@ files.forEach((filename) => {
   const json = JSON.parse(fs.readFileSync(filename, 'utf8'));
   let stats = {};
   let totalTime = 0;
+  let parentLookup = {};
+
+  // iterate through the nodes once to map child IDs to parent names (for the *Patch nodes)
+  // this makes the lookup a lot faster in the next loop
+  json.nodes.forEach((node) => {
+    let parentName = node.label.name;
+    node.children.forEach((childID) => {
+      parentLookup[childID] = parentName;
+    });
+  });
 
   json.nodes.forEach((node) => {
-    const funcName = node.label.name;
-    if (stats[funcName] === undefined) {
+
+    let nodeName = node.label.name;
+    let nodeID = node.id;
+
+    // special cases for these nodes:
+    // * applyPatches
+    // * applyPatch
+    // * derivePatches
+    // because by themselves they don't tell us much - it's their parent nodes that we care about
+    if (nodeName == "applyPatches" || nodeName == "applyPatch" || nodeName == "derivePatches") {
+      nodeName = `${nodeName}: ${parentLookup[nodeID]}`;
+    }
+
+    if (stats[nodeName] === undefined) {
       // doesn't exist, add it
-      stats[funcName] = {
-        id: funcName,
+      stats[nodeName] = {
+        id: nodeName,
         selftime: node.stats.time.self,
         calls: 1,
       };
     } else {
       // already exists, update
-      stats[funcName].selftime += node.stats.time.self;
-      stats[funcName].calls += 1;
+      stats[nodeName].selftime += node.stats.time.self;
+      stats[nodeName].calls += 1;
     }
 
     // keep track of total time
@@ -61,54 +83,31 @@ files.forEach((filename) => {
   // next, combine things so I can get a sense of Babel vs Eyeglass vs other
 
   // TODO: clean this up to avoid all the repetition
-  let combinedStats = {
-    eyeglass: {
-      id: "eyeglass",
-      time: 0,
-      calls: 0,
-      percent: 0,
-    },
-    babel: {
-      id: "babel",
-      time: 0,
-      calls: 0,
-      percent: 0,
-    },
-    cleanup: {
-      id: "cleanup",
-      time: 0,
-      calls: 0,
-      percent: 0,
-    },
-    command: {
-      id: "command",
-      time: 0,
-      calls: 0,
-      percent: 0,
-    },
-    patch: {
-      id: "patch",
-      time: 0,
-      calls: 0,
-      percent: 0,
-    },
-    other: {
-      id: "other",
+  let combinedStats = {};
+  ['eyeglass', 'babel', 'cleanup', 'command', 'patch', 'other'].forEach(node => {
+    combinedStats[node] = {
+      id: node,
       time: 0,
       calls: 0,
       percent: 0,
     }
-  };
+  });
 
   let eyeglassRegex = /eyeglass/i;
   let babelRegex = /babel/i;
+  let templateCompilerRegex = /templatecompiler/i;
   let cleanupRegex = /cleanup/i;
   let commandRegex = /command/i;
   let patchRegex = /patch/i;
 
-  // TODO: clean this up somehow to avoid all the repetition?
+  // TODO: clean this up to avoid all the repetition
   sortedStats.forEach((stat) => {
     if (stat.id.match(babelRegex)) {
+      combinedStats.babel.time += stat.selftime;
+      combinedStats.babel.calls += stat.calls;
+      combinedStats.babel.percent += stat.percent;
+    } else if (stat.id.match(templateCompilerRegex)) {
+      // this is also a babel thing
       combinedStats.babel.time += stat.selftime;
       combinedStats.babel.calls += stat.calls;
       combinedStats.babel.percent += stat.percent;
@@ -116,18 +115,22 @@ files.forEach((filename) => {
       combinedStats.eyeglass.time += stat.selftime;
       combinedStats.eyeglass.calls += stat.calls;
       combinedStats.eyeglass.percent += stat.percent;
-    } else if (stat.id.match(cleanupRegex)) {
-      combinedStats.cleanup.time += stat.selftime;
-      combinedStats.cleanup.calls += stat.calls;
-      combinedStats.cleanup.percent += stat.percent;
-    } else if (stat.id.match(commandRegex)) {
-      combinedStats.command.time += stat.selftime;
-      combinedStats.command.calls += stat.calls;
-      combinedStats.command.percent += stat.percent;
-    } else if (stat.id.match(patchRegex)) {
-      combinedStats.patch.time += stat.selftime;
-      combinedStats.patch.calls += stat.calls;
-      combinedStats.patch.percent += stat.percent;
+
+    // for the rest of these, I'm going to lump them together in "other" for now
+    // TODO: these should probably be split out under "other", but for now it's too much info
+    // } else if (stat.id.match(cleanupRegex)) {
+    //   combinedStats.cleanup.time += stat.selftime;
+    //   combinedStats.cleanup.calls += stat.calls;
+    //   combinedStats.cleanup.percent += stat.percent;
+    // } else if (stat.id.match(commandRegex)) {
+    //   combinedStats.command.time += stat.selftime;
+    //   combinedStats.command.calls += stat.calls;
+    //   combinedStats.command.percent += stat.percent;
+    // } else if (stat.id.match(patchRegex)) {
+    //   combinedStats.patch.time += stat.selftime;
+    //   combinedStats.patch.calls += stat.calls;
+    //   combinedStats.patch.percent += stat.percent;
+
     } else {
       combinedStats.other.time += stat.selftime;
       combinedStats.other.calls += stat.calls;
