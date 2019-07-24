@@ -3,6 +3,7 @@
 
 @import { all_git_branches, in_git_repo, do_git } from .bash_git
 @import { echo_info } from .bash_shared_functions
+@import_var { COLOR_FG_GREEN, COLOR_RESET } from .bash_colors
 
 @uses_cmds sed, git
 
@@ -26,7 +27,8 @@ then
   for((i=0; i<$num_merged; i++))
   do
     name="${all_merged[$i]}"
-    merge_status[$name]="(merged)"
+    # add color here
+    merge_status[$name]="${COLOR_FG_GREEN}(merged)${COLOR_RESET}"
   done
 
   # display the branches and prompt for choice
