@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# "WTF Is Going On With You?"
+# Figure out where a process came from, and WTF it's doing
+
+# helper stuff
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_RESET='\033[0m'
+echo_info () {
+  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}"
+}
+
+echo_info "WTF is going on here? let's see..."
+
+# TODO: I've only tested this on OSX - figure out any changes needed for linux
+
+# optional arg - single input PID
+input_pid="$1"
+
+if [ -z "$input_pid" ]
+then
+
+  # no PID input, use `top` to list the top 10 processes so I can select one
+  #
+  # `top` options:
+  #  `-o cpu` : order by CPU usage, descending
+  #  `-n 10`  : show the top 10 processes (that's usually all I need, the offending proc should be in there somewhere)
+  #  `-l 2`   : use logging mode (don't change the screen), and display 2 samples (the first will be invalid b/c %CPU uses delta values)
+  #  `-F`     : don't include shared libraries/frameworks
+  #  `-R`     : don't traverse and report the memory object map for each process (default)
+  #  `-stats` : the stats to display (otherwise it will do everything which line-wraps and is impossible to read)
+  #
+  # using `tail` so this only prints out the valid process info, not the first invalid samples, and none of the overall stats
+  #
+  # and using process substitution to capture the output asynchronously, while showing a spinner
+  exec 3< <(top \
+    -o cpu \
+    -n 10 \
+    -l 2 \
+    -F \
+    -R \
+    -stats pid,ppid,command,user,cpu,cpu_me,cpu_others,time,threads,mem,purg \
+    | tail -n12 \
+  )
+  spinner -m "collecting process info..." $!
+
+  # display that
+  cat <&3
+
+  # prompt for PID of the process
+  echo -n "Which PID? "
+  read target_pid
+  if [ -z "$target_pid" ]
+  then
+    echo "no PID entered"
+    exit 1
+  fi
+
+else
+  # otherwise we alread know the PID, so use that
+  target_pid="$input_pid"
+fi
+
+echo ""
+echo_info "Info for PID:"
+echo "$target_pid"
+
+# TODO: make sure the PID still exists?
+
+# get the full command string
+echo ""
+echo_info "Full command (from ps)"
+ps -p "$target_pid" -o args=
+
+# show process tree (use `brew install pstree` to get this on OSX)
+echo ""
+echo_info "Process tree (from pstree)"
+pstree -p "$target_pid"
+
+# figure out the PWD of that process
+# (from https://stackoverflow.com/a/8331292)
+echo ""
+echo_info "CWD (from lsof)"
+lsof -a -d cwd -p "$target_pid"
+
+# use `top` to show what's going on with that single process, until I hit Ctrl-C
+echo ""
+echo_info "Current info from top"
+# using this function to hide all the redundant `top` stuff
+cleanup_top_output() {
+  seen_header=0
+  # read from stdin
+  while read line
+  do
+    # if the line starts with the header, show that once
+    if [[ "$line" =~ ^PID ]] && [ "$seen_header" -eq 0 ]
+    then
+      echo "$line"
+      seen_header=1
+    # if the line starts with the target PID, then show that always
+    elif [[ "$line" =~ ^"$target_pid" ]]
+    then
+      echo "$line"
+    # otherwise don't show the line
+    fi
+  done
+}
+top -pid "$target_pid" -l 0 -F -R -stats pid,ppid,command,user,cpu,cpu_me,cpu_others,time,threads,mem,purg | cleanup_top_output
