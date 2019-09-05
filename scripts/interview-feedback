@@ -10,7 +10,6 @@ osascript -e 'tell application "Google Chrome" to activate'
 echo "Populating interview feedback text..."
 
 # emulate keystrokes to type the formatted text into the field
-# TODO: do I need delays for any of this? doesn't seem like it at the moment...
   osascript <<EOF
 tell application "System Events"
   keystroke "b" using command down
@@ -18,42 +17,49 @@ tell application "System Events"
   keystroke "b" using command down
   keystroke ": X minutes" & return
   keystroke "TODO" & return
+  delay 0.2
 
   keystroke "b" using command down
   keystroke "Brace Matching (link in notes)"
   keystroke "b" using command down
   keystroke ": X minutes" & return
   keystroke "TODO" & return
+  delay 0.2
 
   keystroke "b" using command down
   keystroke "Max Contiguous Subsequence"
   keystroke "b" using command down
   keystroke ": X minutes" & return
   keystroke "TODO" & return
+  delay 0.2
 
   keystroke "b" using command down
   keystroke "Function Time (link in notes)"
   keystroke "b" using command down
   keystroke ": X minutes" & return
   keystroke "TODO" & return
+  delay 0.2
 
   keystroke "b" using command down
   keystroke "Good"
   keystroke "b" using command down
   keystroke ":" & return
   keystroke "- TODO" & return
+  delay 0.2
 
   keystroke "b" using command down
   keystroke "Fair"
   keystroke "b" using command down
   keystroke ":" & return
   keystroke "- TODO" & return
+  delay 0.2
 
   keystroke "b" using command down
   keystroke "Poor"
   keystroke "b" using command down
   keystroke ":" & return
   keystroke "- TODO" & return
+  delay 0.2
 
   keystroke "b" using command down
   keystroke "Overall"
