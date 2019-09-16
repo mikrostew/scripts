@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# Periodic dialog to remind me to get up from my desk and move around during the day
+# (every 45 minutes)
+
+while :
+do
+  # wait 45 minutes, then display the dialog
+  # (45 minutes = 45 * 60 = 2700 seconds)
+  echo "[$(date)] 45 minutes..."
+  sleep 2700
+
+  # time's up, remind me to take a break by displaying this dialog
+  echo "[$(date)] Take a break!"
+
+  # display the dialog (don't need to capture the button clicked)
+  osascript<<EOSCRIPT
+set theDialogText to "It's been 45 minutes - time to get up and move around!!\n\n\n\n\n"
+display dialog theDialogText buttons {"Stop This", "Keep Going"} default button "Keep Going" cancel button "Stop This"
+EOSCRIPT
+
+  # quit if cancelled
+  user_cancel="$?"
+  if [ "$user_cancel" -ne 0 ]
+  then
+    echo "Cancelled - exiting..."
+    exit "$user_cancel"
+  fi
+
+  # otherwise this loop will keep going
+done
