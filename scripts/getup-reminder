@@ -2,6 +2,7 @@
 
 # Periodic dialog to remind me to get up from my desk and move around during the day
 # (every 45 minutes)
+# (dialog docs: https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/DisplayDialogsandAlerts.html)
 
 while :
 do
