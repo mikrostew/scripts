@@ -8,7 +8,7 @@
 #
 # Launch Automator (hit ⌘ -Space and use spotlight)
 # File > New
-# Select "Service" and click "Choose"
+# Select "Quick Action" and click "Choose"
 # In the top right hand of the window:
 #   set dropdowns so that 'Service recieves "no input" in "any application"'
 # In the second column containing the long list, double-click "Run Shell Script"
