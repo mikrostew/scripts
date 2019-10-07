@@ -39,7 +39,6 @@ shift $((OPTIND-1))
 
 # all the possible menu options, mapped to function names
 declare -A menu_items
-menu_items['Cafe Menus']='cafe_menus'
 menu_items['Floor Plans']='floor_plans'
 menu_items['Review Boards']='review_boards'
 menu_items['Coding Music']='coding_music'
@@ -53,14 +52,6 @@ open_url() {
   then
     xdg-open "$1"
   fi
-}
-
-cafe_menus() {
-  # menus opened in reverse order, so the ones closest to me I will see first
-  open_url 'https://epe-bizapi.linkedin.biz:6020/campuses/south-bay-hq/cafes/21/menu' # Elevate (580)
-  open_url 'https://epe-bizapi.linkedin.biz:6020/campuses/south-bay-hq/cafes/23/menu' # Journey (950)
-  open_url 'https://epe-bizapi.linkedin.biz:6020/campuses/south-bay-hq/cafes/19/menu' # Mezzo (700 bldg 3)
-  open_url 'https://epe-bizapi.linkedin.biz:6020/campuses/south-bay-hq/cafes/22/menu' # Nosh (700 bldg 4)
 }
 
 floor_plans() {
