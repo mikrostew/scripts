@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Opens new Firefox window
+
+# open a new Firefox window (and bring it to the front with focus)
+# (I'm running nightly version)
+osascript -e 'tell application "Firefox Nightly" to activate'
+osascript -e 'tell application "System Events" to keystroke "n" using command down'
