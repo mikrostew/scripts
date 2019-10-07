@@ -33,6 +33,9 @@ links[".bundle"]=".bundle"
 # rubocop
 links[".rubocop.yml"]=".rubocop.yml"
 
+# karabiner elements
+links[".config/karabiner"]="karabiner"
+
 # platform-specific
 if system_is_darwin?
 then

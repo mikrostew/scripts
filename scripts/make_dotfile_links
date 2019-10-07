@@ -53,6 +53,7 @@ links[".gitignore"]=".gitignore"
 links[".tmux.conf"]=".tmux.conf"
 links[".bundle"]=".bundle"
 links[".rubocop.yml"]=".rubocop.yml"
+links[".config/karabiner"]="karabiner"
 if system_is_darwin?
 then
   links[".ssh/config"]=".ssh-config-mac"
