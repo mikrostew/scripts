@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Opens new Chrome window
+
+clipboard_contents="$(pbpaste)"
+
+if [[ "$clipboard_contents" =~ ^http ]]
+then
+  # URL in clipboard - open that URL in a new Chrome window (and bring it to the front)
+  osascript <<END_SCRIPT
+tell application "Google Chrome"
+  make new window
+  set URL of active tab of window 1 to "$clipboard_contents"
+  activate
+end tell
+END_SCRIPT
+else
+  # no URL in clipboard - open a new blank Chrome window (and bring it to the front)
+  osascript -e 'tell application "Google Chrome" to make new window activate'
+fi
