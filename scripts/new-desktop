@@ -113,9 +113,10 @@ sleep 0.5
 # have to account for an external monitor
 # print everythign after the line '"Display Identifier" = Main;',
 # and delete everything after the line '"Current Space" ='
+# also account for unplugged external monitor with '"Collapsed Space" ='
 # then count the number of matches of ManagedSpaceID
 
-number_of_desktops="$(defaults read com.apple.spaces | sed -e '1,/"Display Identifier" = Main;/ d' -e '/"Current Space" =/,$ d' | grep -c ManagedSpaceID)"
+number_of_desktops="$(defaults read com.apple.spaces | sed -e '1,/"Display Identifier" = Main;/ d' -e '/"Current Space" =/,$ d' -e '/"Collapsed Space" =/,$ d' | grep -c ManagedSpaceID)"
 
 echo "Now there are $number_of_desktops desktops"
 
