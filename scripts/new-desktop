@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# Create a new desktop (Space) with Mission Control, and switch to it
+
+# key code reference:
+# https://eastmanreference.com/complete-list-of-applescript-key-codes
+
+# control-uparrow to get into mission control
+osascript -e 'tell application "System Events" to key code 126 using control down'
+
+# give that time to animate
+sleep 0.5
+
+# this is not working (shows "missing value")
+# from https://apple.stackexchange.com/a/180729 and https://apple.stackexchange.com/a/234640
+#osascript -e 'tell application "System Events" to click (every button whose value of attribute "AXDescription" is "add desktop") of group 1 of process "Dock"'
+
+# this works, but I don't understand how
+# from https://apple.stackexchange.com/a/281460
+#osascript -e 'tell application "System Events" to click (every button whose value of attribute "AXDescription" is "add desktop") of group 2 of group 1 of group 1 of process "Dock"'
+
+# this is probably how they figured that out:
+# from https://www.reddit.com/r/applescript/comments/360l6v/close_a_space_with_applescript/cr9tj4j/
+#
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#     groups of process "Dock"
+# end tell
+# END_SCRIPT
+#
+# which returns "group Mission Control of application process Dock"
+# so there's only one group, let's get the info on that
+#
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#     properties of (group 1 of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# returns:
+# minimum value:missing value, orientation:missing value, position:-2560, 0, class:group, accessibility description:missing value, role description:group, focused:true, title:missing value, size:4240, 1440, help:missing value, entire contents:, enabled:missing value, maximum value:missing value, role:AXGroup, value:missing value, subrole:missing value, selected:missing value, name:Mission Control, description:group
+#
+# does that have buttons?
+#
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#     buttons of (group 1 of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# no, that returns an empty string
+# let's get the groups in that group then
+#
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#     groups of (group 1 of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# returns:
+# group 1 of group Mission Control of application process Dock, group 2 of group Mission Control of application process Dock
+#
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#     properties of (group 1 of group 1 of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# nothing helpful, this is probably the group containing the button to add a new desktop
+#
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#     groups of (group 1 of group 1 of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# there we go, "group 1 of ..., group Spaces Bar of group 1 of group Mission Control of application process Dock"
+# that looks like the thing we want
+#
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#     buttons of (group "Spaces Bar" of group 1 of group "Mission Control" of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# returns "button 1 of group Spaces Bar of group 1 of group Mission Control of application process Dock"
+#
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#     properties of (button 1 of group "Spaces Bar" of group 1 of group "Mission Control" of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# there we go:
+# minimum value:missing value, orientation:missing value, position:-104, -136, class:button, accessibility description:add desktop, role description:button, focused:false, title:missing value, size:176, 176, help:missing value, entire contents:, enabled:missing value, maximum value:missing value, role:AXButton, value:missing value, subrole:missing value, selected:missing value, name:missing value, description:add desktop
+#
+# so AXDescription is probably "accessibility description"
+
+# all that to click this button:
+osascript <<END_SCRIPT
+tell application "System Events"
+    click (first button whose value of attribute "AXDescription" is "add desktop") of group "Spaces Bar" of group 1 of group "Mission Control" of process "Dock"
+end tell
+END_SCRIPT
+
+# give that time to animate
+sleep 0.5
+
+# TODO: hit control-something to get to that new desktop
+
+# use control-downarrow to exit mission control
+osascript -e 'tell application "System Events" to key code 125 using control down'
+
