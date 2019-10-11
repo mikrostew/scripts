@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 # Create a new desktop (Space) with Mission Control, and switch to it
 
-# key code reference:
-# https://eastmanreference.com/complete-list-of-applescript-key-codes
-
 # control-uparrow to get into mission control
 osascript -e 'tell application "System Events" to key code 126 using control down'
 
@@ -95,6 +92,8 @@ sleep 0.5
 #
 # so AXDescription is probably "accessibility description"
 
+echo "Adding a new desktop..."
+
 # all that to click this button:
 osascript <<END_SCRIPT
 tell application "System Events"
@@ -107,8 +106,7 @@ sleep 0.5
 
 # figure out how many desktops there are now
 # adapted from https://stackoverflow.com/a/6783652
-# NOTE: this is kind of brittle, I'm parsing this output which is kinda structured, but in a weird way
-# (and I don't want to spend a ton of time on this)
+# TODO: this is brittle - I should properly parse this output but I don't want to spend a ton of time on this
 
 # have to account for an external monitor
 # print everythign after the line '"Display Identifier" = Main;',
@@ -118,10 +116,34 @@ sleep 0.5
 
 number_of_desktops="$(defaults read com.apple.spaces | sed -e '1,/"Display Identifier" = Main;/ d' -e '/"Current Space" =/,$ d' -e '/"Collapsed Space" =/,$ d' | grep -c ManagedSpaceID)"
 
-echo "Now there are $number_of_desktops desktops"
+echo "Switching to desktop $number_of_desktops..."
 
-# TODO: hit control-something to get to that new desktop
+# key code reference:
+# https://eastmanreference.com/complete-list-of-applescript-key-codes
+# (have to use key code in mission control)
+# NOTE: have to set the mission control keyboard shortcuts in system preferences
 
-# use control-downarrow to exit mission control
-osascript -e 'tell application "System Events" to key code 125 using control down'
+case $number_of_desktops in
+  1) key_code=18;;
+  2) key_code=19;;
+  3) key_code=20;;
+  4) key_code=21;;
+  5) key_code=23;;
+  6) key_code=22;;
+  7) key_code=26;;
+  8) key_code=28;;
+  *) key_code=125;; # down arrow
+esac
+
+# go to the new desktop
+# (or just get out of mission control if there are more than 8 desktops)
+osascript <<ENDSCRIPT
+tell application "System Events" to key code $key_code using control down
+ENDSCRIPT
+
+# give that time to animate
+sleep 0.5
+
+# then escape to get out of mission control
+osascript -e 'tell application "System Events" to key code 53'
 
