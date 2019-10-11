@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # Create a new desktop (Space) with Mission Control, and switch to it
 
+# NOTE: not using this anymore, because it doesn't consistently work:
 # control-uparrow to get into mission control
-osascript -e 'tell application "System Events" to key code 126 using control down'
+#osascript -e 'tell application "System Events" to key code 126 using control down'
+
+# get into Mission Control
+"/Applications/Mission Control.app/Contents/MacOS/Mission Control"
 
 # give that time to animate
 sleep 0.5
@@ -105,16 +109,18 @@ END_SCRIPT
 sleep 0.5
 
 # figure out how many desktops there are now
-# adapted from https://stackoverflow.com/a/6783652
-# TODO: this is brittle - I should properly parse this output but I don't want to spend a ton of time on this
 
-# have to account for an external monitor
-# print everythign after the line '"Display Identifier" = Main;',
-# and delete everything after the line '"Current Space" ='
-# also account for unplugged external monitor with '"Collapsed Space" ='
-# then count the number of matches of ManagedSpaceID
+# NOTE: I previously tried to adapt https://stackoverflow.com/a/6783652, and parse the output of `defaults read com.apple.spaces`,
+#       but that was brittle and hacky
+# NOTE: Also, apparently when this is run via Karabiner, the `jq` command cannot be found, so I'm using the full path here
 
-number_of_desktops="$(defaults read com.apple.spaces | sed -e '1,/"Display Identifier" = Main;/ d' -e '/"Current Space" =/,$ d' -e '/"Collapsed Space" =/,$ d' | grep -c ManagedSpaceID)"
+# use plutil to convert to json, and jq to parse that and count the current number of spaces
+# (uncomment these lines to get some debugging info in a logfile)
+#plutil -convert json -o - "$HOME/Library/Preferences/com.apple.spaces.plist" | /usr/local/bin/jq '.' >> "$HOME/new-desktop.log" 2>&1
+#echo "status: $?" >> "$HOME/new-desktop.log"
+
+# find the .Monitors section with ."Display Identifier" == "Main", and count the number of spaces
+number_of_desktops="$(plutil -convert json -o - "$HOME/Library/Preferences/com.apple.spaces.plist" | /usr/local/bin/jq '.SpacesDisplayConfiguration."Management Data".Monitors[] | if ."Display Identifier" == "Main" then .Spaces else empty end | length')"
 
 echo "Switching to desktop $number_of_desktops..."
 
