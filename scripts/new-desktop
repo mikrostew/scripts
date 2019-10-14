@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Create a new desktop (Space) with Mission Control, and switch to it
 
+# NOTE: enable reduced motion so the animations have less affect on the timing
+# System Preferences > Accessibility > Display > Reduce Motion [✓]
+
+
 # NOTE: not using this anymore, because it doesn't consistently work:
 # control-uparrow to get into mission control
 #osascript -e 'tell application "System Events" to key code 126 using control down'
