@@ -61,8 +61,8 @@ get_li_rb_api_def ()
 {
     local api_def="";
     local cache_file="$DOTFILES_DIR/cache/li-rb-api-def.cache";
-    local cache_file_expired="$(find $cache_file -mtime +1)";
-    if [ -n "$cache_file_expired" ]; then
+    local cache_file_expired="$(find $cache_file -mtime +1 2>/dev/null)";
+    if [ ! -f "$cache_file" ] || [ -n "$cache_file_expired" ]; then
         echo_info "RB API definitions not cached, requesting...";
         api_def="$(curl -X GET -H 'Accept: application/json' 'https://rb.corp.linkedin.com/api/' 2>/dev/null)";
         exit_code="$?";
