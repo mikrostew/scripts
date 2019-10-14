@@ -227,21 +227,23 @@ then
   @exit_on_error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
 
   # check product-spec.json for 'mint submit'
-  if in_mint_submit_repo; then
-    echo_info "supports mint submit? YES"
-    # mint submit
-    do_cmd mint submit
-    if [ "$?" -ne 0 ];then
-      echo_fail_banner
-    else
-      echo_success_banner
-    fi
-    # mint submit is async, so for now undo the merge in case I have to resubmit
-    echo_info "Undoing the merge so I can keep working..."
-    git_undo_merge "$branch_name"
-  else
-    echo_info "supports mint submit? NO"
+  # if in_mint_submit_repo; then
+  #   echo_info "supports mint submit? YES"
+  #   # mint submit
+  #   do_cmd mint submit
+  #   if [ "$?" -ne 0 ];then
+  #     echo_fail_banner
+  #   else
+  #     echo_success_banner
+  #   fi
+  #   # mint submit is async, so for now undo the merge in case I have to resubmit
+  #   echo_info "Undoing the merge so I can keep working..."
+  #   git_undo_merge "$branch_name"
+  # else
+    # echo_info "supports mint submit? NO"
+
     # git submit
+    # (could do `git submit --async`, but whatever)
     do_git submit
     if [ "$?" -ne 0 ]; then
       # submit failed, could be precommit, or ACL check, or whatever
@@ -255,5 +257,5 @@ then
     # rebase to pick up the change
     gpr
     # and done!
-  fi
+  # fi
 fi
