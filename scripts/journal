@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Add entries to a very simple journal markdown file
+
+# (similar to how did.txt works)
+
+journal_file="$HOME/Sync/notes/journal.md"
+
+# timestamp format like "Wednesday, 2019-10-16 (11:58:20)"
+timestamp="$(date +"%A, %Y-%m-%d (%H:%M:%S)")"
+
+# do this in macvim - insert at top of file
+
+# (from Vim FAQ: http://vimdoc.sourceforge.net/htmldoc/vimfaq.html - insert a blank line with :put='')
+
+# what is going on here?
+# - adds the timestamp to the top of the file, with a '#' in front to be a header
+# - then a blank line under that to space it out from the previous entry
+# - then back to the top, and add two blank lines, so the result is that I start the entry with a blank line on either side
+#
+# like so:
+#
+# # Wednesday, 2019-10-16 (12:29:51)
+#
+# ▏
+#
+# # Wednesday, 2019-10-16 (12:26:45)
+
+mvim +"normal O# $timestamp" +":put =''" +"normal ggo" +":put =''" +startinsert "$journal_file"
