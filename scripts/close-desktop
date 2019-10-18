@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+# Close the current desktop (Space) with Mission Control
+# (modified from the new-desktop script)
+
+# NOTE: enable reduced motion so the animations have less affect on the timing
+# System Preferences > Accessibility > Display > Reduce Motion [✓]
+
+########################################
+# figure out desktop and resolution info
+########################################
+
+# NOTE: when this is run via Karabiner, the `jq` command cannot be found, so I'm using the full path here
+
+# find the .Monitors section with ."Display Identifier" == "Main", and count the number of spaces
+current_desktops="$(plutil -convert json -o - "$HOME/Library/Preferences/com.apple.spaces.plist" | /usr/local/bin/jq '.SpacesDisplayConfiguration."Management Data".Monitors[] | if ."Display Identifier" == "Main" then .Spaces else empty end | length')"
+
+echo "Currently, there are $current_desktops desktops"
+
+# TODO: get the current desktop
+# TODO: get the current resolution
+
+########################################
+# get into Mission Control
+########################################
+
+# run the app directly
+"/Applications/Mission Control.app/Contents/MacOS/Mission Control"
+
+# give that time to animate
+sleep 0.5
+
+########################################
+# close the current desktop
+########################################
+
+# ideas for how to figure out the button to click on:
+#   https://www.reddit.com/r/applescript/comments/360l6v/close_a_space_with_applescript/cr9tj4j/
+#   https://superuser.com/a/336553
+
+# let's figure this out...
+
+
+# echo "elements in Dock:"
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#     UI elements of process "Dock"
+# end tell
+# END_SCRIPT
+#
+# which returns:
+#  elements in Dock:
+#  list 1 of application process Dock, group Mission Control of application process Dock
+#
+# ok, so going to use Mission Control
+
+
+# echo "elements in Mission Control:"
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#     UI elements of (group "Mission Control" of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# returns:
+#  elements in Mission Control:
+#  group 1 of group Mission Control of application process Dock, group 2 of group Mission Control of application process Dock
+#
+# hmm, group 1 and group 2, let's see what's in each one
+
+
+# echo "elements in group 1:"
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#    UI elements of (group 1 of group "Mission Control" of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# echo "elements in group 2:"
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#    UI elements of (group 2 of group "Mission Control" of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# returns:
+#  elements in group 1:
+#  group 1 of group 1 of group Mission Control of application process Dock, group Spaces Bar of group 1 of group Mission Control of application process Dock
+#  elements in group 2:
+#  group 1 of group 2 of group Mission Control of application process Dock, group Spaces Bar of group 2 of group Mission Control of application process Dock
+#
+# looks like the same thing in each, maybe because I have an external monitor hooked up, there's one for each monitor?
+# (turn off monitor)
+#
+#  elements in group 1:
+#  group 1 of group 1 of group Mission Control of application process Dock, group Spaces Bar of group 1 of group Mission Control of application process Dock
+#  elements in group 2:
+#  36:47: execution error: System Events got an error: Can’t get group 2 of group "Mission Control" of process "Dock". Invalid index. (-1719)
+#
+# yup, so group 1 is my main monitor, which is what I want
+# and I want the Spaces Bar (group 1 is the open windows in the bottom pane)
+
+
+# echo "elements in spaces bar:"
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#    UI elements of (group "Spaces Bar" of group 1 of group "Mission Control" of process "Dock")
+# end tell
+# END_SCRIPT
+
+# returns:
+#  elements in spaces bar:
+#  list 1 of group Spaces Bar of group 1 of group Mission Control of application process Dock, button 1 of group Spaces Bar of group 1 of group Mission Control of application process Dock
+#
+# I already know that button 1 is the button to add a new desktop (from the new-desktop script),
+# so we must want list 1, which I'm guessing is the list of desktops
+
+
+# echo "elements in list:"
+# osascript <<END_SCRIPT
+# tell application "System Events"
+#    UI elements of (list 1 of group "Spaces Bar" of group 1 of group "Mission Control" of process "Dock")
+# end tell
+# END_SCRIPT
+#
+# returns:
+#  elements in list:
+#  button Desktop 1 of list 1 of group Spaces Bar of group 1 of group Mission Control of application process Dock, button Desktop 2 of list 1 of group Spaces Bar of group 1 of group Mission Control of application process Dock, button Desktop 3 of list 1 of group Spaces Bar of group 1 of group Mission Control of application process Dock, button Desktop 4 of list 1 of group Spaces Bar of group 1 of group Mission Control of application process Dock
+#
+# just buttons to choose a desktop, because mission control is not expanded, hmm...
+
+
+# ok, so that seems to be a dead end - there is no button that is part of the UI, that I can figure out how to get to
+
+
+
+
+# just do this with mouse movements
+# using cliclick (https://github.com/BlueM/cliclick)
+
+# move to the top of the screen to expand mission control
+echo "moving mouse to expand"
+cliclick m:100,0
+
+sleep 0.5
+
+# TODO: figure out where to go based on resolution, current desktop, and total number of desktops
+# (for now this is just hard-coded to test things out)
+
+# hold option down
+osascript -e 'tell application "System Events" to key down option'
+
+# wait for the close buttons to appear
+sleep 0.5
+
+# click the close button (hard-coded to desktop 5 for testing)
+cliclick c:1120,27
+
+# option up
+osascript -e 'tell application "System Events" to key up option'
+
+
+########################################
+# get out of Mission Control
+########################################
+
+# then escape to get out of mission control
+osascript -e 'tell application "System Events" to key code 53'
+

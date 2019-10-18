@@ -51,6 +51,9 @@ sleep 0.5
 # this is probably how they figured that out:
 # from https://www.reddit.com/r/applescript/comments/360l6v/close_a_space_with_applescript/cr9tj4j/
 #
+# also, you can use "UI elements" to figure out the hierarchy
+# https://superuser.com/a/336553
+#
 # osascript <<END_SCRIPT
 # tell application "System Events"
 #     groups of process "Dock"
