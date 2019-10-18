@@ -44,7 +44,23 @@ done
 
 echo "Desktop index = $current_index"
 
-# TODO: get the current resolution
+# get the current resolution
+
+# trying the answers on https://superuser.com/q/447295
+#
+# wrong:
+# $ system_profiler SPDisplaysDataType | grep Resolution
+#           Resolution: 2880 x 1800 Retina
+#
+# right:
+# $ osascript -e 'tell application "Finder" to get bounds of window of desktop'
+# 0, 0, 1680, 1050
+
+resolution_info="$(osascript -e 'tell application "Finder" to get bounds of window of desktop' | tr -d ',')"
+display_width="$(echo "$resolution_info" | awk '{print $3}' )"
+display_height="$(echo "$resolution_info" | awk '{print $4}' )"
+
+echo "Display resolution: $display_width x $display_height"
 
 exit
 
