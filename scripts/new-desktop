@@ -105,6 +105,7 @@ sleep 0.5
 #
 # there we go, "group 1 of ..., group Spaces Bar of group 1 of group Mission Control of application process Dock"
 # that looks like the thing we want
+# (group 1 is the open windows in the bottom pane)
 #
 # osascript <<END_SCRIPT
 # tell application "System Events"
