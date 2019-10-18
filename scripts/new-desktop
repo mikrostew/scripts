@@ -4,16 +4,41 @@
 # NOTE: enable reduced motion so the animations have less affect on the timing
 # System Preferences > Accessibility > Display > Reduce Motion [✓]
 
+########################################
+# figure out how many desktops there are now
+########################################
+
+# NOTE: I previously tried to adapt https://stackoverflow.com/a/6783652, and parse the output of `defaults read com.apple.spaces`,
+#       but that was brittle and hacky
+# NOTE: Also, apparently when this is run via Karabiner, the `jq` command cannot be found, so I'm using the full path here
+
+# use plutil to convert to json, and jq to parse that and count the current number of spaces
+# (uncomment these lines to get some debugging info in a logfile)
+#plutil -convert json -o - "$HOME/Library/Preferences/com.apple.spaces.plist" | /usr/local/bin/jq '.' >> "$HOME/new-desktop.log" 2>&1
+#echo "status: $?" >> "$HOME/new-desktop.log"
+
+# find the .Monitors section with ."Display Identifier" == "Main", and count the number of spaces
+current_desktops="$(plutil -convert json -o - "$HOME/Library/Preferences/com.apple.spaces.plist" | /usr/local/bin/jq '.SpacesDisplayConfiguration."Management Data".Monitors[] | if ."Display Identifier" == "Main" then .Spaces else empty end | length')"
+
+echo "Currently, there are $current_desktops desktops"
+
+########################################
+# get into Mission Control
+########################################
 
 # NOTE: not using this anymore, because it doesn't consistently work:
 # control-uparrow to get into mission control
 #osascript -e 'tell application "System Events" to key code 126 using control down'
 
-# get into Mission Control
+# just run the app directly
 "/Applications/Mission Control.app/Contents/MacOS/Mission Control"
 
 # give that time to animate
 sleep 0.5
+
+########################################
+# add a new desktop
+########################################
 
 # this is not working (shows "missing value")
 # from https://apple.stackexchange.com/a/180729 and https://apple.stackexchange.com/a/234640
@@ -112,28 +137,20 @@ END_SCRIPT
 # give that time to animate
 sleep 0.5
 
-# figure out how many desktops there are now
+########################################
+# switch to the newest desktop
+########################################
 
-# NOTE: I previously tried to adapt https://stackoverflow.com/a/6783652, and parse the output of `defaults read com.apple.spaces`,
-#       but that was brittle and hacky
-# NOTE: Also, apparently when this is run via Karabiner, the `jq` command cannot be found, so I'm using the full path here
+newest_desktop=$(( current_desktops + 1 ))
 
-# use plutil to convert to json, and jq to parse that and count the current number of spaces
-# (uncomment these lines to get some debugging info in a logfile)
-#plutil -convert json -o - "$HOME/Library/Preferences/com.apple.spaces.plist" | /usr/local/bin/jq '.' >> "$HOME/new-desktop.log" 2>&1
-#echo "status: $?" >> "$HOME/new-desktop.log"
-
-# find the .Monitors section with ."Display Identifier" == "Main", and count the number of spaces
-number_of_desktops="$(plutil -convert json -o - "$HOME/Library/Preferences/com.apple.spaces.plist" | /usr/local/bin/jq '.SpacesDisplayConfiguration."Management Data".Monitors[] | if ."Display Identifier" == "Main" then .Spaces else empty end | length')"
-
-echo "Switching to desktop $number_of_desktops..."
+echo "Switching to desktop $newest_desktop..."
 
 # key code reference:
 # https://eastmanreference.com/complete-list-of-applescript-key-codes
 # (have to use key code in mission control)
 # NOTE: have to set the mission control keyboard shortcuts in system preferences
 
-case $number_of_desktops in
+case $newest_desktop in
   1) key_code=18;;
   2) key_code=19;;
   3) key_code=20;;
@@ -142,7 +159,7 @@ case $number_of_desktops in
   6) key_code=22;;
   7) key_code=26;;
   8) key_code=28;;
-  *) key_code=125;; # down arrow
+  *) key_code=125;; # down arrow (or this could be Esc I guess)
 esac
 
 # go to the new desktop
@@ -153,6 +170,10 @@ ENDSCRIPT
 
 # give that time to animate
 sleep 0.5
+
+########################################
+# get out of Mission Control
+########################################
 
 # then escape to get out of mission control
 osascript -e 'tell application "System Events" to key code 53'
