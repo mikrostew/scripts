@@ -11,13 +11,42 @@
 
 # NOTE: when this is run via Karabiner, the `jq` command cannot be found, so I'm using the full path here
 
+# the spaces info, as JSON
+spaces_json="$(plutil -convert json -o - "$HOME/Library/Preferences/com.apple.spaces.plist")"
+
 # find the .Monitors section with ."Display Identifier" == "Main", and count the number of spaces
-current_desktops="$(plutil -convert json -o - "$HOME/Library/Preferences/com.apple.spaces.plist" | /usr/local/bin/jq '.SpacesDisplayConfiguration."Management Data".Monitors[] | if ."Display Identifier" == "Main" then .Spaces else empty end | length')"
+total_desktops="$(echo "$spaces_json" | /usr/local/bin/jq '.SpacesDisplayConfiguration."Management Data".Monitors[] | if ."Display Identifier" == "Main" then .Spaces else empty end | length')"
 
-echo "Currently, there are $current_desktops desktops"
+echo "Currently, there are $total_desktops desktops"
 
-# TODO: get the current desktop
+# get .id of ."Current Space"
+# (using id64 because uuid is blank for the first space)
+current_id="$(echo "$spaces_json" | /usr/local/bin/jq -r '.SpacesDisplayConfiguration."Management Data".Monitors[] | if ."Current Space" then ."Current Space".id64 else empty end')"
+
+echo "Desktop ID = $current_id"
+
+# use that to find the desktop number
+# (NOT using base64 idea from https://starkandwayne.com/blog/bash-for-loop-over-json-array-using-jq/ anymore)
+
+# output one ID each line for the .Spaces where ."Display Identifier" == "Main",
+space_ids="$(echo "$spaces_json" | /usr/local/bin/jq -r '.SpacesDisplayConfiguration."Management Data".Monitors[] | if ."Display Identifier" == "Main" then .Spaces[] else empty end | .id64')"
+
+# loop over that, to find the index matching our current ID
+index=0
+for id in $(echo "$space_ids"); do
+  if [ "$id" == "$current_id" ]
+  then
+    current_index="$index"
+    break
+  fi
+  index=$(( index + 1 ))
+done
+
+echo "Desktop index = $current_index"
+
 # TODO: get the current resolution
+
+exit
 
 ########################################
 # get into Mission Control
