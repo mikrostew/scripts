@@ -19,6 +19,9 @@ total_desktops="$(echo "$spaces_json" | /usr/local/bin/jq '.SpacesDisplayConfigu
 
 echo "Currently, there are $total_desktops desktops"
 
+# for debugging:
+#echo "$spaces_json" | /usr/local/bin/jq -r '.SpacesDisplayConfiguration."Management Data".Monitors[]'
+
 # get .id of ."Current Space"
 # (using id64 because uuid is blank for the first space)
 current_id="$(echo "$spaces_json" | /usr/local/bin/jq -r '.SpacesDisplayConfiguration."Management Data".Monitors[] | if ."Current Space" then ."Current Space".id64 else empty end')"
@@ -62,11 +65,11 @@ display_height="$(echo "$resolution_info" | awk '{print $4}' )"
 
 echo "Display resolution: $display_width x $display_height"
 
-exit
-
 ########################################
 # get into Mission Control
 ########################################
+
+echo "opening Mission Control..."
 
 # run the app directly
 "/Applications/Mission Control.app/Contents/MacOS/Mission Control"
@@ -178,31 +181,36 @@ sleep 0.5
 
 
 
-
 # just do this with mouse movements
 # using cliclick (https://github.com/BlueM/cliclick)
+# (same as jq, have to give full path for things in /usr/loca/bin/)
 
 # move to the top of the screen to expand mission control
-echo "moving mouse to expand"
-cliclick m:100,0
+echo "moving mouse to expand Mission Control..."
+/usr/local/bin/cliclick m:100,0
 
 sleep 0.5
 
-# TODO: figure out where to go based on resolution, current desktop, and total number of desktops
-# (for now this is just hard-coded to test things out)
+# close button locations - right now this only works for 1680x1050
+button_x=$(( 856 - (total_desktops * 88) + (current_index * 176) ))
+button_y=28
+
+echo "Clicking close button for desktop $current_index, at $button_x,$button_y"
 
 # hold option down
-osascript -e 'tell application "System Events" to key down option'
+#osascript -e 'tell application "System Events" to key down option'
 
 # wait for the close buttons to appear
-sleep 0.5
+#sleep 0.5
 
-# click the close button (hard-coded to desktop 5 for testing)
-cliclick c:1120,27
+# click the close button
+/usr/local/bin/cliclick "m:$button_x,$button_y"
+#cliclick "c:$button_x,$button_y"
 
 # option up
-osascript -e 'tell application "System Events" to key up option'
+#osascript -e 'tell application "System Events" to key up option'
 
+exit
 
 ########################################
 # get out of Mission Control
