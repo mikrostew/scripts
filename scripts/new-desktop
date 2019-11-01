@@ -31,7 +31,15 @@ echo "Currently, there are $current_desktops desktops"
 #osascript -e 'tell application "System Events" to key code 126 using control down'
 
 # just run the app directly
-"/Applications/Mission Control.app/Contents/MacOS/Mission Control"
+# (in 10.15 Catalina this moved to /System)
+MC_PATH="/Applications/Mission Control.app/Contents/MacOS/Mission Control"
+MC_PATH_CATALINA="/System/Applications/Mission Control.app/Contents/MacOS/Mission Control"
+
+if [ -f "$MC_PATH" ]; then
+  "$MC_PATH"
+elif [ -f "$MC_PATH_CATALINA" ]; then
+  "$MC_PATH_CATALINA"
+fi
 
 # give that time to animate
 sleep 0.5
