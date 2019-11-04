@@ -26,6 +26,12 @@ do
   sleep 0.1
 done
 
+# get the exit code of that process
+wait $cmd_pid
+exit_code="$?"
+
 # attempt to clean up (doesn't always work)
 printf "\r%-${total_length}s\r" ' ' >&2
 
+# use the exit code of the input PID
+exit "$exit_code"

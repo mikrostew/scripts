@@ -3,7 +3,7 @@
 # DO NOT EDIT! This script was auto-generated. To update this script, edit
 # the file ~/dotfiles/script-gen/spinner, and run 'generate-scripts.sh'
 ###########################################################################
-#e457d96030394219a70aec38223ddd20
+#c64a442a7e01f929b296aebe383aeb5f
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -53,4 +53,7 @@ do
   printf "\r${spin_chars:$i:1} ${spin_msg}" >&2
   sleep 0.1
 done
+wait $cmd_pid
+exit_code="$?"
 printf "\r%-${total_length}s\r" ' ' >&2
+exit "$exit_code"
