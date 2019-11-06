@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Start a new tmux session
+
+# optional
+session_name="$1"
+
+# if there is no input session name, use the current git branch at PWD
+if [ -n "$session_name" ]
+then
+  tmux new -s "$session_name"
+else
+  # get the current branch name, and use that
+  current_branch="$(git rev-parse --abbrev-ref HEAD)"
+  tmux new -s "$current_branch"
+fi
