@@ -11,28 +11,30 @@ echo_info() {
   echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}"
 }
 
+# try to kill the input process
+kill_proc_name() {
+  # arguments
+  proc_name="$1"
+
+  echo_info "killing '$proc_name'"
+  pkill -I "$proc_name" || echo "(no process found)"
+}
 
 # close the Cisco AnyConnect VPN client, if I had that running at home
-echo_info "Cisco VPN"
-pkill -I AnyConnect || echo "(no process found)"
+kill_proc_name "AnyConnect"
 
 # close Outlook, so I can restart it to pick up any new stuff
 # (this will bring up a dialog about force quitting, whatever I just want to close you dumb program)
-echo_info "Outlook"
-pkill -I Outlook || echo "(no process found)"
+kill_proc_name "Outlook"
 
 # close Slack, to reclaim memory and reset its state
-echo_info "Slack"
-pkill -I Slack || echo "(no process found)"
+kill_proc_name "Slack"
 
 # same with Discord
-echo_info "Discord"
-pkill -I Discord || echo "(no process found)"
+kill_proc_name "Discord"
 
 # in case I left this open
-echo_info "KeePassX"
-pkill -I KeePassX || echo "(no process found)"
+kill_proc_name "KeePassX"
 
 # any images, PDFs, etc. that are still open
-echo_info "Preview"
-pkill -I Preview || echo "(no process found)"
+kill_proc_name "Preview"
