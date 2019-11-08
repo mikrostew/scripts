@@ -13,6 +13,33 @@ echo "Populating interview feedback text..."
   osascript <<EOF
 tell application "System Events"
   keystroke "b" using command down
+  keystroke "Overall"
+  keystroke "b" using command down
+  keystroke ":" & return
+  keystroke "- TODO" & return
+
+  keystroke "b" using command down
+  keystroke "Good"
+  keystroke "b" using command down
+  keystroke ":" & return
+  keystroke "- TODO" & return
+  delay 0.2
+
+  keystroke "b" using command down
+  keystroke "Fair"
+  keystroke "b" using command down
+  keystroke ":" & return
+  keystroke "- TODO" & return
+  delay 0.2
+
+  keystroke "b" using command down
+  keystroke "Poor"
+  keystroke "b" using command down
+  keystroke ":" & return
+  keystroke "- TODO" & return
+  delay 0.2
+
+  keystroke "b" using command down
   keystroke "Intros and Resume"
   keystroke "b" using command down
   keystroke ": X minutes" & return
@@ -40,31 +67,5 @@ tell application "System Events"
   keystroke "TODO" & return
   delay 0.2
 
-  keystroke "b" using command down
-  keystroke "Good"
-  keystroke "b" using command down
-  keystroke ":" & return
-  keystroke "- TODO" & return
-  delay 0.2
-
-  keystroke "b" using command down
-  keystroke "Fair"
-  keystroke "b" using command down
-  keystroke ":" & return
-  keystroke "- TODO" & return
-  delay 0.2
-
-  keystroke "b" using command down
-  keystroke "Poor"
-  keystroke "b" using command down
-  keystroke ":" & return
-  keystroke "- TODO" & return
-  delay 0.2
-
-  keystroke "b" using command down
-  keystroke "Overall"
-  keystroke "b" using command down
-  keystroke ":" & return
-  keystroke "TODO"
 end tell
 EOF
