@@ -7,7 +7,7 @@
 
 // This script:
 // * parses the instrumentation.*.json files,
-// TODO: als does other things...
+// * also does other things...
 
 const fs = require('fs');
 
@@ -82,7 +82,7 @@ files.forEach((filename) => {
 
   // next, combine things so I can get a sense of Babel vs Eyeglass vs other
 
-  // TODO: clean this up to avoid all the repetition
+  // should clean this up to avoid all the repetition, but whatever
   let combinedStats = {};
   ['eyeglass', 'babel', 'cleanup', 'command', 'patch', 'other'].forEach(node => {
     combinedStats[node] = {
@@ -100,7 +100,7 @@ files.forEach((filename) => {
   let commandRegex = /command/i;
   let patchRegex = /patch/i;
 
-  // TODO: clean this up to avoid all the repetition
+  // should clean this up to avoid all the repetition, but whatever
   sortedStats.forEach((stat) => {
     if (stat.id.match(babelRegex)) {
       combinedStats.babel.time += stat.selftime;
@@ -117,7 +117,8 @@ files.forEach((filename) => {
       combinedStats.eyeglass.percent += stat.percent;
 
     // for the rest of these, I'm going to lump them together in "other" for now
-    // TODO: these should probably be split out under "other", but for now it's too much info
+    // (these should probably be split out under "other", but for now it's too much info)
+    //
     // } else if (stat.id.match(cleanupRegex)) {
     //   combinedStats.cleanup.time += stat.selftime;
     //   combinedStats.cleanup.calls += stat.calls;
