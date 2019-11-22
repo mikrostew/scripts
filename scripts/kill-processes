@@ -42,3 +42,6 @@ kill_proc_name "Preview"
 # if I left Cisco Proximity running
 # (lower case b/c the proc name is that way)
 kill_proc_name "proximity"
+
+# if I left VLC running after listening to music
+kill_proc_name "VLC"
