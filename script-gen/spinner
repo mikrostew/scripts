@@ -27,11 +27,13 @@ do
 done
 
 # get the exit code of that process
-wait $cmd_pid
-exit_code="$?"
+# NOTE: can't actually do this here, because the process will not be a child of this script
+#   (will have to wait in the code that calls this script)
+#wait $cmd_pid
+#exit_code="$?"
 
 # attempt to clean up (doesn't always work)
 printf "\r%-${total_length}s\r" ' ' >&2
 
 # use the exit code of the input PID
-exit "$exit_code"
+#exit "$exit_code"
