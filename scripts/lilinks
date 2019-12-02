@@ -39,7 +39,6 @@ shift $((OPTIND-1))
 
 # all the possible menu options, mapped to function names
 declare -A menu_items
-menu_items['Floor Plans']='floor_plans'
 menu_items['Review Boards']='review_boards'
 menu_items['Coding Music']='coding_music'
 
@@ -52,12 +51,6 @@ open_url() {
   then
     xdg-open "$1"
   fi
-}
-
-floor_plans() {
-  echo "floor_plans: TODO"
-  # TODO: this should prompt for the building, and then link to the floor plan
-  # (or, if I have these downloaded locally, open those instead, which should be faster)
 }
 
 review_boards() {
