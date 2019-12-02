@@ -12,30 +12,6 @@ in_linkedin_mp() {
   [ -f "$file_to_check" ] && return 0 || echo_err "$(pwd) is not a LinkedIn MultiProduct (missing $file_to_check)" && return -1
 }
 
-# this is what is not tracked by git (from voyager-web):
-#
-# $ git clean -ndx
-# Would remove .eyeglass_cache/
-# Would remove .gradle/
-# Would remove .npmrc
-# Would remove .pemberlyrc
-# Would remove bower_components/
-# Would remove build/
-# Would remove config/
-# Would remove core/bower_components
-# Would remove core/node_modules
-# Would remove core/vendor/babel/
-# Would remove core/vendor/fake-jquery.js
-# Would remove dist/
-# Would remove extended/bower_components
-# Would remove extended/node_modules
-# Would remove extended/vendor/babel/
-# Would remove extended/vendor/fake-jquery.js
-# Would remove i18n/
-# Would remove node_modules/
-# Would remove pemberly
-# Would remove tmp/
-
 
 if in_linkedin_mp; then
   username="$(whoami)"
@@ -67,11 +43,4 @@ if in_linkedin_mp; then
     echo_info "removing disk cache files..."
     do_cmd rm -rf "$disk_cache_dir"
   fi
-
-  # TODO optional args:
-  #  --deps   * removes all that above, as well as bower_components/ and node_modules/, and pemberly stuff - requires re-running `just init`
-  #  --all    * total clean, including config/ and i18n/ - requires running `mint update` and `just init`
-
-  # TODO arg to re-run those commands after cleaning?
-  #  --init?
 fi
