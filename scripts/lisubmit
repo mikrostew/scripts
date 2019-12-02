@@ -1,7 +1,6 @@
 #!/usr/bin/env badash
 # Squash commits, rebase, merge, and submit, for LI workflow
 
-# TODO: add comments back in from the file in script-gen
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -205,7 +204,7 @@ then
   echo_info ""
   # squash changes on this branch
   squash-branch "$commit_msg" "$commit_msg_extra_line"
-  @exit_on_error "Dang it! squashing failed (TODO: auto recovery here?)"
+  @exit_on_error "Dang it! squashing failed (should probably do some kind of recovery here...)"
 
   if not_on_git_branch 'master'
   then

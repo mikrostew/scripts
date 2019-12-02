@@ -9,7 +9,6 @@
 @uses_cmds jq git
 
 # SETTINGS
-# TODO: display this list before running 'git review create'?
 ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
 
 branch_name=$(current_git_branch)
@@ -20,7 +19,7 @@ if [ -n "$review_id" ]
 then
   # update
 
-  # TODO: check if ACL is covered, then do platform-review if that is required?
+  # this doesn't covery platform-review
   # see go/voyager/web/platform-review for details of that command
 
   echo_info "RB $review_id already exists for this branch - updating..."
