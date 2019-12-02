@@ -11,7 +11,29 @@ echo_info () {
 
 echo_info "WTF is going on here? let's see..."
 
-# TODO: I've only tested this on OSX - figure out any changes needed for linux
+# differences between platforms
+if [ "$(uname)" == "Darwin" ] # OSX
+then
+  # `top` options:
+  #  `-o cpu` : order by CPU usage, descending
+  #  `-n 10`  : show the top 10 processes (that's usually all I need, the offending proc should be in there somewhere)
+  #  `-l 2`   : use logging mode (don't change the screen), and display 2 samples (the first will be invalid b/c %CPU uses delta values)
+  #  `-F`     : don't include shared libraries/frameworks
+  #  `-R`     : don't traverse and report the memory object map for each process (default)
+  #  `-stats` : the stats to display (otherwise it will do everything which line-wraps and is impossible to read)
+  top_arguments=( -o "$cpu_order" -n 10 -l 2 -F -R -stats pid,ppid,command,user,cpu,cpu_me,cpu_others,time,threads,mem,purg )
+else  # assume Linux
+  # `top` options:
+  #  `-o +%CPU` : order by CPU usage, descending
+  #  `-b`       : batch mode (like logging mode for OSX)
+  #  `-n 2`     : number of iterations
+  #  TODO: still need args for these from OSX:
+  #  `-n 10`  : show the top 10 processes (that's usually all I need, the offending proc should be in there somewhere)
+  #  `-F`     : don't include shared libraries/frameworks
+  #  `-R`     : don't traverse and report the memory object map for each process (default)
+  #  `-stats` : the stats to display (otherwise it will do everything which line-wraps and is impossible to read)
+  top_arguments=( -o +%CPU -b -n 2 )
+fi
 
 # optional arg - single input PID
 input_pid="$1"
@@ -20,27 +42,10 @@ if [ -z "$input_pid" ]
 then
 
   # no PID input, use `top` to list the top 10 processes so I can select one
-  #
-  # `top` options:
-  #  `-o cpu` : order by CPU usage, descending
-  #  `-n 10`  : show the top 10 processes (that's usually all I need, the offending proc should be in there somewhere)
-  #  `-l 2`   : use logging mode (don't change the screen), and display 2 samples (the first will be invalid b/c %CPU uses delta values)
-  #  `-F`     : don't include shared libraries/frameworks
-  #  `-R`     : don't traverse and report the memory object map for each process (default)
-  #  `-stats` : the stats to display (otherwise it will do everything which line-wraps and is impossible to read)
-  #
-  # using `tail` so this only prints out the valid process info, not the first invalid samples, and none of the overall stats
-  #
-  # and using process substitution to capture the output asynchronously, while showing a spinner
-  exec 3< <(top \
-    -o cpu \
-    -n 10 \
-    -l 2 \
-    -F \
-    -R \
-    -stats pid,ppid,command,user,cpu,cpu_me,cpu_others,time,threads,mem,purg \
-    | tail -n12 \
-  )
+  # - using `tail` so this only prints out the valid process info, not the first invalid samples, and none of the overall stats
+  # - and using process substitution to capture the output asynchronously, while showing a spinner
+  echo "top ${top_arguments[@]}"
+  exec 3< <(top ${top_arguments[@]} | tail -n12 )
   spinner -m "collecting process info..." $!
 
   # display that
