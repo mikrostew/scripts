@@ -23,7 +23,13 @@ then
   # see go/voyager/web/platform-review for details of that command
 
   echo_info "RB $review_id already exists for this branch - updating..."
-  # if there is an argument supplied, use that for the description
+
+  # if there is no argument supplied, use the last commit message
+  if [ -z "$input_description" ]
+  then
+    input_description="$(git log -1 --pretty=%B)"
+  fi
+
   echo -n "Description of these changes [$input_description]: "
   read diff_description
   if [ -z "$diff_description" ]
