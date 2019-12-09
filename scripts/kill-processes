@@ -1,47 +1,61 @@
 #!/usr/bin/env bash
-# Kill a bunch of things to reset at the beginning of the day, or whenever
+# Auto-kill a bunch of things to reset at the beginning of the day, or whenever
 
-# All of these use -I, which asks for confirmation before killing
-
-COLOR_FG_BOLD_BLUE='\033[1;34m'
+# colors
 COLOR_RESET='\033[0m'
+COLOR_FG_BOLD_GREEN='\033[1;32m'
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_RED='\033[0;31m'
 
-# echo with blue text
-echo_info() {
-  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}"
+# helper functions
+proc-kill-info() {
+  action="$1"
+  details="$2"
+
+  echo -e -n " ${COLOR_FG_BOLD_GREEN}$action${COLOR_RESET} $details..."
 }
-
-# try to kill the input process
-kill_proc_name() {
-  # arguments
+proc-killed() {
+  echo -e "[${COLOR_FG_GREEN}OK${COLOR_RESET}]"
+}
+proc-not-found() {
+  echo -e "(${COLOR_FG_RED}not found${COLOR_RESET})"
+}
+kill-proc-name() {
   proc_name="$1"
 
-  echo_info "killing '$proc_name'"
-  pkill -I "$proc_name" || echo "(no process found)"
+  proc-kill-info "kill" "'$proc_name'"
+  pkill "$proc_name" && proc-killed || proc-not-found
 }
 
+
+##############################
+# let the killing begin
+##############################
+
 # close the Cisco AnyConnect VPN client, if I had that running at home
-kill_proc_name "AnyConnect"
+kill-proc-name "AnyConnect"
 
 # close Outlook, so I can restart it to pick up any new stuff
-# (this will bring up a dialog about force quitting, whatever I just want to close you dumb program)
-kill_proc_name "Outlook"
+kill-proc-name "Outlook"
+# if successful, that will bring up a dialog about force quitting, whatever, don't care, kill that too
+sleep 0.5
+kill-proc-name "Microsoft Error Reporting"
 
 # close Slack, to reclaim memory and reset its state
-kill_proc_name "Slack"
+kill-proc-name "Slack"
 
 # same with Discord
-kill_proc_name "Discord"
+kill-proc-name "Discord"
 
 # in case I left this open
-kill_proc_name "KeePassX"
+kill-proc-name "KeePassX"
 
 # any images, PDFs, etc. that are still open
-kill_proc_name "Preview"
+kill-proc-name "Preview"
 
 # if I left Cisco Proximity running
 # (lower case b/c the proc name is that way)
-kill_proc_name "proximity"
+kill-proc-name "proximity"
 
 # if I left VLC running after listening to music
-kill_proc_name "VLC"
+kill-proc-name "VLC"
