@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Paste the shrug emoji ¯\_(ツ)_/¯
+
+# Tried this, and a few variations, which doesn't work:
+#osascript -e 'tell application "System Events" to keystroke "¯\_(ツ)_/¯"'
+
+# Also tried this, which only works for some applications:
+#echo '¯\_(ツ)_/¯' | pbcopy
+#pbpaste
+
+# So I'm using the clipboard workaround from:
+# https://apple.stackexchange.com/questions/288536/is-it-possible-to-keystroke-special-characters-in-applescript
+
+osascript <<'EOF'
+set the clipboard to "¯\\_(ツ)_/¯"
+tell application "System Events" to keystroke "v" using command down
+EOF
