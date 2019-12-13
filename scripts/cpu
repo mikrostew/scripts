@@ -53,7 +53,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-if system_is_darwin?
+if @system_is_darwin?
 then
   do_cmd top -F -R -o cpu
 else

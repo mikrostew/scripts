@@ -36,11 +36,11 @@ do
 done
 shift $((OPTIND-1))
 @uses_cmds sysctl/Darwin lscpu/Linux egrep wc sort
-if system_is_darwin?
+if @system_is_darwin?
 then
   echo "logical CPUs:  $(sysctl -n hw.logicalcpu_max) max ($(sysctl -n hw.logicalcpu) available)"
   echo "physical CPUs: $(sysctl -n hw.physicalcpu_max) max ($(sysctl -n hw.physicalcpu) available)"
-elif system_is_linux?
+elif @system_is_linux?
 then
   echo "logical CPUs:  $(lscpu -p | egrep -v '^#' | wc -l)"
   echo "physical CPUs: $(lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l)"

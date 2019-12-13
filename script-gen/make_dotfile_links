@@ -37,11 +37,11 @@ links[".rubocop.yml"]=".rubocop.yml"
 links[".config/karabiner"]="karabiner"
 
 # platform-specific
-if system_is_darwin?
+if @system_is_darwin?
 then
   # ssh
   links[".ssh/config"]=".ssh-config-mac"
-elif system_is_linux?
+elif @system_is_linux?
 then
   # ssh
   links[".ssh/config"]=".ssh-config-linux"
