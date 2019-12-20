@@ -16,5 +16,10 @@ else
 
   # get the current branch name, and use that
   current_branch="$(git rev-parse --abbrev-ref HEAD)"
-  tmux new -s "$repo_name | $current_branch"
+
+  # if the session name contains periods, tmux will fail with "bad session name"
+  # (see https://github.com/tmux-python/tmuxp/issues/132)
+  session_name="$( echo "$repo_name | $current_branch" | tr '.' '_')"
+
+  tmux new -s "$session_name"
 fi
