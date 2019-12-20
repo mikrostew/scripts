@@ -4,12 +4,17 @@
 # optional
 session_name="$1"
 
-# if there is no input session name, use the current git branch at PWD
+# if there is no input session name, use the current repo name & git branch at PWD
 if [ -n "$session_name" ]
 then
   tmux new -s "$session_name"
 else
+  # get the current repo name, using the name of the remote
+  # (see https://stackoverflow.com/a/42543006/)
+  origin_url="$(git config --get remote.origin.url)"
+  repo_name="$(basename -s .git $origin_url)"
+
   # get the current branch name, and use that
   current_branch="$(git rev-parse --abbrev-ref HEAD)"
-  tmux new -s "$current_branch"
+  tmux new -s "$repo_name | $current_branch"
 fi
