@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Open the oncall monitoring pages in the browser
+
+# opened in reverse order, to see the ones I care about more first
+
+# C2P
+open 'https://tools.corp.linkedin.com/apps/tools/productivity/ui/#/c2p?product=voyager-web'
+
+# failed precommit
+open 'https://crt.prod.linkedin.com/#/events?products=%5B%22voyager-api%22%5D&statuses=%5B%22FAILED%22%5D&types=%5B%22PRE%22%5D'
+open 'https://crt.prod.linkedin.com/#/events?products=%5B%22voyager-web%22%5D&statuses=%5B%22FAILED%22%5D&types=%5B%22PRE%22%5D'
+
+# failed PCX
+open 'https://crt.prod.linkedin.com/#/events?products=%5B%22voyager-api%22%5D&statuses=%5B%22FAILED%22%5D&types=%5B%22PCX%22%5D'
+open 'https://crt.prod.linkedin.com/#/events?products=%5B%22voyager-web%22%5D&statuses=%5B%22FAILED%22%5D&types=%5B%22PCX%22%5D'
+
+# precommit status
+open 'https://crt.prod.linkedin.com/#/multiproducts/monitor?eventTypes=%5B%22PRE%22%5D&products=%5B%22*voyager-api%22%2C%22*voyager-web%22%5D&starredView=true'
+
+# PCL status
+open 'https://crt.prod.linkedin.com/#/multiproducts/monitor?eventTypes=%5B%22PCX%22%5D&products=%5B%22*voyager-api%22%2C%22*voyager-web%22%5D&starredView=true'
