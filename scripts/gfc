@@ -1,14 +1,13 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gfc, and run 'generate-scripts.sh'
-###########################################################################
-#357bee15fa1907a6cac944b87c7d3089
+# [git] Fork a repo from github and clone locally (Git Fork & Clone)
 
+# colors
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
+# imported functions
 do_cmd ()
 {
     local cmd_args="";
@@ -67,6 +66,8 @@ show_help_msg() {
   echo 'Arguments:'
   echo '  repo_url         URL of the github repository to fork'
 }
+
+# args
 while getopts ":h" opt
 do
   case $opt in
@@ -84,26 +85,61 @@ do
   esac
 done
 shift $((OPTIND-1))
+
+# mandatory arg - URL of the github repository to fork
 repo_url="${1:?Missing argument \'repo_url\'}"
+
 @uses_cmds curl jq
+
 my_username="mikrostew"
+
+# will split into array because it's 2 strings separated by space
 repo_info=( $(git_parse_repo_url $repo_url) )
 username=${repo_info[0]}
 repo_name=${repo_info[1]}
-api_token="$($HOME/Dropbox/secret/get-api-token github-fork-token)"
+
+# create fork from original repo
+
+# get API token from the keychain (will have to input my password)
+api_token="$(security find-generic-password -ga github-fork-token -w)"
+if [ -e "$api_token" ]
+then
+  echo_err "Unable to get the API token"
+  exit 1
+fi
+
+# not using do_cmd here because I don't want the API token echoed to the screen
 echo_ack "(curl -X POST -u '$my_username:XXXXX' 'https://api.github.com/repos/$username/$repo_name/forks')"
 output="$(curl -X POST -u "$my_username:$api_token" "https://api.github.com/repos/$username/$repo_name/forks")"
+# (Note that running that multiple times won't create multiple forks)
 @exit_on_error 'API call to fork the repository failed' 'echo "JSON output: $output"'
+
+# TODO - check 'output' for error
+
 echo_info "Waiting 10 seconds for github to create the fork..."
 sleep 10
+
+# clone the repo locally (use the 'ssh_url' property from the returned JSON)
 ssh_url="$(echo $output | jq --raw-output '.ssh_url')"
+if [ "$ssh_url" == "null" ]
+then
+  echo_err "Unable to get the 'ssh-url' property"
+  echo "Output is:"
+  echo "$output"
+  exit 1
+fi
+
 do_git clone "$ssh_url" "$repo_name"
+# check for error, wait, and retry once if it failed
 if [ "$?" -ne 0 ]
 then
   echo_info "Waiting 10 more seconds and retrying once..."
   sleep 10
   do_git clone "$ssh_url" "$repo_name"
+  # if it failed again then something is wrong
   @exit_on_error 'Failed to clone the repository - check if https://github.com/$my_username/$repo_name exists'
 fi
+
+# cd into that folder && set upstream to the original repo
 cd "$repo_name" && do_git remote add upstream "$repo_url"
 do_git remote -v
