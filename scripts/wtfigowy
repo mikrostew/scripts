@@ -21,7 +21,7 @@ then
   #  `-F`     : don't include shared libraries/frameworks
   #  `-R`     : don't traverse and report the memory object map for each process (default)
   #  `-stats` : the stats to display (otherwise it will do everything which line-wraps and is impossible to read)
-  top_arguments=( -o "$cpu_order" -n 10 -l 2 -F -R -stats pid,ppid,command,user,cpu,cpu_me,cpu_others,time,threads,mem,purg )
+  top_arguments=( -o cpu -n 10 -l 2 -F -R -stats pid,ppid,command,user,cpu,cpu_me,cpu_others,time,threads,mem,purg )
 else  # assume Linux
   # `top` options:
   #  `-o +%CPU` : order by CPU usage, descending
