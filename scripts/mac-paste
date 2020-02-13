@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+osascript <<EOScript
+tell application "System Events"
+  repeat with char in the characters of (the clipboard)
+    keystroke char
+    delay 0.02
+  end repeat
+end tell
+EOScript
