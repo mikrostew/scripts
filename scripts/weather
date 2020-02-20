@@ -1,13 +1,11 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/weather, and run 'generate-scripts.sh'
-###########################################################################
-#eaa93855f612d5c345bf0b41bb2fe8d4
+# Get current weather by zip code
+# uses OpenWeatherMap API - http://openweathermap.org/api
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
@@ -19,6 +17,7 @@ show_help_msg() {
   echo 'Options:'
   echo '  -h               Show this help message'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -36,10 +35,21 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses_cmds curl jq bc xargs
-zip_codes=( 94015 94043 94105 )
+
+# get API key from the keychain (will probably have to input my password)
+api_key="$(security find-generic-password -ga open-weather-map -w)"
+if [ -e "$api_key" ]
+then
+  echo_err "Unable to get the API key"
+  exit 1
+fi
+
+# Sunnyvale, Mountain View, SF
+zip_codes=( 94087 94043 94105 )
+
 for zip in ${zip_codes[*]}; do
-  api_key="$($HOME/Dropbox/secret/get-api-token open-weather-map)"
   page=$(curl "http://api.openweathermap.org/data/2.5/weather?zip=${zip},us&appid=${api_key}" 2>/dev/null)
   name="$(echo $page | jq --raw-output -M '.name')"
   temp_kelvin="$(echo $page | jq --raw-output -M '.main.temp')"
@@ -48,6 +58,7 @@ for zip in ${zip_codes[*]}; do
   humidity="$(echo $page | jq --raw-output -M '.main.humidity')"
   main="$(echo $page | jq --raw-output -M '.weather | .[0] | .main')"
   description="$(echo $page | jq --raw-output -M '.weather | .[0] | .description')"
+
   echo -e "${COLOR_FG_BOLD_BLUE}$name${COLOR_RESET} ($zip)"
   echo -e "Weather:     ${COLOR_FG_BOLD_BLUE}$main - $description${COLOR_RESET}"
   echo -e "Temperature: ${COLOR_FG_BOLD_BLUE}$temp_f${COLOR_RESET}°F (${temp_celcius}°C)"
