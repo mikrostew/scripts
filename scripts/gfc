@@ -102,7 +102,7 @@ repo_name=${repo_info[1]}
 
 # get API token from the keychain (will have to input my password)
 api_token="$(security find-generic-password -ga github-fork-token -w)"
-if [ -e "$api_token" ]
+if [ -z "$api_token" ]
 then
   echo_err "Unable to get the API token"
   exit 1

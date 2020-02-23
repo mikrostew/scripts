@@ -40,7 +40,7 @@ shift $((OPTIND-1))
 
 # get API key from the keychain (will probably have to input my password)
 api_key="$(security find-generic-password -ga open-weather-map -w)"
-if [ -e "$api_key" ]
+if [ -z "$api_key" ]
 then
   echo_err "Unable to get the API key"
   exit 1
