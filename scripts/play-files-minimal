@@ -77,7 +77,10 @@ do
   echo -e -n "${COLOR_FG_LIGHT_GRAY}    $url${COLOR_RESET}"
 
   # play the song, suppressing the output
-  ffplay -nodisp -autoexit -volume 100 "$song" >/dev/null 2>&1
+  # TODO: this does not respond to commands like volume up/down - I think I have to have the display running for that?
+  ffplay -nodisp -autoexit -volume 100 "$song" >/dev/null 2>&1 &
+  # background that and wait, so that Ctrl-C will stop this script and not go to the next song
+  wait "$!"
 done
 
 # cleanup
