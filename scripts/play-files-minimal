@@ -68,18 +68,16 @@ do
   # TODO: add this info to the metadata of all the files
   url="https://ninjaslob.bandcamp.com/"
 
+  # blank line so this will scroll down to only show the next 2 lines
+  echo ""
+  # show artist and title
   echo -e "$MUSIC_NOTE${COLOR_FG_LIGHT_GRAY}  Now Playing:${COLOR_FG_BOLD_LIGHT_GRAY} $artist - $title  $MUSIC_NOTE"
-
-  # play the song, suppressing the output
-  ffplay -nodisp -autoexit -volume 100 "$song" >/dev/null 2>&1 &
-  player_pid="$!"
-
   # show a URL to the artist's page below the song that's playing
   # (spaced nicely so it lines up)
   echo -e -n "${COLOR_FG_LIGHT_GRAY}    $url${COLOR_RESET}"
 
-  # wait for that song to finish playing
-  wait "$player_pid"
+  # play the song, suppressing the output
+  ffplay -nodisp -autoexit -volume 100 "$song" >/dev/null 2>&1
 done
 
 # cleanup
