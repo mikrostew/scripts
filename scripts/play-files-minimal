@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# Play the input files randomly, displaying the artist and song for the stream in a very small terminal window
+
+# To hide the title bar and make this look nice and minimal, set these in iTerm2:
+# iTerm2 > Preferences > Appearance > Tabs > Show tab bar even when there is only one tab  --> unselected
+# iTerm2 > Preferences > Profiles > Default > Window > Style  --> No title bar
+# (will have to restart it for this to take effect)
+
+# colors and things
+COLOR_RESET='\033[0m'
+COLOR_BG_WHITE='\033[0;107m'
+COLOR_FG_LIGHT_GRAY='\033[0;37m'
+COLOR_FG_BOLD_LIGHT_GRAY='\033[1;37m'
+MUSIC_NOTE="${COLOR_BG_WHITE}🎵${COLOR_RESET}"
+
+# set this up for if/when I Ctrl-C out of this
+function reset_things {
+  # make sure the cursor is visible
+  tput cnorm
+  # reset the font size
+  osascript -e 'tell application "System Events" to keystroke "0" using command down'
+
+}
+trap reset_things EXIT
+
+# check that something was input (could also use $#)
+if [ "$#" -eq 0 ]
+then
+  echo "no input files provided"
+  exit 1
+fi
+
+# randomize the order of the input files
+# shuf puts each one on a separate line, so use readarray to put that in the array correctly
+readarray -t song_list <<< "$(shuf -e "$@" )"
+
+# setup the terminal
+
+# resize and reposition
+# see http://invisible-island.net/xterm/ctlseqs/ctlseqs.html, search "window manipulation"
+# TODO: figure out what is the longest artist + title in these songs
+# (could do that dynamically, based on the input songs - but that might take a while to scan them all - could cache it tho...)
+printf '\033[8;2;80t' # 80W x 2H chars
+# TODO: I should also reposition this - see my dotfiles for how to do that
+# TODO: could I also get the current size and position, and restore those at the end?
+
+# scale up the text to be legible
+# this simulates hitting Cmd-0, then Cmd-<+> 3 times
+osascript <<EOF
+tell application "System Events" to keystroke "0" using command down
+tell application "System Events" to keystroke "+" using command down
+tell application "System Events" to keystroke "+" using command down
+tell application "System Events" to keystroke "+" using command down
+EOF
+
+# make the cursor invisible
+# (from https://www.unix.com/shell-programming-and-scripting/176837-bash-hide-terminal-cursor.html)
+tput civis
+
+# play the songs
+
+for song in "${song_list[@]}"
+do
+  # first get the song info
+  # TODO: I could do this in a sinle ffprobe call, and parse the output (probably faster)
+  artist="$(ffprobe -loglevel error -show_entries format_tags=artist -of default=noprint_wrappers=1:nokey=1 "$song")"
+  title="$(ffprobe -loglevel error -show_entries format_tags=title -of default=noprint_wrappers=1:nokey=1 "$song")"
+  # TODO: add this info to the metadata of all the files
+  url="https://ninjaslob.bandcamp.com/"
+
+  echo -e "$MUSIC_NOTE${COLOR_FG_LIGHT_GRAY}  Now Playing:${COLOR_FG_BOLD_LIGHT_GRAY} $artist - $title  $MUSIC_NOTE"
+
+  # play the song, suppressing the output
+  ffplay -nodisp -autoexit -volume 100 "$song" >/dev/null 2>&1 &
+  player_pid="$!"
+
+  # show a URL to the artist's page below the song that's playing
+  # (spaced nicely so it lines up)
+  echo -e -n "${COLOR_FG_LIGHT_GRAY}    $url${COLOR_RESET}"
+
+  # wait for that song to finish playing
+  wait "$player_pid"
+done
+
+# cleanup
+reset_things
