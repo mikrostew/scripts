@@ -36,13 +36,29 @@ readarray -t song_list <<< "$(shuf -e "$@" )"
 
 # setup the terminal
 
-# resize and reposition
+# resize
 # see http://invisible-island.net/xterm/ctlseqs/ctlseqs.html, search "window manipulation"
 # TODO: figure out what is the longest artist + title in these songs
 # (could do that dynamically, based on the input songs - but that might take a while to scan them all - could cache it tho...)
 printf '\033[8;2;80t' # 80W x 2H chars
-# TODO: I should also reposition this - see my dotfiles for how to do that
-# TODO: could I also get the current size and position, and restore those at the end?
+
+# reposition
+# get the current resolution:
+resolution="$(system_profiler -json SPDisplaysDataType | jq -r '.SPDisplaysDataType[] | select(.spdisplays_ndrvs != null) | .spdisplays_ndrvs[] | select(.spdisplays_main == "spdisplays_yes") | ._spdisplays_resolution')"
+# for example, that returns: 1680 x 1050
+if [[ "$resolution" =~ ([0-9]+)\ x\ ([0-9]+) ]]
+then
+  display_width="${BASH_REMATCH[1]}"
+  display_height="${BASH_REMATCH[2]}"
+  # reposition this 80 pixels up from the bottom, and 10 pixels from the left, which looks about right
+  xpos="10"
+  ypos="$(( $display_height - 80 ))"
+  echo "repositioning to $xpos, $ypos"
+  printf '\033[3;%s;%st' "$xpos" "$ypos"
+else
+  echo "Error: Unable to parse resolution from '$resolution'"
+  echo "(not going to reposition)"
+fi
 
 # scale up the text to be legible
 # this simulates hitting Cmd-0, then Cmd-<+> 3 times
