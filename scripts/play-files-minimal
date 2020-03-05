@@ -3,8 +3,13 @@
 
 # To hide the title bar and make this look nice and minimal, set these in iTerm2:
 # iTerm2 > Preferences > Appearance > Tabs > Show tab bar even when there is only one tab  --> unselected
-# iTerm2 > Preferences > Profiles > Default > Window > Style  --> No title bar
+# iTerm2 > Preferences > Appearance > General > Theme  --> Minimal
 # (will have to restart it for this to take effect)
+
+# NOTE: You need to install `shuf`, which you can do with `brew install coreutils`
+
+# fail if any command fails
+set -e
 
 # colors and things
 COLOR_RESET='\033[0m'
@@ -13,13 +18,12 @@ COLOR_FG_LIGHT_GRAY='\033[0;37m'
 COLOR_FG_BOLD_LIGHT_GRAY='\033[1;37m'
 MUSIC_NOTE="${COLOR_BG_WHITE}🎵${COLOR_RESET}"
 
-# set this up for if/when I Ctrl-C out of this
-function reset_things {
+# set this up for if/when I Ctrl-C out of this, and on normal exit
+reset_things() {
   # make sure the cursor is visible
   tput cnorm
   # reset the font size
   osascript -e 'tell application "System Events" to keystroke "0" using command down'
-
 }
 trap reset_things EXIT
 
@@ -38,8 +42,6 @@ readarray -t song_list <<< "$(shuf -e "$@" )"
 
 # resize
 # see http://invisible-island.net/xterm/ctlseqs/ctlseqs.html, search "window manipulation"
-# TODO: figure out what is the longest artist + title in these songs
-# (could do that dynamically, based on the input songs - but that might take a while to scan them all - could cache it tho...)
 printf '\033[8;2;80t' # 80W x 2H chars
 
 # reposition
@@ -50,6 +52,7 @@ if [[ "$resolution" =~ ([0-9]+)\ x\ ([0-9]+) ]]
 then
   display_width="${BASH_REMATCH[1]}"
   display_height="${BASH_REMATCH[2]}"
+  echo "resolution is $display_width x $display_height"
   # reposition this 80 pixels up from the bottom, and 10 pixels from the left, which looks about right
   xpos="10"
   ypos="$(( $display_height - 80 ))"
@@ -78,11 +81,12 @@ tput civis
 for song in "${song_list[@]}"
 do
   # first get the song info
-  # TODO: I could do this in a sinle ffprobe call, and parse the output (probably faster)
-  artist="$(ffprobe -loglevel error -show_entries format_tags=artist -of default=noprint_wrappers=1:nokey=1 "$song")"
-  title="$(ffprobe -loglevel error -show_entries format_tags=title -of default=noprint_wrappers=1:nokey=1 "$song")"
-  # TODO: add this info to the metadata of all the files
-  url="https://ninjaslob.bandcamp.com/"
+  # each one of these is on a separate line, so read it into an array line by line
+  readarray -t song_info <<< "$(ffprobe -loglevel error -show_entries format_tags=title,artist,url -of default=noprint_wrappers=1:nokey=1 "$song")"
+  # then pull out the info
+  title="${song_info[0]}"
+  artist="${song_info[1]}"
+  url="${song_info[2]}"
 
   # blank line so this will scroll down to only show the next 2 lines
   echo ""
@@ -93,11 +97,15 @@ do
   echo -e -n "${COLOR_FG_LIGHT_GRAY}    $url${COLOR_RESET}"
 
   # play the song, suppressing the output
-  # TODO: this does not respond to commands like volume up/down - I think I have to have the display running for that?
+  # NOTE: this does not respond to commands like volume up/down - I have to show the display for that
   ffplay -nodisp -autoexit -volume 100 "$song" >/dev/null 2>&1 &
   # background that and wait, so that Ctrl-C will stop this script and not go to the next song
   wait "$!"
-done
+done &
 
-# cleanup
-reset_things
+# while that plays, discard all input, so this will not print things to the screen and mess up the display
+while true
+do
+  # read input but don't echo it or store it anywhere
+  read -rs
+done
