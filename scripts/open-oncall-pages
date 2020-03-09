@@ -4,7 +4,7 @@
 # opened in reverse order, to see the ones I care about more first
 
 # C2P
-open 'https://tools.corp.linkedin.com/apps/tools/productivity/ui/#/c2p?product=voyager-web'
+open 'https://productivity.tools.corp.linkedin.com/ui/#/c2p?product=voyager-web'
 
 # failed precommit
 open 'https://crt.prod.linkedin.com/#/events?products=%5B%22voyager-api%22%5D&statuses=%5B%22FAILED%22%5D&types=%5B%22PRE%22%5D'
