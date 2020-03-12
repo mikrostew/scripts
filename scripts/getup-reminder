@@ -1,23 +1,66 @@
 #!/usr/bin/env bash
 
 # Periodic dialog to remind me to get up from my desk and move around during the day
-# (every 45 minutes)
-# (dialog docs: https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/DisplayDialogsandAlerts.html)
+
+# input can be number of minutes, or a time (default is 45 minutes from now)
+if [ -n "$1" ]
+then
+  # figure out the input value
+  if [[ "$1" =~ ^[0-9]+$ ]]
+  then
+    # it's a number, use that
+    getup_minutes="$1"
+  elif [[ "$1" =~ [0-9]+:[0-9]+ ]]
+  then
+    # it's a time - figure out how many minutes away that is
+    # (adapted from https://stackoverflow.com/a/14309184)
+    IFS=: read next_hour next_min <<< "$1"
+    IFS=: read now_hour now_min <<< "$(date +%H:%M)"
+
+    # convert to seconds from Unix epoch time
+    next_seconds=$(date -j -f "%Y-%m-%d %H:%M:%S" "1970-01-01 $next_hour:$next_min:00" +%s)
+    now_seconds=$(date -j -f "%Y-%m-%d %H:%M:%S" "1970-01-01 $now_hour:$now_min:00" +%s)
+
+    getup_minutes="$(( (next_seconds - now_seconds) / 60))"
+
+    if [ "$getup_minutes" -lt 0 ]
+    then
+      echo "Error: time '$1' is in the past (current time is $(date +%H:%M))"
+      exit 1
+    fi
+
+  else
+    # can't figure it out
+    echo "I don't understand the input '$1' - please input a number of minutes, or a time in HH:MM format"
+    exit 1
+  fi
+else
+  # default is getup in 45 minutes from now
+  getup_minutes=45
+fi
 
 while :
 do
-  # wait 45 minutes, then display the dialog
-  # (45 minutes = 45 * 60 = 2700 seconds)
-  echo "[$(date)] 45 minutes..."
-  sleep 2700
+  minutes_left="$getup_minutes"
+
+  # wait that number of minutes, then display the dialog
+  echo "[$(date +%H:%M)] get up in $getup_minutes minutes"
+
+  # display something every minute (60 seconds)
+  for ((i=minutes_left; i>=1; i--))
+  do
+    echo "$i minutes left..."
+    sleep 60
+  done
 
   # time's up, remind me to take a break by displaying this dialog
-  echo "[$(date)] Take a break!"
+  echo "[$(date +%H:%M)] Take a break!"
 
   # display the dialog (don't need to capture the button clicked)
+  # (dialog docs: https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/DisplayDialogsandAlerts.html)
   osascript<<EOSCRIPT
-set theDialogText to "It's been 45 minutes - time to get up and move around!!\n\n\n\n\n"
-display dialog theDialogText buttons {"Stop This", "Keep Going"} default button "Keep Going" cancel button "Stop This"
+set theDialogText to "It's been $getup_minutes minutes - time to get up and move around!!\n\n\n\n\n"
+display dialog theDialogText buttons {"Stop", "Sit for another $getup_minutes minutes"} default button "Sit for another $getup_minutes minutes" cancel button "Stop"
 EOSCRIPT
 
   # quit if cancelled
