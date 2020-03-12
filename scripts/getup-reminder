@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
-# Periodic dialog to remind me to get up from my desk and move around during the day
+# Dialog to remind me to get up from my desk and move around during the day
+#
+# Use it like this:
+#  $ getup-reminder         ==> default, get a popup in 45 minutes
+#  $ getup-reminder 14:35   ==> get a popup at time 14:35
+#  $ getup-reminder 30      ==> get a popup in 30 minutes
 
 # input can be number of minutes, or a time (default is 45 minutes from now)
 if [ -n "$1" ]
@@ -10,7 +15,7 @@ then
   then
     # it's a number, use that
     getup_minutes="$1"
-  elif [[ "$1" =~ [0-9]+:[0-9]+ ]]
+  elif [[ "$1" =~ ^[0-9]+:[0-9]+$ ]]
   then
     # it's a time - figure out how many minutes away that is
     # (adapted from https://stackoverflow.com/a/14309184)
