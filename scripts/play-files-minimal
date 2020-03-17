@@ -81,6 +81,92 @@ tput civis
 for song in "${song_list[@]}"
 do
   # first get the song info
+
+  # this works for opus:
+  # $ ffprobe -loglevel error -of json -show_entries stream_tags A\ Ninja\ Slob\ Drew\ Me\ -\ Sampler\ -\ 01\ We\ Are\;.opus
+  # {
+  #     "streams": [
+  #         {
+  #             "tags": {
+  #                 "encoder": "Lavc58.54.100 libopus",
+  #                 "TITLE": "We Are;",
+  #                 "ARTIST": "A Ninja Slob Drew Me",
+  #                 "DATE": "2014",
+  #                 "comment": "Visit http://ninjaslob.bandcamp.com",
+  #                 "ALBUM": "Sampler",
+  #                 "track": "1",
+  #                 "album_artist": "A Ninja Slob Drew Me"
+  #             }
+  #         }
+  #     ]
+  # }
+
+  # this works for flac
+  # $ ffprobe -loglevel error -of json -show_entries format_tags A\ Ninja\ Slob\ Drew\ Me\ -\ Sampler\ -\ 01\ We\ Are\;.flac
+  # {
+  #     "format": {
+  #         "tags": {
+  #             "TITLE": "We Are;",
+  #             "ARTIST": "A Ninja Slob Drew Me",
+  #             "DATE": "2014",
+  #             "COMMENT": "Visit http://ninjaslob.bandcamp.com",
+  #             "ALBUM": "Sampler",
+  #             "track": "1",
+  #             "album_artist": "A Ninja Slob Drew Me"
+  #         }
+  #     }
+  # }
+
+  # so, what if I do both?
+
+  # $ ffprobe -loglevel error -of json -show_entries stream_tags:format_tags A\ Ninja\ Slob\ Drew\ Me\ -\ Sampler\ -\ 01\ We\ Are\;.flac
+  # {
+  #     "streams": [
+  #         {
+  #
+  #         },
+  #         {
+  #             "tags": {
+  #                 "comment": "Cover (front)"
+  #             }
+  #         }
+  #     ],
+  #     "format": {
+  #         "tags": {
+  #             "TITLE": "We Are;",
+  #             "ARTIST": "A Ninja Slob Drew Me",
+  #             "DATE": "2014",
+  #             "COMMENT": "Visit http://ninjaslob.bandcamp.com",
+  #             "ALBUM": "Sampler",
+  #             "track": "1",
+  #             "album_artist": "A Ninja Slob Drew Me"
+  #         }
+  #     }
+  # }
+
+  # $ ffprobe -loglevel error -of json -show_entries stream_tags:format_tags A\ Ninja\ Slob\ Drew\ Me\ -\ Sampler\ -\ 01\ We\ Are\;.opus
+  # {
+  #     "streams": [
+  #         {
+  #             "tags": {
+  #                 "encoder": "Lavc58.54.100 libopus",
+  #                 "TITLE": "We Are;",
+  #                 "ARTIST": "A Ninja Slob Drew Me",
+  #                 "DATE": "2014",
+  #                 "comment": "Visit http://ninjaslob.bandcamp.com",
+  #                 "ALBUM": "Sampler",
+  #                 "track": "1",
+  #                 "album_artist": "A Ninja Slob Drew Me"
+  #             }
+  #         }
+  #     ],
+  #     "format": {
+  #
+  #     }
+  # }
+
+  # ok, so I will need to do both, and just use whatever is available...
+
   # each one of these is on a separate line, so read it into an array line by line
   readarray -t song_info <<< "$(ffprobe -loglevel error -show_entries format_tags=title,artist,url -of default=noprint_wrappers=1:nokey=1 "$song")"
   # then pull out the info
