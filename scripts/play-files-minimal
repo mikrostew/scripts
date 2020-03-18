@@ -11,13 +11,6 @@
 # fail if any command fails
 set -e
 
-# colors and things
-COLOR_RESET='\033[0m'
-COLOR_BG_WHITE='\033[0;107m'
-COLOR_FG_LIGHT_GRAY='\033[0;37m'
-COLOR_FG_BOLD_LIGHT_GRAY='\033[1;37m'
-MUSIC_NOTE="${COLOR_BG_WHITE}🎵${COLOR_RESET}"
-
 # set this up for if/when I Ctrl-C out of this, and on normal exit
 reset_things() {
   # make sure the cursor is visible
@@ -80,111 +73,8 @@ tput civis
 
 for song in "${song_list[@]}"
 do
-  # first get the song info
-
-  # this works for opus:
-  # $ ffprobe -loglevel error -of json -show_entries stream_tags A\ Ninja\ Slob\ Drew\ Me\ -\ Sampler\ -\ 01\ We\ Are\;.opus
-  # {
-  #     "streams": [
-  #         {
-  #             "tags": {
-  #                 "encoder": "Lavc58.54.100 libopus",
-  #                 "TITLE": "We Are;",
-  #                 "ARTIST": "A Ninja Slob Drew Me",
-  #                 "DATE": "2014",
-  #                 "comment": "Visit http://ninjaslob.bandcamp.com",
-  #                 "ALBUM": "Sampler",
-  #                 "track": "1",
-  #                 "album_artist": "A Ninja Slob Drew Me"
-  #             }
-  #         }
-  #     ]
-  # }
-
-  # this works for flac
-  # $ ffprobe -loglevel error -of json -show_entries format_tags A\ Ninja\ Slob\ Drew\ Me\ -\ Sampler\ -\ 01\ We\ Are\;.flac
-  # {
-  #     "format": {
-  #         "tags": {
-  #             "TITLE": "We Are;",
-  #             "ARTIST": "A Ninja Slob Drew Me",
-  #             "DATE": "2014",
-  #             "COMMENT": "Visit http://ninjaslob.bandcamp.com",
-  #             "ALBUM": "Sampler",
-  #             "track": "1",
-  #             "album_artist": "A Ninja Slob Drew Me"
-  #         }
-  #     }
-  # }
-
-  # so, what if I do both?
-
-  # $ ffprobe -loglevel error -of json -show_entries stream_tags:format_tags A\ Ninja\ Slob\ Drew\ Me\ -\ Sampler\ -\ 01\ We\ Are\;.flac
-  # {
-  #     "streams": [
-  #         {
-  #
-  #         },
-  #         {
-  #             "tags": {
-  #                 "comment": "Cover (front)"
-  #             }
-  #         }
-  #     ],
-  #     "format": {
-  #         "tags": {
-  #             "TITLE": "We Are;",
-  #             "ARTIST": "A Ninja Slob Drew Me",
-  #             "DATE": "2014",
-  #             "COMMENT": "Visit http://ninjaslob.bandcamp.com",
-  #             "ALBUM": "Sampler",
-  #             "track": "1",
-  #             "album_artist": "A Ninja Slob Drew Me"
-  #         }
-  #     }
-  # }
-
-  # $ ffprobe -loglevel error -of json -show_entries stream_tags:format_tags A\ Ninja\ Slob\ Drew\ Me\ -\ Sampler\ -\ 01\ We\ Are\;.opus
-  # {
-  #     "streams": [
-  #         {
-  #             "tags": {
-  #                 "encoder": "Lavc58.54.100 libopus",
-  #                 "TITLE": "We Are;",
-  #                 "ARTIST": "A Ninja Slob Drew Me",
-  #                 "DATE": "2014",
-  #                 "comment": "Visit http://ninjaslob.bandcamp.com",
-  #                 "ALBUM": "Sampler",
-  #                 "track": "1",
-  #                 "album_artist": "A Ninja Slob Drew Me"
-  #             }
-  #         }
-  #     ],
-  #     "format": {
-  #
-  #     }
-  # }
-
-  # ok, so I will need to do both, and just use whatever is available...
-
-  # each one of these is on a separate line, so read it into an array line by line
-  readarray -t song_info <<< "$(ffprobe -loglevel error -show_entries format_tags=title,artist,url -of default=noprint_wrappers=1:nokey=1 "$song")"
-  # then pull out the info
-  title="${song_info[0]}"
-  artist="${song_info[1]}"
-  url="${song_info[2]}"
-
-  # blank line so this will scroll down to only show the next 2 lines
-  echo ""
-  # show artist and title
-  echo -e "$MUSIC_NOTE${COLOR_FG_LIGHT_GRAY}  Now Playing:${COLOR_FG_BOLD_LIGHT_GRAY} $artist - $title  $MUSIC_NOTE"
-  # show a URL to the artist's page below the song that's playing
-  # (spaced nicely so it lines up)
-  echo -e -n "${COLOR_FG_LIGHT_GRAY}    $url${COLOR_RESET}"
-
-  # play the song, suppressing the output
-  # NOTE: this does not respond to commands like volume up/down - I have to show the display for that
-  ffplay -nodisp -autoexit -volume 4 "$song" >/dev/null 2>&1 &
+  # moved all this inner stuff to a less brittle node script that can get the song info nicely
+  play-audio-file "$song" &
   # background that and wait, so that Ctrl-C will stop this script and not go to the next song
   wait "$!"
 done &
