@@ -1,0 +1,411 @@
+#!/usr/bin/env bash
+# For albums I download from bandcamp
+# - unzip,
+# - add metadata for copyright and URL,
+# - convert to opus, and normalize the volume
+# Output files are stored in SyncAudio/streaming/<artist>/<album>/
+
+# must have these installed:
+#  ffmpeg: `brew install ffmpeg`  (includes ffprobe)
+#  ffmpeg-normalize: https://github.com/slhck/ffmpeg-normalize
+
+PROGRAM_NAME="process-bandcamp-zips"
+VERSION="1.0.0"
+
+# possible creative commons copyrights that I can use
+declare -A COPYRIGHTS
+COPYRIGHTS['CC BY 4.0']='Attribution: http://creativecommons.org/licenses/by/4.0/'
+COPYRIGHTS['CC BY 3.0']='Attribution: http://creativecommons.org/licenses/by/3.0/'
+COPYRIGHTS['CC BY-NC 4.0']='Attribution-NonCommercial: http://creativecommons.org/licenses/by-nc/4.0/'
+COPYRIGHTS['CC BY-NC 3.0']='Attribution-NonCommercial: http://creativecommons.org/licenses/by-nc/3.0/'
+
+
+# display errors and info
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+
+echo_error() {
+  #echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo "[error] $@" 1>&2
+}
+
+echo_info() {
+  #echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+  echo "[info] $@" 1>&2
+}
+
+# TODO: should I log all of this somewhere?
+# (to a known location in my home dir? temp dir? current dir? not sure...)
+
+# temp files to capture async function stdout, stderr, and exit code
+ASYNC_STDOUT="$(mktemp "$TMPDIR/$PROGRAM_NAME.stdout.XXXXXX")"
+ASYNC_STDERR="$(mktemp "$TMPDIR/$PROGRAM_NAME.stderr.XXXXXX")"
+ASYNC_EXIT_CODE="$(mktemp "$TMPDIR/$PROGRAM_NAME.exit-code.XXXXXX")"
+touch "$ASYNC_STDOUT" "$ASYNC_STDERR" "$ASYNC_EXIT_CODE"
+
+# use process substitution to run the input command asynchronously
+run_async() {
+  # $@ is all the args passed to this function
+  # TODO: also log this?
+  echo_info "(CMD) $@"
+
+  # print stdout to ASYNC_STDOUT, stderr to ASYNC_STDERR, and exit code to ASYNC_EXIT_CODE
+  { "$@" 1>"$ASYNC_STDOUT" 2>"$ASYNC_STDERR"; echo "$?" >"$ASYNC_EXIT_CODE"; } &
+}
+
+
+# show a busy spinner while the input PID is running, to clean up the output
+spin_wait() {
+  # arguments
+  cmd_pid="$1" # PID of the long-running command
+  spin_msg="$2" # Text to display along with the spinner animation
+
+  spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
+  num_chars=${#spin_chars}
+  total_length=$(( 2 + ${#spin_msg} ))
+
+  # show a spinner with the spin_msg every 1/10th second while the process is running
+  i=0
+  while kill -0 $cmd_pid 2>/dev/null
+  do
+    i=$(( (i + 1) % num_chars ))
+    printf "\r${spin_chars:$i:1} ${spin_msg}" >&2
+    sleep 0.1
+  done
+
+  # get the exit code of that process (from the temp file)
+  exit_code="$(cat <"$ASYNC_EXIT_CODE")"
+
+  # print [OK] or [FAIL] along with the spin text
+  if [ "$exit_code" -eq 0 ]
+  then
+    printf "\r${spin_msg} [OK]\n" >&2
+  else
+    printf "\r${spin_msg} [FAIL]\n" >&2
+  fi
+
+  # return the exit code of the input PID
+  return "$exit_code"
+}
+
+# how to use this
+print_usage() {
+  echo "$PROGRAM_NAME v$VERSION"
+  echo "Annotate and convert FLAC albums downloaded from bandcamp"
+  echo ""
+  echo "Usage:"
+  echo "  $PROGRAM_NAME <zip-file> [<zip-file-2> ... ]"
+}
+
+prompt_for_copyright() {
+  # arguments
+  local for_artist="$1"
+
+  # collect the menu items into an indexed array for selection (with sorted keys)
+  readarray -t menu_items_by_index <<< "$(for key in "${!COPYRIGHTS[@]}"; do echo "$key"; done | sort )"
+  num_items="${#menu_items_by_index[@]}"
+
+  echo "" 1>&2
+  echo "Which copyright does '$for_artist' use?" 1>&2
+
+  for(( i = 0; i < $num_items; i++ ))
+  do
+    # dislplay a 1-based index, which is nicer to select
+    echo -e "[$(( i + 1 ))] ${menu_items_by_index[$i]}" 1>&2
+  done
+
+  echo "" 1>&2
+  echo -n "Selection: " 1>&2
+
+  read item_num
+  if [ -n "$item_num" ] && (( "$item_num" <= "$num_items" ))
+  then
+    (( item_index = item_num - 1 ))
+    local copyright_type="${menu_items_by_index[$item_index]}"
+    local copyright_text="${COPYRIGHTS[$copyright_type]}"
+    if [ -z "$copyright_text" ]
+    then
+      echo_error "Blank copyright"
+      exit 1
+    fi
+    # output the text of the copyright to write to the files
+    echo "$copyright_text"
+  else
+    echo_info "(no option selected)"
+    exit 1
+  fi
+}
+
+prompt_for_url() {
+  # arguments
+  local for_artist="$1"
+
+  echo "" 1>&2
+  echo "What URL to use for '$for_artist'?" 1>&2
+  echo -n "> " 1>&2
+
+  read input_url
+  if [ -n "$input_url" ]
+  then
+    # output the URL to write to the files
+    echo "$input_url"
+  else
+    echo_info "(no URL given)"
+    exit 1
+  fi
+}
+
+# check for required commands
+req_check() {
+  if [ ! $(command -v $2) ]; then
+    echo "Required command '$2' not found" >&2
+    printf -v "$1" "1"
+  fi
+}
+
+# figure out where the files should go
+# (I have this in different locations on different machines b/c auto backup reasons)
+if [ -d "$HOME/SyncAudio" ]
+then
+  base_dir="$HOME/SyncAudio/streaming"
+elif [ -d "/usr/local/SyncThing/SyncAudio" ]
+then
+  base_dir="/usr/local/SyncThing/SyncAudio/streaming"
+else
+  echo_error "Could not find the SyncAudio/ directory"
+  exit 1
+fi
+
+# check that any dependent programs are installed
+cmd_check_rtn=0
+req_check cmd_check_rtn mktemp
+req_check cmd_check_rtn unzip
+req_check cmd_check_rtn jq
+req_check cmd_check_rtn ffmpeg
+req_check cmd_check_rtn ffmpeg-normalize
+if [ "$cmd_check_rtn" != 0 ]; then exit $cmd_check_rtn; fi
+
+# delete any remaining temp files and directories
+cleanup_temp() {
+  echo_info "(exit) cleaning up temp files"
+  rm "$ASYNC_STDOUT" "$ASYNC_STDERR" "$ASYNC_EXIT_CODE"
+
+  if [ -n "$temp_dir" ]
+  then
+    echo_info "(exit) cleaning up temp dir '$temp_dir'..."
+    rm -r "$temp_dir"
+  else
+    echo_info "(exit) temp dir already cleaned up"
+  fi
+}
+trap cleanup_temp EXIT
+
+
+
+# make sure we have some input files
+if [ "$#" -le 0 ]
+then
+  print_usage
+  exit 1
+fi
+
+# initialize some things
+declare -A copyright_for_artist
+declare -A url_for_artist
+
+
+# process each input zip file
+for zip_file in "$@"
+do
+  echo_info "Processing ZIP file '$zip_file'..."
+
+  # create a temp dir
+  temp_dir="$(mktemp -d "$TMPDIR/$PROGRAM_NAME.XXXXXX")"
+  if [ -z "$temp_dir" ]
+  then
+    echo_error "could not create a temp dir"
+  fi
+  echo_info "Created temp dir '$temp_dir'"
+
+  # `unzip` to that temp directory
+  run_async unzip "$zip_file" -d "$temp_dir"
+  spin_wait $! "Extracting files..."
+  if [ "$?" -ne 0 ]
+  then
+    echo_error "Failed to unzip '$zip_file'"
+    echo_info "stdout:"
+    echo "$(cat <"$ASYNC_STDOUT")"
+    echo_info "stderr:"
+    echo "$(cat <"$ASYNC_STDERR")"
+    exit 1
+  fi
+
+  # initialize before the loop
+  output_dir=""
+
+  unzip_output="$(cat <"$ASYNC_STDOUT")"
+  # figure out how many files were extracted
+  num_extracted_files="$(echo "$unzip_output" | grep 'extracting:' | wc -l | tr -d '[:space:]')"
+  echo_info "Extracted $num_extracted_files files"
+  if [ "$num_extracted_files" -eq 0 ]
+  then
+    echo_error "Extracted 0 files"
+    exit 1
+  fi
+
+  # process each FLAC file in that dir
+  for flac_file in "$temp_dir"/*.flac
+  do
+    # get the file info from the name
+    # (from the add-copyright script)
+    #file_dir="$(dirname "$flac_file")"
+    file_name="$(basename "$flac_file")"
+    # get the file base and extension (see https://stackoverflow.com/a/965072)
+    file_base="${file_name%.*}"
+    file_ext="${file_name##*.}"
+    echo_info "Processing FLAC file '$file_base.$file_ext'..."
+    if [ -z "$file_base" ] || [ -z "$file_ext" ]
+    then
+      echo_error "Empty file base or ext"
+      exit 1
+    fi
+
+    # get the artist, album, track#, and song info
+    tag_json="$(get-audio-file-tags "$flac_file")"
+    song_artist="$(jq --raw-output '.artist' <<< "$tag_json")"
+    song_album="$(jq --raw-output '.album' <<< "$tag_json")"
+    song_title="$(jq --raw-output '.title' <<< "$tag_json")"
+    song_track="$(jq --raw-output '.track' <<< "$tag_json")"
+    echo_info "Artist='$song_artist', Album='$song_album', Title='$song_title', Track='$song_track'"
+
+    # check that none of those are empty
+    if [ -z "$song_artist" ] || [ -z "$song_album" ] || [ -z "$song_title" ] || [ -z "$song_track" ]
+    then
+      echo_error "At least one of those metadata ^^^ fields is empty"
+      exit 1
+    fi
+
+    # clean those up for use in the filename
+    # (filter out '/' '\' ':' '|' '*' characters, and normalize track number to 2 digits)
+    song_artist_fmt="$(echo "$song_artist" | sed 's"[/\:|*]"-"g')"
+    song_album_fmt="$(echo "$song_album" | sed 's"[/\:|*]"-"g')"
+    song_title_fmt="$(echo "$song_title" | sed 's"[/\:|*]"-"g')"
+    song_track_fmt="$(printf "%02d" "$song_track")"
+    echo_info "(formatted) Artist='$song_artist_fmt', Album='$song_album_fmt', Title='$song_title_fmt', Track='$song_track_fmt'"
+
+    # prompt for copyright, if necessary
+    if [ -z "${copyright_for_artist[$song_artist_fmt]}" ]
+    then
+      # need to prompt for copyright for this artist
+      song_copyright_fmt="$(prompt_for_copyright "$song_artist")"
+      if [ -z "$song_copyright_fmt" ]; then exit 1; fi
+      copyright_for_artist[$song_artist_fmt]="$song_copyright_fmt"
+    else
+      echo_info "(copyright already entered for this artist)"
+      song_copyright_fmt="${copyright_for_artist[$song_artist_fmt]}"
+    fi
+    echo_info "using copyright: '$song_copyright_fmt'"
+
+    # prompt for URL, if necessary
+    if [ -z "${url_for_artist[$song_artist_fmt]}" ]
+    then
+      # need to prompt for URL for this artist
+      song_url_fmt="$(prompt_for_url "$song_artist")"
+      if [ -z "$song_url_fmt" ]; then exit 1; fi
+      url_for_artist[$song_artist_fmt]="$song_url_fmt"
+    else
+      echo_info "(URL already entered for this artist)"
+      song_url_fmt="${url_for_artist[$song_artist_fmt]}"
+    fi
+    echo_info "using URL: '$song_url_fmt'"
+
+    # make sure the output dir exists
+    # (only need this once per artist & album combo, but whatever, this is a slow script)
+    output_dir="$base_dir/$song_artist_fmt/$song_album_fmt"
+    echo_info "ensure output dir '$output_dir' exists"
+    mkdir -p "$output_dir"
+
+    # flac file with all metadata
+    flac_metadata_file="$temp_dir/$file_base-METADATA.$file_ext"
+    echo_info "intermediate metadata file: '$flac_metadata_file'"
+
+    # add the URL and copyright info to the file
+    run_async ffmpeg -i "$flac_file" -metadata copyright="song_copyright_fmt" -metadata url="song_url_fmt" -codec copy "$flac_metadata_file"
+    spin_wait $! "Adding metadata..."
+    if [ "$?" -ne 0 ]
+    then
+      echo_error "Failed to add metadata"
+      echo_info "stdout:"
+      echo "$(cat <"$ASYNC_STDOUT")"
+      echo_info "stderr:"
+      echo "$(cat <"$ASYNC_STDERR")"
+      exit 1
+    fi
+    echo_info "wrote file '$file_base-METADATA.$file_ext'"
+
+    # final output opus file
+    final_output_file="$output_dir/$song_track_fmt - $song_title_fmt.opus"
+    echo_info "final opus file: '$final_output_file'"
+
+    # normalize and convert
+    # (using --force to force overwrite of existing files)
+    run_async ffmpeg-normalize "$flac_metadata_file" --video-disable --force --audio-codec libopus --audio-bitrate 128k -o "$final_output_file"
+    spin_wait $! "Converting to opus and normalizing..."
+    if [ "$?" -ne 0 ]
+    then
+      echo_error "Failed to normalize and convert"
+      echo_info "stdout:"
+      echo "$(cat <"$ASYNC_STDOUT")"
+      echo_info "stderr:"
+      echo "$(cat <"$ASYNC_STDERR")"
+      exit 1
+    fi
+    echo_info "wrote file '$song_track_fmt - $song_title_fmt.opus'"
+
+    # delete the flac files
+    rm "$flac_file"
+    rm "$flac_metadata_file"
+    echo_info "deleted the intermediate flac files"
+  done
+
+  # make sure this variable is not empty
+  if [ -n "$output_dir" ]
+  then
+    echo_info "copying over any other non-flac files"
+    # move over any other files from that directory (artwork, etc.)
+    mv -v "$temp_dir"/*.* "$output_dir/"
+
+    # show the converted files in the output directory
+    echo_info "Output directory '$output_dir':"
+    ls -l "$output_dir"
+  else
+    echo_info "no output dir, not copying anything else"
+  fi
+
+  # cleanup:
+  # delete the temp dir (not using rm since this should be empty)
+  rmdir "$temp_dir"
+  if [ "$?" -ne 0 ]
+  then
+    echo ""
+    echo_error "Could not remove directory $temp_dir"
+    exit 1
+  else
+    # so the exit trap doesn't try to delete the already deleted dir
+    temp_dir=""
+  fi
+  echo_info "Removed temp dir"
+
+  # delete the input ZIP file (prompt for this, and assume no)
+  echo -n "Delete the input file '$zip_file'? [y/N] "
+  read delete_input_file
+  if [ "$delete_input_file" == "y" ] || [ "$delete_input_file" == "Y" ]
+  then
+    rm "$zip_file"
+    echo_info "Deleted original file '$zip_file'"
+  else
+    echo_info "did not remove the original zip file"
+  fi
+
+done
