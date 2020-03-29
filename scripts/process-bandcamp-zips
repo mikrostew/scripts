@@ -246,11 +246,15 @@ do
 
   unzip_output="$(cat <"$ASYNC_STDOUT")"
   # figure out how many files were extracted
-  num_extracted_files="$(echo "$unzip_output" | grep 'extracting:' | wc -l | tr -d '[:space:]')"
+  num_extracted_files="$(echo "$unzip_output" | grep -e 'extracting:' -e 'inflating:' | wc -l | tr -d '[:space:]')"
   echo_info "Extracted $num_extracted_files files"
   if [ "$num_extracted_files" -eq 0 ]
   then
     echo_error "Extracted 0 files"
+    echo_info "stdout:"
+    echo "$(cat <"$ASYNC_STDOUT")"
+    echo_info "stderr:"
+    echo "$(cat <"$ASYNC_STDERR")"
     exit 1
   fi
 
