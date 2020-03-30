@@ -74,7 +74,7 @@ tput civis
 for song in "${song_list[@]}"
 do
   # moved all this inner stuff to a less brittle node script that can get the song info nicely
-  play-audio-file "$song" &
+  play-audio-file-old "$song" &
   # background that and wait, so that Ctrl-C will stop this script and not go to the next song
   wait "$!"
 done &
