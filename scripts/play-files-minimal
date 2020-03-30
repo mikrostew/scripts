@@ -1,0 +1,85 @@
+#!/usr/bin/env node
+// Play the input files and directories in random order
+
+const fs = require('fs');
+const path = require('path');
+
+// extensions that I currently use
+const AUDIO_FILE_EXTENSIONS = ['.flac', '.opus', '.mp3'];
+
+
+function isAudioFile(file) {
+  const ext = path.extname(file);
+  return AUDIO_FILE_EXTENSIONS.includes(ext);
+}
+
+// shuffle the input array in O(n) time
+// from https://stackoverflow.com/a/12646864
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  // have to return the array, don't know why they don't in the code there
+  return array;
+}
+
+// collect all audio files from the input files and directories, and randomize them
+function getRandomizedInputFiles() {
+  return new Promise((resolve, reject) => {
+    // argv[0] is node
+    // argv[1] is this script
+    // argv[2] an onward are the input files and dirs
+    const args = process.argv.slice(2);
+    if (args.length === 0) {
+      reject('Error: You must input at least one file or directory');
+    } else {
+      // initialize
+      let allAudioFiles = [];
+      let filesAndDirsToProcess = args;
+      let numDirsFound = 0;
+      let haveError = false;
+
+      for (let i = 0; i < filesAndDirsToProcess.length; i++) {
+        const fileOrDir = filesAndDirsToProcess[i];
+
+        // first check that it exists before trying to stat
+        const exists = fs.existsSync(fileOrDir);
+        if (!exists) {
+          reject(`Error: ${fileOrDir} does not exist`);
+          haveError = true;
+          break;
+        }
+
+        // then stat and figure out if it's a file or directory or what
+        const stat = fs.lstatSync(fileOrDir);
+        if (stat.isDirectory()) {
+          // add all the things in this dir to the list of things to process (then process them)
+          const filesInDir = fs.readdirSync(fileOrDir);
+          // have to prepend the dir to get the full path
+          const thingsToProcess = filesInDir.map(f => path.join(fileOrDir, f));
+          filesAndDirsToProcess = filesAndDirsToProcess.concat(thingsToProcess);
+          numDirsFound++;
+        } else if (stat.isFile()) {
+          // make sure it's an audio file - don't try to play cover art or whatever
+          if (isAudioFile(fileOrDir)) {
+            allAudioFiles.push(fileOrDir);
+          }
+        } else {
+          reject(`Error: ${fileOrDir} is not a file or directory`);
+          haveError = true;
+          break;
+        }
+      };
+      if (!haveError) {
+        console.log(`Found ${allAudioFiles.length} audio files (in ${numDirsFound} directories)`);
+        resolve(shuffleArray(allAudioFiles));
+      }
+    }
+  });
+}
+
+
+
+getRandomizedInputFiles()
+.then((audioFiles) => console.log(audioFiles))
