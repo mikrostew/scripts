@@ -335,7 +335,7 @@ do
     echo_info "intermediate metadata file: '$flac_metadata_file'"
 
     # add the URL and copyright info to the file
-    run_async ffmpeg -i "$flac_file" -metadata copyright="song_copyright_fmt" -metadata url="song_url_fmt" -codec copy "$flac_metadata_file"
+    run_async ffmpeg -i "$flac_file" -metadata copyright="$song_copyright_fmt" -metadata url="$song_url_fmt" -codec copy "$flac_metadata_file"
     spin_wait $! "Adding metadata..."
     if [ "$?" -ne 0 ]
     then
