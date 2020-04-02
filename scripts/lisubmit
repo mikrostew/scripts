@@ -225,24 +225,22 @@ then
   # if dcommit failed, probably missing a shipit from ACL
   @exit_on_error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
 
-  # check product-spec.json for 'mint submit'
-  # if in_mint_submit_repo; then
-  #   echo_info "supports mint submit? YES"
-  #   # mint submit
-  #   do_cmd mint submit
-  #   if [ "$?" -ne 0 ];then
-  #     echo_fail_banner
-  #   else
-  #     echo_success_banner
-  #   fi
-  #   # mint submit is async, so for now undo the merge in case I have to resubmit
-  #   echo_info "Undoing the merge so I can keep working..."
-  #   git_undo_merge "$branch_name"
-  # else
-    # echo_info "supports mint submit? NO"
+  # git submit
+  # (could do `git submit --async`, but whatever)
 
-    # git submit
-    # (could do `git submit --async`, but whatever)
+  # use --async?
+  echo -n "Submit async? (to work on another branch) [Y/n]: "
+  read async_confirm
+  if [ -z "$async_confirm" ] || [ "$async_confirm" == "Y" ] || [ "$async_confirm" == "y" ]
+  then
+    echo_info "Submitting asynchronously - you can go work on another branch"
+    do_git submit --async
+    if [ "$?" -ne 0 ]; then echo_fail_banner; else echo_success_banner; fi
+    # either way, success or fail, want to undo the merge to preserve the branch
+    echo_info "Checking out your original branch..."
+    git_undo_merge "$branch_name"
+  else
+    echo_info "Submitting synchronously - watch this terminal for progress"
     do_git submit
     if [ "$?" -ne 0 ]; then
       # submit failed, could be precommit, or ACL check, or whatever
@@ -256,5 +254,5 @@ then
     # rebase to pick up the change
     gpr
     # and done!
-  # fi
+  fi
 fi
