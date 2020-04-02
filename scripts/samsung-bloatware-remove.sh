@@ -45,10 +45,13 @@ adb shell "pm uninstall -k --user 0 com.skype.raider"
 # Kids Installer - what is this?
 adb shell "pm uninstall -k --user 0 com.samsung.android.kidsinstaller"
 
-# Samsung Clousd
+# Samsung Cloud
 adb shell "pm uninstall -k --user 0 com.samsung.android.scloud"
 adb shell "pm uninstall -k --user 0 com.samsung.android.samsungpass"
 adb shell "pm uninstall -k --user 0 com.samsung.android.samsungpassautofill"
+
+# Samsung Dex for PC
+adb shell "pm uninstall -k --user 0 com.sec.android.app.dexonpc"
 
 
 ##########################
