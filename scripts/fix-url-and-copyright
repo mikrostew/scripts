@@ -1,0 +1,212 @@
+#!/usr/bin/env node
+// Play the input files and directories in random order
+// (using ffprobe and ffplay, from ffmpeg)
+
+const chalk = require('chalk');
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
+
+// extensions that I currently use
+const AUDIO_FILE_EXTENSIONS = ['.flac', '.opus', '.mp3'];
+
+// use this to cache url and copyright info for each artist
+// format is:
+// {
+//   "skip": "true | false",          // should files from this artist be skipped?
+//   "url": "http://...",             // url for this artist
+//   "copyright": "Attribution...",   // copyright for this artist
+// }
+const METADATA_PER_ARTIST = {}
+
+function isAudioFile(file) {
+  const ext = path.extname(file);
+  return AUDIO_FILE_EXTENSIONS.includes(ext);
+}
+
+// collect all audio files from the input files and directories
+function getInputFiles() {
+  return new Promise((resolve, reject) => {
+    // argv[0] is node
+    // argv[1] is this script
+    // argv[2] an onward are the input files and dirs
+    const args = process.argv.slice(2);
+    if (args.length === 0) {
+      reject('Error: You must input at least one file or directory');
+    } else {
+      // initialize
+      let allAudioFiles = [];
+      let filesAndDirsToProcess = args;
+      let numDirsFound = 0;
+      let haveError = false;
+
+      for (let i = 0; i < filesAndDirsToProcess.length; i++) {
+        const fileOrDir = filesAndDirsToProcess[i];
+
+        // first check that it exists before trying to stat
+        const exists = fs.existsSync(fileOrDir);
+        if (!exists) {
+          reject(`Error: ${fileOrDir} does not exist`);
+          haveError = true;
+          break;
+        }
+
+        // then stat and figure out if it's a file or directory or what
+        const stat = fs.lstatSync(fileOrDir);
+        if (stat.isDirectory()) {
+          // add all the things in this dir to the list of things to process (then process them)
+          const filesInDir = fs.readdirSync(fileOrDir);
+          // have to prepend the dir to get the full path
+          const thingsToProcess = filesInDir.map(f => path.join(fileOrDir, f));
+          filesAndDirsToProcess = filesAndDirsToProcess.concat(thingsToProcess);
+          numDirsFound++;
+        } else if (stat.isFile()) {
+          // make sure it's an audio file - don't try to play cover art or whatever
+          if (isAudioFile(fileOrDir)) {
+            allAudioFiles.push(fileOrDir);
+          }
+        } else {
+          reject(`Error: ${fileOrDir} is not a file or directory`);
+          haveError = true;
+          break;
+        }
+      };
+      if (!haveError) {
+        console.log(`Found ${allAudioFiles.length} audio files (in ${numDirsFound} directories)`);
+        resolve(allAudioFiles);
+      }
+    }
+  });
+}
+
+// play the input list of audio files
+async function modifyFiles(files) {
+  //console.log(files);
+  for (const file of files) {
+    //console.log(`playing file ${file}`);
+    await parseMetadataAndModify(file);
+  }
+}
+
+// parse the metadata for the file, then modify it if needed
+function parseMetadataAndModify(filename) {
+  return getFileTags(filename)
+    // modify the file based on the artist
+    .then((jsonData) => parseMetadataTags(jsonData))
+    .then((metadataTags) => modifyFileInfo(filename, metadataTags));
+}
+
+
+// get the metadata tags for the input file
+function getFileTags(filename) {
+  return new Promise((resolve, reject) => {
+    // use ffprobe to get the metadata tags for the file in JSON format
+    let tagsJsonData = "";
+    const ffprobe = spawn('ffprobe', ['-loglevel', 'error', '-of', 'json', '-show_entries', 'stream_tags:format_tags', filename]);
+
+    ffprobe.stdout.on('data', (data) => {
+      tagsJsonData += data;
+    });
+
+    ffprobe.on('close', (code) => {
+      if (code !== 0) {
+        //console.log
+        reject(`ffprobe exited with code ${code}`);
+      } else {
+        resolve(JSON.parse(tagsJsonData));
+      }
+    });
+  });
+}
+
+// combine the metadata tags from stream and format info
+// these tags can be stored in the file in one of two sections (that I know of):
+// $ ffprobe -loglevel error -of json -show_entries stream_tags:format_tags A\ Ninja\ Slob\ Drew\ Me\ -\ Sampler\ -\ 01\ We\ Are\;.flac
+// {
+//     "streams": [
+//         {
+//
+//         },
+//         {
+//             "tags": {
+//                 "comment": "Cover (front)"
+//             }
+//         }
+//     ],
+//     "format": {
+//         "tags": {
+//             "TITLE": "We Are;",
+//             "ARTIST": "A Ninja Slob Drew Me",
+//             "DATE": "2014",
+//             "COMMENT": "Visit http://ninjaslob.bandcamp.com",
+//             "ALBUM": "Sampler",
+//             "track": "1",
+//             "album_artist": "A Ninja Slob Drew Me"
+//         }
+//     }
+// }
+//
+// $ ffprobe -loglevel error -of json -show_entries stream_tags:format_tags A\ Ninja\ Slob\ Drew\ Me\ -\ Sampler\ -\ 01\ We\ Are\;.opus
+// {
+//     "streams": [
+//         {
+//             "tags": {
+//                 "encoder": "Lavc58.54.100 libopus",
+//                 "TITLE": "We Are;",
+//                 "ARTIST": "A Ninja Slob Drew Me",
+//                 "DATE": "2014",
+//                 "comment": "Visit http://ninjaslob.bandcamp.com",
+//                 "ALBUM": "Sampler",
+//                 "track": "1",
+//                 "album_artist": "A Ninja Slob Drew Me"
+//             }
+//         }
+//     ],
+//     "format": {
+//
+//     }
+// }
+function parseMetadataTags(tagJson) {
+  return new Promise((resolve, reject) => {
+    let tags = {};
+    if (tagJson['streams'] !== undefined && Array.isArray(tagJson['streams'])) {
+      tagJson['streams'].forEach(stream => {
+        if (stream['tags'] !== undefined) {
+          // store these tags first, converting everything to lowercase
+          Object.keys(stream['tags']).forEach(tag => tags[tag.toLowerCase()] = stream['tags'][tag]);
+        }
+      });
+    }
+
+    if (tagJson['format'] !== undefined && tagJson['format']['tags'] !== undefined) {
+      // store these tags now, converting everything to lowercase
+      // (and possibly overwriting the previous tags - these win in precedence)
+      Object.keys(tagJson['format']['tags']).forEach(tag => tags[tag.toLowerCase()] = tagJson['format']['tags'][tag]);
+    }
+
+    resolve(tags);
+  });
+}
+
+// output the file info to the console
+// TODO:
+function modifyFileInfo(file, tags) {
+  return new Promise((resolve, _reject) => {
+    const artistAndAlbum = chalk.green.bold(`${tags.artist} – ${tags.title}`);
+    console.log(`Modifying ${artistAndAlbum}...`);
+    // show what is going to happen
+    console.log(`url: ${tags.url} --> ??`);
+    console.log(`copyright: ${tags.copyright} --> ??`);
+    resolve();
+  });
+}
+
+
+
+getInputFiles()
+.then((audioFiles) => modifyFiles(audioFiles))
+.catch((err) => {
+  console.error(`Error: ${err}`);
+  process.exit(1);
+});
+
