@@ -5,19 +5,37 @@
 const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 const { spawn } = require('child_process');
 
 // extensions that I currently use
 const AUDIO_FILE_EXTENSIONS = ['.flac', '.opus', '.mp3'];
 
+// creative commons copyrights that I can use
+const COPYRIGHTS = {
+  "CC BY 4.0": "Attribution: http://creativecommons.org/licenses/by/4.0/",
+  "CC BY 3.0": "Attribution: http://creativecommons.org/licenses/by/3.0/",
+  "CC BY-NC 4.0": "Attribution-NonCommercial: http://creativecommons.org/licenses/by-nc/4.0/",
+  "CC BY-NC 3.0": "Attribution-NonCommercial: http://creativecommons.org/licenses/by-nc/3.0/",
+}
+// the names of those ^^, in an array for later
+const COPYRIGHTS_ARR = Object.keys(COPYRIGHTS).sort();
+
 // use this to cache url and copyright info for each artist
 // format is:
 // {
-//   "skip": "true | false",          // should files from this artist be skipped?
-//   "url": "http://...",             // url for this artist
-//   "copyright": "Attribution...",   // copyright for this artist
+//   skip: true | false,          // should files from this artist be skipped?
+//   url: "http://...",             // url for this artist
+//   copyright: "Attribution...",   // copyright for this artist
 // }
 const METADATA_PER_ARTIST = {}
+
+// need to get input from the user for this
+const READLINE_INTERFACE = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
 
 function isAudioFile(file) {
   const ext = path.extname(file);
@@ -188,17 +206,76 @@ function parseMetadataTags(tagJson) {
   });
 }
 
-// output the file info to the console
-// TODO:
-function modifyFileInfo(file, tags) {
-  return new Promise((resolve, _reject) => {
-    const artistAndAlbum = chalk.green.bold(`${tags.artist} – ${tags.title}`);
-    console.log(`Modifying ${artistAndAlbum}...`);
-    // show what is going to happen
-    console.log(`url: ${tags.url} --> ??`);
-    console.log(`copyright: ${tags.copyright} --> ??`);
-    resolve();
+function promptForCopyright(artist) {
+  return new Promise((resolve, reject) => {
+    console.log(`What copyright does ${artist} use?`)
+    for (let i = 0; i < COPYRIGHTS_ARR.length; i++) {
+      console.log(`[${i}] ${COPYRIGHTS_ARR[i]}`);
+    }
+    READLINE_INTERFACE.question("> ", function(inputCopyright) {
+      if (inputCopyright === "") {
+        reject("No copyright input given");
+      } else {
+        // if the index was valid, return that copyright text
+        if (COPYRIGHTS_ARR[inputCopyright] !== undefined) {
+          const copyrightType = COPYRIGHTS_ARR[inputCopyright];
+          console.log(`(input '${copyrightType}')`);
+          resolve(COPYRIGHTS[copyrightType]);
+        } else {
+          reject("Did not select a valid copyright");
+        }
+      }
+    });
   });
+}
+
+function promptForURL(artist) {
+  return new Promise((resolve, reject) => {
+    console.log(`What URL to use for ${artist}?`)
+    READLINE_INTERFACE.question("> ", function(inputUrl) {
+      if (inputUrl === "") {
+        reject("No URL input given");
+      } else {
+        resolve(inputUrl);
+      }
+    });
+  });
+}
+
+// prompt for URL and copyright for this artist, if necessary
+// resolves with:
+// {
+//   url: "http://...",
+//   copyright: "blah blah",
+// }
+async function getArtistInfo(artist) {
+  if (METADATA_PER_ARTIST[artist] === undefined) {
+    const copyright = await promptForCopyright(artist);
+    const url = await promptForURL(artist);
+    METADATA_PER_ARTIST[artist] = {
+      skip: false,
+      url: url,
+      copyright: copyright,
+    };
+  }
+
+  // now we have the info
+  const metadata = METADATA_PER_ARTIST[artist];
+  return {
+    url: metadata.url,
+    copyright: metadata.copyright
+  };
+}
+
+// output the file info to the console
+async function modifyFileInfo(file, tags) {
+  const artistAndAlbum = chalk.green.bold(`${tags.artist} – ${tags.title}`);
+  console.log(`Modifying ${artistAndAlbum}...`);
+  // get URL and copyright info if needed
+  const updateInfo = await getArtistInfo(tags.artist);
+  // show what is going to happen
+  console.log(`url: ${tags.url} --> ${updateInfo.url}`);
+  console.log(`copyright: ${tags.copyright} --> ${updateInfo.copyright}`);
 }
 
 
@@ -208,5 +285,7 @@ getInputFiles()
 .catch((err) => {
   console.error(`Error: ${err}`);
   process.exit(1);
+})
+.finally(() => {
+  READLINE_INTERFACE.close();
 });
-
