@@ -267,6 +267,50 @@ async function getArtistInfo(artist) {
   };
 }
 
+// TODO
+function writeToFile(file, url, copyright) {
+  // TODO: do this in node
+  // # add the URL and copyright info to the file
+  // run_async ffmpeg -i "$flac_file" -metadata copyright="$song_copyright_fmt" -metadata url="$song_url_fmt" -codec copy "$flac_metadata_file"
+  // spin_wait $! "Adding metadata..."
+  // if [ "$?" -ne 0 ]
+  // then
+  // echo_error "Failed to add metadata"
+  // echo_info "stdout:"
+  // echo "$(cat <"$ASYNC_STDOUT")"
+  // echo_info "stderr:"
+  // echo "$(cat <"$ASYNC_STDERR")"
+  // exit 1
+  // fi
+  // echo_info "wrote file '$file_base-METADATA.$file_ext'"
+
+  return new Promise((resolve, reject) => {
+    // use ffprobe to get the metadata tags for the file in JSON format
+    let ffmpegStdout = "";
+    let ffmpegStderr = "";
+    // TODO: need a new output file now, dang it...
+    const ffmpeg = spawn('ffmpeg', ['-i', file, '-metadata', `copyright=${}`, '-metadata', `url=${}`, '-codec', 'copy', new_file);
+
+    ffmpeg.stdout.on('data', (data) => {
+      ffmpegStdout += data;
+    });
+
+    ffmpeg.stderr.on('data', (data) => {
+      ffmpegStderr += data;
+    });
+
+    // TODO
+    ffmpeg.on('close', (code) => {
+      if (code !== 0) {
+        //console.log
+        reject(`ffmpeg exited with code ${code}`);
+      } else {
+        resolve(JSON.parse(tagsJsonData));
+      }
+    });
+  });
+}
+
 // output the file info to the console
 async function modifyFileInfo(file, tags) {
   const artistAndAlbum = chalk.green.bold(`${tags.artist} – ${tags.title}`);
@@ -276,6 +320,8 @@ async function modifyFileInfo(file, tags) {
   // show what is going to happen
   console.log(`url: ${tags.url} --> ${updateInfo.url}`);
   console.log(`copyright: ${tags.copyright} --> ${updateInfo.copyright}`);
+  // TODO: figure out how to make a temp file to switch and overwrite in place
+  //await writeToFile(file, tags.url, tags.copyright);
 }
 
 
