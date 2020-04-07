@@ -203,9 +203,13 @@ function outputFileInfo(tags) {
   // black music notes with a white background
   const notes = chalk.bgWhite('🎵');
   // note the en dash here (not a hyphen)
-  // TODO: limit this length and add asterisks - some Cloudkicker titles are very long...
-  const artistAndAlbum = chalk.green.bold(`${tags.artist} – ${tags.title}`);
-  console.log(`${notes} ${artistAndAlbum}`);
+  let artistAndAlbum = `${tags.artist} – ${tags.title}`;
+  // limit this length to 80 chars, adding ellipsis for anything longer (some titles are very long…)
+  if (artistAndAlbum.length > 80) {
+    artistAndAlbum = `${artistAndAlbum.substring(0,79)}…`;
+  }
+  const artistAndAlbumColored = chalk.green.bold(artistAndAlbum);
+  console.log(`${notes} ${artistAndAlbumColored}`);
   // show a URL to the artist's page below the song that's playing
   // (spaced nicely so it lines up with above)
   console.log(`   ${tags.url ? tags.url : ""}`);
