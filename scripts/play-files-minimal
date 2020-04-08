@@ -201,7 +201,7 @@ function outputFileInfo(tags) {
   // blank line so this will scroll down to only show the next 2 lines
   console.log("");
   // black music notes with a white background
-  const notes = chalk.bgWhite('🎵');
+  const notes = chalk.green.bold('♪');
   // note the en dash here (not a hyphen)
   let artistAndAlbum = `${tags.artist} – ${tags.title}`;
   // limit this length to 80 chars, adding ellipsis for anything longer (some titles are very long…)
