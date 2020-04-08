@@ -132,8 +132,6 @@ function getFileTags(filename) {
         //console.log
         reject(`ffprobe exited with code ${code}`);
       } else {
-        console.log("ffprobe stdout:");
-        console.log(tagsJsonData);
         resolve(JSON.parse(tagsJsonData));
       }
     });
@@ -275,16 +273,17 @@ function writeMetadata(file, url, copyright) {
   // create a new temp file
   const fileExt = path.extname(file);
   const tempFile = tmp.fileSync({ postfix: fileExt });
-  console.log('Temp file: ', tempFile.name);
 
   return new Promise((resolve, reject) => {
     // use ffprobe to get the metadata tags for the file in JSON format
     let ffmpegStdout = "";
     let ffmpegStderr = "";
     // write the updated file to the temp file
-    // NOTE: '-y' here is for overwriting the temp file that already exists
-    //const ffmpeg = spawn('ffmpeg', ['-y', '-i', file, '-metadata', `copyright=${copyright}`, '-metadata', `url=${url}`, '-codec', 'copy', tempFile.name]);
-    const ffmpeg = spawn('ffmpeg', ['-y', '-i', file, '-metadata', `copyright=${copyright}`, '-metadata', `url=${url}`, '-codec', 'copy', tempFile.name]);
+    // NOTES:
+    // * '-y' here is for overwriting the temp file that already exists
+    // * the stream specifier ":s:a:0" is for the first audio stream, since this doesn't work otherwise
+    // TODO: is there a way I can detect that ^^ and pick the right stream automatically?
+    const ffmpeg = spawn('ffmpeg', ['-y', '-i', file, '-metadata:s:a:0', `copyright=${copyright}`, '-metadata:s:a:0', `url=${url}`, '-codec', 'copy', tempFile.name]);
 
     ffmpeg.stdout.on('data', (data) => {
       ffmpegStdout += data;
@@ -301,7 +300,7 @@ function writeMetadata(file, url, copyright) {
         console.error(`stderr: ${ffmpegStderr}`);
         reject(`ffmpeg exited with code ${code}`);
       } else {
-        console.log(`wrote metadata to file ${tempFile.name}`);
+        //console.log(`wrote metadata to file ${tempFile.name}`);
         // return the temp file location
         resolve(tempFile.name);
       }
@@ -311,19 +310,17 @@ function writeMetadata(file, url, copyright) {
 
 // make sure the new file got the right info
 function verifyNewFile(fileName, url, copyright) {
-  console.log(`Checking new file ${fileName}`);
   // get the updated file tags
   return getFileTags(fileName)
     // and parse that
     .then((jsonData) => parseMetadataTags(jsonData))
     .then((metadataTags) => {
-      console.log('got tags:');
-      console.log(metadataTags);
       return new Promise((resolve, reject) => {
-        console.log("expected tags:");
-        console.log(`${url}, ${copyright}`);
-        console.log("got tags:");
-        console.log(`${metadataTags.url}, ${metadataTags.copyright}`);
+        if (url === metadataTags.url && copyright === metadataTags.copyright) {
+          console.log(`${url}, ${copyright} ✅`);
+        } else {
+          console.log(`${url}, ${copyright} ❌`);
+        }
         // TODO
         reject('testing this out...');
       });
@@ -337,11 +334,12 @@ async function modifyFileInfo(file, tags) {
   // get URL and copyright info if needed
   const updateInfo = await getArtistInfo(tags.artist);
   // show what is going to happen
-  console.log(`url: ${tags.url} --> ${updateInfo.url}`);
-  console.log(`copyright: ${tags.copyright} --> ${updateInfo.copyright}`);
+  //console.log(`url: ${tags.url} --> ${updateInfo.url}`);
+  //console.log(`copyright: ${tags.copyright} --> ${updateInfo.copyright}`);
   // write metadata which creates a new file because of how ffmpeg works
   const newFile = await writeMetadata(file, updateInfo.url, updateInfo.copyright);
   await verifyNewFile(newFile, updateInfo.url, updateInfo.copyright);
+  // TODO: move the new file to the original file
 }
 
 
