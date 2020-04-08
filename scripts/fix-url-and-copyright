@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const { spawn } = require('child_process');
+const tmp = require('tmp');
 
 // extensions that I currently use
 const AUDIO_FILE_EXTENSIONS = ['.flac', '.opus', '.mp3'];
@@ -131,6 +132,8 @@ function getFileTags(filename) {
         //console.log
         reject(`ffprobe exited with code ${code}`);
       } else {
+        console.log("ffprobe stdout:");
+        console.log(tagsJsonData);
         resolve(JSON.parse(tagsJsonData));
       }
     });
@@ -267,29 +270,21 @@ async function getArtistInfo(artist) {
   };
 }
 
-// TODO
-function writeToFile(file, url, copyright) {
-  // TODO: do this in node
-  // # add the URL and copyright info to the file
-  // run_async ffmpeg -i "$flac_file" -metadata copyright="$song_copyright_fmt" -metadata url="$song_url_fmt" -codec copy "$flac_metadata_file"
-  // spin_wait $! "Adding metadata..."
-  // if [ "$?" -ne 0 ]
-  // then
-  // echo_error "Failed to add metadata"
-  // echo_info "stdout:"
-  // echo "$(cat <"$ASYNC_STDOUT")"
-  // echo_info "stderr:"
-  // echo "$(cat <"$ASYNC_STDERR")"
-  // exit 1
-  // fi
-  // echo_info "wrote file '$file_base-METADATA.$file_ext'"
+// write the metadata to a new temp file
+function writeMetadata(file, url, copyright) {
+  // create a new temp file
+  const fileExt = path.extname(file);
+  const tempFile = tmp.fileSync({ postfix: fileExt });
+  console.log('Temp file: ', tempFile.name);
 
   return new Promise((resolve, reject) => {
     // use ffprobe to get the metadata tags for the file in JSON format
     let ffmpegStdout = "";
     let ffmpegStderr = "";
-    // TODO: need a new output file now, dang it...
-    const ffmpeg = spawn('ffmpeg', ['-i', file, '-metadata', `copyright=${}`, '-metadata', `url=${}`, '-codec', 'copy', new_file);
+    // write the updated file to the temp file
+    // NOTE: '-y' here is for overwriting the temp file that already exists
+    //const ffmpeg = spawn('ffmpeg', ['-y', '-i', file, '-metadata', `copyright=${copyright}`, '-metadata', `url=${url}`, '-codec', 'copy', tempFile.name]);
+    const ffmpeg = spawn('ffmpeg', ['-y', '-i', file, '-metadata', `copyright=${copyright}`, '-metadata', `url=${url}`, '-codec', 'copy', tempFile.name]);
 
     ffmpeg.stdout.on('data', (data) => {
       ffmpegStdout += data;
@@ -299,16 +294,40 @@ function writeToFile(file, url, copyright) {
       ffmpegStderr += data;
     });
 
-    // TODO
-    ffmpeg.on('close', (code) => {
+    ffmpeg.on('exit', (code) => {
       if (code !== 0) {
-        //console.log
+        console.error(`ffmpeg exited with code ${code}`);
+        console.error(`stdout: ${ffmpegStdout}`);
+        console.error(`stderr: ${ffmpegStderr}`);
         reject(`ffmpeg exited with code ${code}`);
       } else {
-        resolve(JSON.parse(tagsJsonData));
+        console.log(`wrote metadata to file ${tempFile.name}`);
+        // return the temp file location
+        resolve(tempFile.name);
       }
     });
   });
+}
+
+// make sure the new file got the right info
+function verifyNewFile(fileName, url, copyright) {
+  console.log(`Checking new file ${fileName}`);
+  // get the updated file tags
+  return getFileTags(fileName)
+    // and parse that
+    .then((jsonData) => parseMetadataTags(jsonData))
+    .then((metadataTags) => {
+      console.log('got tags:');
+      console.log(metadataTags);
+      return new Promise((resolve, reject) => {
+        console.log("expected tags:");
+        console.log(`${url}, ${copyright}`);
+        console.log("got tags:");
+        console.log(`${metadataTags.url}, ${metadataTags.copyright}`);
+        // TODO
+        reject('testing this out...');
+      });
+    });
 }
 
 // output the file info to the console
@@ -320,8 +339,9 @@ async function modifyFileInfo(file, tags) {
   // show what is going to happen
   console.log(`url: ${tags.url} --> ${updateInfo.url}`);
   console.log(`copyright: ${tags.copyright} --> ${updateInfo.copyright}`);
-  // TODO: figure out how to make a temp file to switch and overwrite in place
-  //await writeToFile(file, tags.url, tags.copyright);
+  // write metadata which creates a new file because of how ffmpeg works
+  const newFile = await writeMetadata(file, updateInfo.url, updateInfo.copyright);
+  await verifyNewFile(newFile, updateInfo.url, updateInfo.copyright);
 }
 
 
