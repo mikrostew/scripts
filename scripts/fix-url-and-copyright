@@ -318,11 +318,12 @@ function verifyNewFile(fileName, url, copyright) {
       return new Promise((resolve, reject) => {
         if (url === metadataTags.url && copyright === metadataTags.copyright) {
           console.log(`${url}, ${copyright} ✅`);
+          resolve();
         } else {
-          console.log(`${url}, ${copyright} ❌`);
+          console.log(`${metadataTags.url}, ${metadataTags.copyright} ❌`);
+          console.log(`expected: ${url}, ${copyright}`);
+          reject('metadata did not update correctly');
         }
-        // TODO
-        reject('testing this out...');
       });
     });
 }
@@ -339,7 +340,9 @@ async function modifyFileInfo(file, tags) {
   // write metadata which creates a new file because of how ffmpeg works
   const newFile = await writeMetadata(file, updateInfo.url, updateInfo.copyright);
   await verifyNewFile(newFile, updateInfo.url, updateInfo.copyright);
-  // TODO: move the new file to the original file
+  // move the new file to the original file
+  console.log(`${newFile} -> ${file}`);
+  fs.renameSync(newFile, file);
 }
 
 
