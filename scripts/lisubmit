@@ -226,7 +226,6 @@ then
   @exit_on_error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
 
   # git submit
-  # (could do `git submit --async`, but whatever)
 
   # use --async?
   echo -n "Submit async? (to work on another branch) [Y/n]: "
