@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+# release npm project
+#  - update version in package.json
+#  - commit with version in commit message
+#  - [optional] publish to npm
+# (adapted from https://github.com/stefanpenner/dotfiles/blob/master/.config/fish/config.fish)
+
+# colors
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+
+# helper functions
+current_git_branch() {
+  echo "$(git rev-parse --abbrev-ref HEAD)"
+}
+do_cmd()
+{
+  local cmd_args="";
+  for arg in "$@";
+  do
+    case "$arg" in
+      *\ *)
+        cmd_args="$cmd_args \"$arg\""
+        ;;
+      *)
+        cmd_args="$cmd_args $arg"
+        ;;
+    esac;
+  done;
+  echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
+  command "$@"
+}
+do_git()
+{
+  do_cmd git "$@"
+}
+echo_err()
+{
+  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
+echo_info()
+{
+  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+}
+in_git_repo() {
+  git status >/dev/null && return 0 || echo_err "Not in git repo" && return 1
+}
+
+
+if in_git_repo
+then
+  tag="${1:?Must include a tag argument}"
+  current_branch="$(current_git_branch)"
+
+  if [ -f package.json ]; then
+    jq ".version=\"$tag\"" < package.json | sponge package.json
+    git diff
+    do_git add ./package.json
+  fi
+
+  do_git commit -m "release v$tag"
+  do_git tag "v$tag"
+  git log -n1
+  do_git push origin "$current_branch" "v$tag"
+
+  # TODO: need a prompt or cmd line flag for this
+  # if [ -f package.json ]; then
+  #   do_cmd npm publish
+  # fi
+
+  echo_info "released as v$tag 🎉"
+  echo -n "released as v$tag 🎉" | pbcopy
+fi
