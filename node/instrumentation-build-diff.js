@@ -8,7 +8,7 @@
 const fs = require('fs')
 
 // for cases where the builds are not done in the same directories
-// TODO: make these configurable
+// TODO: make these more configurable
 const BEFORE_DIRECTORY = '/Users/mistewar/src/repro/voyager-web_trunk-before'
 const AFTER_DIRECTORY = '/Users/mistewar/src/repro/voyager-web_trunk-after'
 const BEFORE_BROCCOLI_DIR = '/var/folders/2_/30gdkxy15px5zkj31mp58psc000lnr/T/broccoli-98099AtBTPddQge1j'
@@ -43,6 +43,15 @@ function writeToFile (filename, jsonContents) {
   console.log(`Writing file '${ filename }'`)
   fs.writeFileSync(filename, JSON.stringify(jsonContents, null, 2))
 }
+
+// order objects by descending self time, and store in an array
+function orderByTime (jsonObject) {
+  const convertToArray = Object.keys(jsonObject).map(k => jsonObject[k])
+  // sort descending order by self time
+  const sortedStats = convertToArray.sort((a, b) => b.selftime - a.selftime)
+  return sortedStats
+}
+
 
 // first, the combined stats
 
@@ -118,9 +127,12 @@ Object.keys(selfTimeStats2).forEach(node => {
   }
 })
 
-// TODO: order by time
+// order by time
+const selfTimeDiffArray = orderByTime(selfTimeDiff)
+const selfTimeGoneArray = orderByTime(selfTimeGone)
+const selfTimeAddedArray = orderByTime(selfTimeAdded)
 
 // write those out to files
-writeToFile('selftime-diff.json', selfTimeDiff)
-writeToFile('selftime-gone.json', selfTimeGone)
-writeToFile('selftime-added.json', selfTimeAdded)
+writeToFile('selftime-diff.json', selfTimeDiffArray)
+writeToFile('selftime-gone.json', selfTimeGoneArray)
+writeToFile('selftime-added.json', selfTimeAddedArray)
