@@ -103,6 +103,9 @@ Object.keys(selfTimeStats1).forEach(node => {
     selfTimeDiff[normalizedNode] = {
       id: normalizedNode,
       selftime: selfTimeStats2[afterNode].selftime - selfTimeStats1[beforeNode].selftime,
+      // preserve the selftime info, because that's useful to see how big of a change this is
+      originalSelfTime: selfTimeStats1[beforeNode].selftime,
+      newSelfTime: selfTimeStats2[afterNode].selftime,
       calls: selfTimeStats2[afterNode].calls - selfTimeStats1[beforeNode].calls,
       percent: selfTimeStats2[afterNode].percent - selfTimeStats1[beforeNode].percent,
     }
