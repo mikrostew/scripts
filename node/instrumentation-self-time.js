@@ -1,9 +1,9 @@
-/* eslint no-param-reassign: 0, no-console: 0 */
+/* eslint no-param-reassign: 0, no-console: 0, no-sync: 0 */
 
 // For use with instrumentation.*.json files from BROCCOLI_VIZ=1 ember b (or similar commands)
 
 // Run like:
-//  node instrumentation-self-time.js <file1> , <file2>, ...
+//  node instrumentation-self-time.js <file1> [<file2> ...]
 
 // This script:
 // * parses the instrumentation.*.json files,
