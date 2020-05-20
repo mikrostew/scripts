@@ -1,14 +1,16 @@
-#!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/liclean, and run 'generate-scripts.sh'
-###########################################################################
-#46019ef6340b30151e5a496e9bd4cef1
+#!/usr/bin/env bash
+# Clean dirs and files in a MP (for LinkedIn workflow)
 
+# how to use this:
+#  $ liclean
+
+# colors
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
+# imported functions
 do_cmd ()
 {
     local cmd_args="";
@@ -58,16 +60,24 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 in_linkedin_mp() {
   local file_to_check="product-spec.json"
   [ -f "$file_to_check" ] && return 0 || echo_err "$(pwd) is not a LinkedIn MultiProduct (missing $file_to_check)" && return -1
 }
+
 if in_linkedin_mp; then
   username="$(whoami)"
+
   if [ -n "$TMPDIR" ]; then
+    # $TMPDIR is set on OSX
     disk_cache_dir="$TMPDIR/$username"
   else
+    # try to determine the tmpdir used by node
+    # using node in the MP:
+    # (have to filter out the junk printed by just)
     using_just="$(just node -e 'console.log(require("os").tmpdir())' | sed -e '/^[[:space:]]*#/ d')"
+    # using system node:
     using_system="$(node -e 'console.log(require("os").tmpdir())' 2>/dev/null)"
     if [ -n "$using_just" ]; then
       disk_cache_dir="$using_just/$username"
@@ -77,8 +87,11 @@ if in_linkedin_mp; then
       echo_err "could not figure out tmp directory"
     fi
   fi
+
+  # default: remove build products and disk_cache
   echo_info "removing build files..."
-  do_cmd rm -rf .eyeglass_cache/ build/ dist/ tmp/
+  do_cmd rm -rf .eyeglass_cache/ build/ dist/ tmp/ logs/*.log
+
   if [ -n "$disk_cache_dir" ]; then
     echo_info "removing disk cache files..."
     do_cmd rm -rf "$disk_cache_dir"
