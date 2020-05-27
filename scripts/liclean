@@ -88,6 +88,10 @@ if in_linkedin_mp; then
     fi
   fi
 
+  # stop any processes that have not been properly cleaned up
+  echo_info "stopping stray processes..."
+  do_cmd killall node ember java
+
   # default: remove build products and disk_cache
   echo_info "removing build files..."
   do_cmd rm -rf .eyeglass_cache/ build/ dist/ tmp/ logs/*.log
