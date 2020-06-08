@@ -101,7 +101,6 @@ do
 
   if [ -L "$HOME/$first_location" ]
   then
-    echo "FIRST symlink exists, check that it points to the right place..."
     # symlink exists, check if it points to the right place
     link_target="$(readlink $HOME/$first_location)"
     if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
@@ -110,7 +109,6 @@ do
     fi
   elif [ -L "$HOME/$second_location" ]
   then
-    echo "SECOND symlink exists, check that it points to the right place..."
     # symlink exists, check if it points to the right place
     link_target="$(readlink $HOME/$second_location)"
     if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
