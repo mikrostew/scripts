@@ -71,27 +71,51 @@ links[".bundle"]=".bundle"
 # rubocop
 links[".rubocop.yml"]=".rubocop.yml"
 
-# platform-specific
+# SSH is platform-specific, and can be linked from a couple of places now, ugh
 if @system_is_darwin?
 then
-  # ssh
-  links[".ssh/config"]=".ssh-config-mac"
+  # Mac
+  links[".ssh/config|.ssh/config.custom"]=".ssh-config-mac"
 elif @system_is_linux?
 then
-  # ssh
-  links[".ssh/config"]=".ssh-config-linux"
+  # Linux
+  links[".ssh/config|.ssh/config.custom"]=".ssh-config-linux"
 fi
 
 # verify the links
 for i in "${!links[@]}"
 do
-  if [ -L "$HOME/$i" ]
+  # special case for things which can be linked from either of 2 places (only SSH right now)
+  # (if key contains '|', then split on that, and check that either one exists)
+  if [[ "$i" == *"|"* ]]
   then
+    # get the first location (delete everything after & including the delimiter)
+    first_location="${i%|*}"
+    # get the second location (delete everything before & including the delimiter)
+    second_location="${i#*|}"
+  else
+    # default, only one location this can link from
+    first_location="$i"
+    second_location=""
+  fi
+
+  if [ -L "$HOME/$first_location" ]
+  then
+    echo "FIRST symlink exists, check that it points to the right place..."
     # symlink exists, check if it points to the right place
-    link_target="$(readlink $HOME/$i)"
+    link_target="$(readlink $HOME/$first_location)"
     if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
     then
-      echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' has been changed!"
+      echo_err "symlink '$HOME/$first_location => $checkout_dir/${links[$i]}' has been changed!"
+    fi
+  elif [ -L "$HOME/$second_location" ]
+  then
+    echo "SECOND symlink exists, check that it points to the right place..."
+    # symlink exists, check if it points to the right place
+    link_target="$(readlink $HOME/$second_location)"
+    if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
+    then
+      echo_err "symlink '$HOME/$second_location => $checkout_dir/${links[$i]}' has been changed!"
     fi
   else
     echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' does not exist!"
