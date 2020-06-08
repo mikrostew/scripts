@@ -1,19 +1,19 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/verify_dotfile_links, and run 'generate-scripts.sh'
-###########################################################################
-#53fde1add7112ab98f08e8955d56196e
 
+# colors
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
+# helper functions
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
+
+# help text
 show_help_msg() {
-  echo "verify_dotfile_links - Verify the links to the dotfiles haven't changed"
-  echo 'Usage: verify_dotfile_links [options] [checkout_dir]'
+  echo "verify-dotfile-links - Verify the links to the dotfiles haven't changed"
+  echo 'Usage: verify-dotfile-links [options] [checkout_dir]'
   echo ''
   echo 'Options:'
   echo '  -h               Show this help message'
@@ -21,6 +21,8 @@ show_help_msg() {
   echo 'Arguments:'
   echo '  checkout_dir     (optional) The directory where the repo is checked out (defaults to "$HOME/dotfiles")'
 }
+
+# argument parsing
 while getopts ":h" opt
 do
   case $opt in
@@ -39,28 +41,53 @@ do
 done
 shift $((OPTIND-1))
 checkout_dir="${1:-$HOME/dotfiles}"
+
+# check dependent commands
 @uses_cmds readlink
+
+# use bash 4.x associative arrays
 declare -A links
+
+# vim
 links[".vimrc"]=".vimrc"
 links[".vim"]=".vim"
+
+# bash
 links[".bash_profile"]=".bash_profile"
 links[".bashrc"]=".bashrc"
+
+# inputrc
 links[".inputrc"]=".inputrc"
+
+# gitignore
 links[".gitignore"]=".gitignore"
+
+# tmux
 links[".tmux.conf"]=".tmux.conf"
+
+# bundler
 links[".bundle"]=".bundle"
+
+# rubocop
 links[".rubocop.yml"]=".rubocop.yml"
+
+# platform-specific
 if @system_is_darwin?
 then
+  # ssh
   links[".ssh/config"]=".ssh-config-mac"
 elif @system_is_linux?
 then
+  # ssh
   links[".ssh/config"]=".ssh-config-linux"
 fi
+
+# verify the links
 for i in "${!links[@]}"
 do
   if [ -L "$HOME/$i" ]
   then
+    # symlink exists, check if it points to the right place
     link_target="$(readlink $HOME/$i)"
     if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
     then
