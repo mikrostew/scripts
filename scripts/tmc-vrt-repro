@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Process a downloaded .tar.gz of the backstop data to review why the TMC job failed
+
+# fail the script if any command fails
+set -e
+
+
+# this is the folder where I have this setup, but really it could be a temp folder, whatever
+cd "$HOME/Desktop/visreg-repro/"
+
+# delete the current stuff that is probably there
+rm -rf backstop-data.tar.gz ember-backstop/
+
+# this should have been downloaded from CRT
+mv "$HOME/Downloads/backstop-data.tar.gz" ./
+
+# extract it
+tar -xzvf backstop-data.tar.gz
+
+# open the folder containing the index.html in Finder
+open ember-backstop/backstop_data/html_report/
