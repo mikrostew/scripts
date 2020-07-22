@@ -59,8 +59,11 @@ links[".bashrc"]=".bashrc"
 # inputrc
 links[".inputrc"]=".inputrc"
 
-# gitignore
+# git
 links[".gitignore"]=".gitignore"
+links[".gitconfig"]=".gitconfig"
+links[".gitconfig-oss"]=".gitconfig-oss"
+links[".gitconfig-work"]=".gitconfig-work"
 
 # tmux
 links[".tmux.conf"]=".tmux.conf"

@@ -57,8 +57,11 @@ links[".bashrc"]=".bashrc"
 # inputrc
 links[".inputrc"]=".inputrc"
 
-# gitignore
+# git
 links[".gitignore"]=".gitignore"
+links[".gitconfig"]=".gitconfig"
+links[".gitconfig-oss"]=".gitconfig-oss"
+links[".gitconfig-work"]=".gitconfig-work"
 
 # tmux
 links[".tmux.conf"]=".tmux.conf"
@@ -76,6 +79,7 @@ links[".config/karabiner"]="karabiner"
 if [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
 then
   # ssh
+  # TODO: support something like ".ssh/config|.ssh/config.custom", like the verify script
   links[".ssh/config"]=".ssh-config-mac"
 elif [ "$(uname -s | tr [:upper:] [:lower:])" == "linux" ]
 then
@@ -84,6 +88,7 @@ then
 fi
 
 # create the links
+# TODO: support config.custom, like the verify script
 for i in "${!links[@]}"
 do
   echo -n "$HOME/$i => $checkout_dir/${links[$i]}"
