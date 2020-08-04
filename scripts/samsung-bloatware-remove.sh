@@ -53,6 +53,9 @@ adb shell "pm uninstall -k --user 0 com.samsung.android.samsungpassautofill"
 # Samsung Dex for PC
 adb shell "pm uninstall -k --user 0 com.sec.android.app.dexonpc"
 
+# Samsung Social
+adb shell "pm uninstall -k --user 0 com.samsung.android.app.social"
+
 
 ##########################
 # duplicate apps
