@@ -66,10 +66,10 @@ then
   git log -n1
   do_git push origin "$current_branch" "v$tag"
 
-  # TODO: need a prompt or cmd line flag for this
-  # if [ -f package.json ]; then
-  #   do_cmd npm publish
-  # fi
+  # TODO: add a prompt or cmd line flag for this
+  if [ -f package.json ]; then
+    do_cmd npm publish
+  fi
 
   echo_info "released as v$tag 🎉"
   echo -n "released as v$tag 🎉" | pbcopy
