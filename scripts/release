@@ -48,9 +48,19 @@ echo_info()
 in_git_repo() {
   git status >/dev/null && return 0 || echo_err "Not in git repo" && return 1
 }
+on_main_branch() {
+  current_branch="$(current_git_branch)"
+  if [ "$current_branch" == "main" ] || [ "$current_branch" == "master" ]
+  then
+    return 0
+  else
+    echo_err ">_<  Must be on branch 'main' or 'master' for this"
+    return -1
+  fi
+}
 
 
-if in_git_repo
+if in_git_repo && on_main_branch
 then
   tag="${1:?Must include a tag argument}"
   current_branch="$(current_git_branch)"
