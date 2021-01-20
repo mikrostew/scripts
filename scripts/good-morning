@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Automatically do things that I do every morning manually
+
+# TODO: make the output of this nicer, eventually
+
+current_git_branch ()
+{
+    echo "$(git rev-parse --abbrev-ref HEAD)"
+}
+do_cmd ()
+{
+    local cmd_args="";
+    for arg in "$@";
+    do
+        case "$arg" in
+            *\ *)
+                cmd_args="$cmd_args \"$arg\""
+            ;;
+            *)
+                cmd_args="$cmd_args $arg"
+            ;;
+        esac;
+    done;
+    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
+    command "$@"
+}
+do_git ()
+{
+    do_cmd git "$@"
+}
+
+# TODO: first, check that I am connected to VPN, and pause & wait for keypress
+
+# update repos
+
+# Voyager Web
+echo "Voyager Web"
+cd "/Users/$USER/src/li/voyager-web_trunk/"
+# if not on the master branch, checkout master, pull, and rebase
+branch_name="$(current_git_branch)"
+# TODO: check for "main" as well?
+if [ "$branch_name" != "master" ]; then
+  do_git checkout master
+  # pull and rebase from master
+  gpr
+  # go back to the original branch
+  do_git checkout "$branch_name"
+else
+  # pull and rebase from master
+  gpr
+fi
+
+# TODO: do that for more repos
