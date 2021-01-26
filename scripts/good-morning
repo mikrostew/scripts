@@ -36,8 +36,9 @@ do_git ()
 
 # TODO: first, check that I am connected to VPN, and pause & wait for keypress
 
-# open activiy monitor
-
+# open activity monitor
+"/System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor" 2>/dev/null &
+exit
 
 # update homebrew
 echo "homebrew"
