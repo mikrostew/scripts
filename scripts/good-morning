@@ -38,7 +38,6 @@ do_git ()
 
 # open activity monitor
 "/System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor" 2>/dev/null &
-exit
 
 # update homebrew
 echo "homebrew"
