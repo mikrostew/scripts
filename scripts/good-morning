@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 # Automatically do things that I do every morning manually
 
-# TODO: make the output of this nicer, eventually
+# TODO: make the output of this nicer, eventually...
+
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
 
 current_git_branch ()
 {
@@ -31,6 +36,13 @@ do_git ()
 
 # TODO: first, check that I am connected to VPN, and pause & wait for keypress
 
+# open activiy monitor
+
+
+# update homebrew
+echo "homebrew"
+do_cmd brew update
+
 # update repos
 
 # Voyager Web
@@ -50,4 +62,4 @@ else
   gpr
 fi
 
-# TODO: do that for more repos
+# TODO: do that for any more repos?
