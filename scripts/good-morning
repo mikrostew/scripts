@@ -43,7 +43,8 @@ echo_err ()
 }
 
 
-# open activity monitor
+# open activity monitor (after making sure it's not running)
+killall "Activity Monitor"
 "/System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor" 2>/dev/null &
 
 # update homebrew
