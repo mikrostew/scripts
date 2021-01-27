@@ -33,8 +33,15 @@ do_git ()
 {
     do_cmd git "$@"
 }
+echo_ack ()
+{
+    echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
+}
+echo_err ()
+{
+    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+}
 
-# TODO: first, check that I am connected to VPN, and pause & wait for keypress
 
 # open activity monitor
 "/System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor" 2>/dev/null &
@@ -42,6 +49,16 @@ do_git ()
 # update homebrew
 echo "homebrew"
 do_cmd brew update
+
+# check that I am connected to VPN, and pause & wait for keypress
+if ping -c1 tools.corp.linkedin.com
+then
+  echo_ack "Looks like you're connected to VPN"
+else
+  echo_err "Not connected to VPN"
+  echo "Please connect to VPN, then press any key to continue..."
+  read -n1 -s
+fi
 
 # update repos
 
