@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# run an Application given its path
+
+# colors
+COLOR_RESET='\033[0m'
+COLOR_FG_BOLD_GREEN='\033[1;32m'
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_RED='\033[0;31m'
+
+# helper functions
+app-run-info() {
+  action="$1"
+  path="$2"
+
+  # likely the app name, display that to be nice
+  app_name="${app_path##*/}"
+
+  echo -e -n " ${COLOR_FG_BOLD_GREEN}$action${COLOR_RESET} $app_name..."
+}
+app-started() {
+  echo -e "[${COLOR_FG_GREEN}OK${COLOR_RESET}]"
+}
+app-error() {
+  echo -e "(${COLOR_FG_RED}error${COLOR_RESET})"
+}
+
+app_path="$1"
+
+app-run-info "start" "$app_path"
+"$app_path" >/dev/null 2>&1 &
+app_pid="$!"
+kill -0 "$app_pid" && app-started || app-error

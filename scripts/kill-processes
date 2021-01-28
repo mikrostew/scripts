@@ -1,33 +1,6 @@
 #!/usr/bin/env bash
 # Auto-kill a bunch of things to reset at the beginning of the day, or whenever
 
-# colors
-COLOR_RESET='\033[0m'
-COLOR_FG_BOLD_GREEN='\033[1;32m'
-COLOR_FG_GREEN='\033[0;32m'
-COLOR_FG_RED='\033[0;31m'
-
-# helper functions
-proc-kill-info() {
-  action="$1"
-  details="$2"
-
-  echo -e -n " ${COLOR_FG_BOLD_GREEN}$action${COLOR_RESET} $details..."
-}
-proc-killed() {
-  echo -e "[${COLOR_FG_GREEN}OK${COLOR_RESET}]"
-}
-proc-not-found() {
-  echo -e "(${COLOR_FG_RED}not found${COLOR_RESET})"
-}
-kill-proc-name() {
-  proc_name="$1"
-
-  proc-kill-info "kill" "'$proc_name'"
-  pkill "$proc_name" && proc-killed || proc-not-found
-}
-
-
 ##############################
 # let the killing begin
 ##############################

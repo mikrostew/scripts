@@ -44,15 +44,30 @@ echo_err ()
 
 
 # open activity monitor (after making sure it's not running)
-killall "Activity Monitor"
-"/System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor" 2>/dev/null &
+kill-proc-name "Activity Monitor"
+run-app-path "/System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor"
+
+# kill any programs that I don't want to be running
+kill-proc-name "zoom.us"
+kill-proc-name "App Store"
+kill-proc-name "Discord"
+
+# kill and restart some things
+kill-proc-name "Outlook"
+# if successful, sometimes that will bring up a dialog about force quitting, whatever, don't care, kill that too
+sleep 0.5
+kill-proc-name "Microsoft Error Reporting"
+run-app-path "/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook"
+
+kill-proc-name "Slack"
+run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
 
 # update homebrew
 echo "homebrew"
 do_cmd brew update
 
 # check that I am connected to VPN, and pause & wait for keypress
-if ping -c1 tools.corp.linkedin.com
+if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
 then
   echo_ack "Looks like you're connected to VPN"
 else
