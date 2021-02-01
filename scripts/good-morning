@@ -76,6 +76,9 @@ else
   read -n1 -s
 fi
 
+# update engtools
+brew engtools install
+
 # update repos
 
 # Voyager Web
@@ -96,3 +99,6 @@ else
 fi
 
 # TODO: do that for any more repos?
+
+echo_ack ""
+echo_ack "Good Morning!"
