@@ -106,5 +106,8 @@ fi
 
 # TODO: do that for any more repos?
 
+# end on a happy note
 echo_ack ""
 echo_ack "Good Morning!"
+echo_ack ""
+imgcat /usr/local/SyncThing/SyncImages/coffee.jpg
