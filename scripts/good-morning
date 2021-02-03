@@ -57,9 +57,11 @@ kill-proc-name "Outlook"
 # if successful, sometimes that will bring up a dialog about force quitting, whatever, don't care, kill that too
 sleep 0.5
 kill-proc-name "Microsoft Error Reporting"
+sleep 0.5
 run-app-path "/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook"
 
 kill-proc-name "Slack"
+sleep 0.5
 run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
 
 # update homebrew
