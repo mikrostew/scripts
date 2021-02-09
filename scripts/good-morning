@@ -73,6 +73,7 @@ do_cmd brew upgrade git
 do_cmd brew upgrade git-gui
 #do_cmd brew upgrade vim  # this is handled by macvim
 do_cmd brew upgrade macvim
+do_cmd brew upgrade terminal-notifier
 
 # check that I am connected to VPN, and pause & wait for keypress
 if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
