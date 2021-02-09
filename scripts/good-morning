@@ -75,6 +75,16 @@ do_cmd brew upgrade git-gui
 do_cmd brew upgrade macvim
 do_cmd brew upgrade terminal-notifier
 
+# OSS repos
+
+echo "Dotfiles"
+cd "$HOME/dotfiles/"
+# pull, rebase, push
+grap
+
+# TODO: do that for any more repos?
+
+
 # check that I am connected to VPN, and pause & wait for keypress
 if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
 then
@@ -88,11 +98,10 @@ fi
 # update engtools
 do_cmd brew engtools install
 
-# update repos
+# LI repos
 
-# Voyager Web
 echo "Voyager Web"
-cd "/Users/$USER/src/li/voyager-web_trunk/"
+cd "$HOME/src/li/voyager-web_trunk/"
 # if not on the master branch, checkout master, pull, and rebase
 branch_name="$(current_git_branch)"
 # TODO: check for "main" as well?
