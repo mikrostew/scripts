@@ -74,6 +74,7 @@ do_cmd brew upgrade git-gui
 #do_cmd brew upgrade vim  # this is handled by macvim
 do_cmd brew upgrade macvim
 do_cmd brew upgrade terminal-notifier
+do_cmd brew upgrade youtube-dl
 
 # OSS repos
 
