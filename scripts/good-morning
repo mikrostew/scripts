@@ -93,6 +93,7 @@ wait-for-command() {
   fi
 }
 
+echo "Applications"
 
 # open activity monitor (after making sure it's not running)
 kill-proc-name "Activity Monitor"
@@ -115,6 +116,8 @@ kill-proc-name "Slack"
 sleep 0.5
 run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
 
+echo "Homebrew"
+
 # update homebrew before upgrading things
 wait-for-command brew update
 
@@ -128,6 +131,7 @@ wait-for-command brew upgrade youtube-dl
 # OSS repos
 
 echo "Dotfiles"
+
 cd "$HOME/dotfiles/"
 # pull, rebase, push
 gpr && gp
@@ -145,12 +149,15 @@ else
   read -n1 -s
 fi
 
+echo "Engtools"
+
 # update engtools
 wait-for-command brew engtools install
 
 # LI repos
 
 echo "Voyager Web"
+
 cd "$HOME/src/li/voyager-web_trunk/"
 # if not on the master branch, checkout master, pull, and rebase
 branch_name="$(current_git_branch)"
