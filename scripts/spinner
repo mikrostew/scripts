@@ -1,12 +1,18 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/spinner, and run 'generate-scripts.sh'
-###########################################################################
-#a733d652857cd39251a37f4eef17491a
+# Show a busy spinner while the input PID is running
+
+# use this like:
+#  $ sleep 10 &
+#  $ spinner $!
+#  ⠼
+
+# or you can add an optional message for the spinner
+#  $ spinner -m "grepping files..." $!
+#  ⠼ grepping files...
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
@@ -22,6 +28,8 @@ show_help_msg() {
   echo 'Arguments:'
   echo '  cmd_pid          PID of the long-running command'
 }
+
+# parse input arguments
 while getopts ":m:h" opt
 do
   case $opt in
@@ -43,7 +51,9 @@ do
 done
 shift $((OPTIND-1))
 cmd_pid="${1:?Missing argument \'cmd_pid\'}"
+
 spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
+
 num_chars=${#spin_chars}
 total_length=$(( 2 + ${#spin_msg} ))
 i=0
@@ -53,4 +63,15 @@ do
   printf "\r${spin_chars:$i:1} ${spin_msg}" >&2
   sleep 0.1
 done
+
+# get the exit code of that process
+# NOTE: can't actually do this here, because the process will not be a child of this script
+#   (will have to wait in the code that calls this script)
+#wait $cmd_pid
+#exit_code="$?"
+
+# attempt to clean up (doesn't always work)
 printf "\r%-${total_length}s\r" ' ' >&2
+
+# use the exit code of the input PID
+#exit "$exit_code"
