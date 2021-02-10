@@ -81,7 +81,7 @@ do_cmd brew upgrade youtube-dl
 echo "Dotfiles"
 cd "$HOME/dotfiles/"
 # pull, rebase, push
-grap
+gpr && gp
 
 # TODO: do that for any more repos?
 
