@@ -3,7 +3,7 @@
 
 # TODO: make the output of this nicer, eventually...
 
-COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -42,6 +42,57 @@ echo_err ()
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 
+# show a busy spinner while command is running
+# and only show output if there is an error
+# TODO: add this to badash
+wait-for-command() {
+  # TODO: initial arg for whether or not to cleanup the output?
+  # input is a command array
+  local cmd_string="$@"
+
+  # calculate things for the output
+  local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
+  local num_chars=${#spin_chars}
+  local total_length=$(( 2 + ${#cmd_string} ))
+
+  # run the command async, and capture the PID
+  local cmd_start_time=$(gdate +%s%3N)
+  exec 3< <("$@" 2>&1)
+  local cmd_pid="$!"
+
+  # wait for the command to complete, showing a busy spinner
+  i=0
+  while kill -0 $cmd_pid 2>/dev/null
+  do
+    i=$(( (i + 1) % num_chars ))
+    printf "\r${spin_chars:$i:1} ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '${cmd_string}'" >&2
+    sleep 0.1
+  done
+  # calculate total runtime (approx)
+  local cmd_stop_time=$(gdate +%s%3N)
+  local cmd_run_time=$((cmd_stop_time - cmd_start_time))
+
+  # get the exit code of that process
+  wait $cmd_pid
+  local exit_code="$?"
+
+  # TODO: attempt to clean up, depending on option (doesn't always work)
+  # but still check if it failed?
+  #printf "\r%-${total_length}s\r" ' ' >&2
+
+  printf "\r  ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
+
+  # check that the command was successful
+  if [ "$exit_code" == 0 ]
+  then
+    printf " [${COLOR_FG_GREEN}OK${COLOR_RESET}]\n"
+  else
+    printf " [${COLOR_FG_RED}ERROR${COLOR_RESET}]\n"
+    # if it fails, show the command output
+    cat <&3
+  fi
+}
+
 
 # open activity monitor (after making sure it's not running)
 kill-proc-name "Activity Monitor"
@@ -64,17 +115,15 @@ kill-proc-name "Slack"
 sleep 0.5
 run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
 
-# update homebrew
-echo "homebrew"
-do_cmd brew update
+# update homebrew before upgrading things
+wait-for-command brew update
 
 # upgrade things installed via homebrew
-do_cmd brew upgrade git
-do_cmd brew upgrade git-gui
-#do_cmd brew upgrade vim  # this is handled by macvim
-do_cmd brew upgrade macvim
-do_cmd brew upgrade terminal-notifier
-do_cmd brew upgrade youtube-dl
+wait-for-command brew upgrade git
+wait-for-command brew upgrade git-gui
+wait-for-command brew upgrade macvim # upgrading vim is handled by macvim
+wait-for-command brew upgrade terminal-notifier
+wait-for-command brew upgrade youtube-dl
 
 # OSS repos
 
@@ -97,7 +146,7 @@ else
 fi
 
 # update engtools
-do_cmd brew engtools install
+wait-for-command brew engtools install
 
 # LI repos
 
