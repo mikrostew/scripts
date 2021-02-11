@@ -1,37 +1,15 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gpr, and run 'generate-scripts.sh'
-###########################################################################
-#4d4ada3c88ee7ff0e7b8c3e47da69014
+# [git] Pull changes from origin and rebase local changes (Git Pull Rebase)
 
+COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
+# helpers
 current_git_branch ()
 {
     echo "$(git rev-parse --abbrev-ref HEAD)"
-}
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
 }
 echo_err ()
 {
@@ -61,5 +39,65 @@ do
   esac
 done
 shift $((OPTIND-1))
+
+# show a busy spinner while command is running
+# and only show output if there is an error
+# TODO: add this to badash
+wait-for-command() {
+  # TODO: initial arg for whether or not to cleanup the output?
+  # input is a command array
+  local cmd_string="$@"
+
+  # calculate things for the output
+  local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
+  local num_chars=${#spin_chars}
+  local total_length=$(( 2 + ${#cmd_string} ))
+
+  # run the command async, and capture the PID
+  local cmd_start_time=$(gdate +%s%3N)
+  exec 3< <("$@" 2>&1)
+  local cmd_pid="$!"
+
+  # wait for the command to complete, showing a busy spinner
+  i=0
+  while kill -0 $cmd_pid 2>/dev/null
+  do
+    i=$(( (i + 1) % num_chars ))
+    printf "\r${spin_chars:$i:1} ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '${cmd_string}'" >&2
+    sleep 0.1
+  done
+  # calculate total runtime (approx)
+  local cmd_stop_time=$(gdate +%s%3N)
+  local cmd_run_time=$((cmd_stop_time - cmd_start_time))
+
+  # get the exit code of that process
+  wait $cmd_pid
+  local exit_code="$?"
+
+  # TODO: attempt to clean up, depending on option (doesn't always work)
+  # but still check if it failed?
+  #printf "\r%-${total_length}s\r" ' ' >&2
+
+  printf "\r  ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
+
+  # check that the command was successful
+  if [ "$exit_code" == 0 ]
+  then
+    printf " [${COLOR_FG_GREEN}OK${COLOR_RESET}]\n"
+  else
+    printf " [${COLOR_FG_RED}ERROR${COLOR_RESET}]\n"
+    # if it fails, show the command output
+    cat <&3
+  fi
+}
+
+
 branch_name=$(current_git_branch)
-do_git fetch --all --prune && do_git rebase "origin/$branch_name"
+
+# sometimes `git pull --rebase` fails with "fatal: Cannot rebase onto multiple branches."
+# could try doing the full command (from https://stackoverflow.com/a/35844073)
+# git pull origin "$branch_name" --rebase
+# but sometimes that also fails,
+# so be more explicit and split it into 2 commands (adapted from https://stackoverflow.com/a/35844073)
+# (also prunes, which is a nice benefit)
+wait-for-command git fetch --all --prune && wait-for-command git rebase "origin/$branch_name"
