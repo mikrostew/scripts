@@ -20,6 +20,4 @@ branch_name=$(current_git_branch)
 # but sometimes that also fails,
 # so be more explicit and split it into 2 commands (adapted from https://stackoverflow.com/a/35844073)
 # (also prunes, which is a nice benefit)
-@wait-for-command git fetch --all --prune
-@exit_on_error "Failed to fetch"
-@wait-for-command git rebase "origin/$branch_name"
+@wait-for-command git fetch --all --prune && @wait-for-command git rebase "origin/$branch_name"
