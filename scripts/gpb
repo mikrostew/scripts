@@ -1,37 +1,12 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gpb, and run 'generate-scripts.sh'
-###########################################################################
-#37fb7bf159e5110a3ee21bacc58cc2e0
+# [git] Push current local branch to origin, and set upstream (Git Push Branch)
 
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 current_git_branch ()
 {
     echo "$(git rev-parse --abbrev-ref HEAD)"
-}
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
 }
 echo_err ()
 {
@@ -41,32 +16,9 @@ in_git_repo ()
 {
     git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
 }
-show_help_msg() {
-  echo "gpb - [git] Push current local branch to origin, and set upstream (Git Push Branch)"
-  echo 'Usage: gpb [options]'
-  echo ''
-  echo 'Options:'
-  echo '  -h               Show this help message'
-}
-while getopts ":h" opt
-do
-  case $opt in
-    h)
-      show_help_msg && exit 0
-      ;;
-    \?)
-      echo_err "$0: invalid option '-$OPTARG'"
-      exit 1
-      ;;
-    :)
-      echo_err "$0: option '-$OPTARG' requires an argument"
-      exit 1
-      ;;
-  esac
-done
-shift $((OPTIND-1))
+
 if in_git_repo
 then
   branch_name=$(current_git_branch)
-  do_git push -u origin "$branch_name"
+  @wait-for-command git push -u origin "$branch_name"
 fi
