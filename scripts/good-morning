@@ -3,6 +3,7 @@
 
 # TODO: make the output of this nicer, eventually...
 
+COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -43,17 +44,20 @@ echo_err ()
 }
 
 # different things for different machines
-hostname="$(hostname)"
-if [[ "$hostname" =~ MacBook-Air ]]
+HOST_NAME="$(hostname)"
+if [[ "$HOST_NAME" =~ MacBook-Air ]]
 then
   machine="Home Laptop"
-elif [[ "$hostname" =~ mistewar-mn ]]
+elif [[ "$HOST_NAME" =~ mistewar-mn ]]
 then
   machine="Work Laptop"
 else
-  echo_err "Machine '$hostname' has not been configured for this script"
+  echo_err "Machine '$HOST_NAME' has not been configured for this script"
   exit 1
 fi
+echo ""
+echo -e "Running for '${COLOR_FG_BOLD_BLUE}$machine${COLOR_RESET}' ($HOST_NAME)"
+echo ""
 
 echo "Applications"
 
