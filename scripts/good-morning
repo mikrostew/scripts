@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 # Automatically do things that I do every morning manually
 
 # TODO: make the output of this nicer, eventually...
@@ -42,56 +42,18 @@ echo_err ()
     echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 
-# show a busy spinner while command is running
-# and only show output if there is an error
-# TODO: add this to badash
-wait-for-command() {
-  # TODO: initial arg for whether or not to cleanup the output?
-  # input is a command array
-  local cmd_string="$@"
-
-  # calculate things for the output
-  local spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
-  local num_chars=${#spin_chars}
-  local total_length=$(( 2 + ${#cmd_string} ))
-
-  # run the command async, and capture the PID
-  local cmd_start_time=$(gdate +%s%3N)
-  exec 3< <("$@" 2>&1)
-  local cmd_pid="$!"
-
-  # wait for the command to complete, showing a busy spinner
-  i=0
-  while kill -0 $cmd_pid 2>/dev/null
-  do
-    i=$(( (i + 1) % num_chars ))
-    printf "\r${spin_chars:$i:1} ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '${cmd_string}'" >&2
-    sleep 0.1
-  done
-  # calculate total runtime (approx)
-  local cmd_stop_time=$(gdate +%s%3N)
-  local cmd_run_time=$((cmd_stop_time - cmd_start_time))
-
-  # get the exit code of that process
-  wait $cmd_pid
-  local exit_code="$?"
-
-  # TODO: attempt to clean up, depending on option (doesn't always work)
-  # but still check if it failed?
-  #printf "\r%-${total_length}s\r" ' ' >&2
-
-  printf "\r  ${COLOR_FG_BOLD_GREEN}running${COLOR_RESET} '$cmd_string' (${cmd_run_time}ms)" >&2
-
-  # check that the command was successful
-  if [ "$exit_code" == 0 ]
-  then
-    printf " [${COLOR_FG_GREEN}OK${COLOR_RESET}]\n"
-  else
-    printf " [${COLOR_FG_RED}ERROR${COLOR_RESET}]\n"
-    # if it fails, show the command output
-    cat <&3
-  fi
-}
+# different things for different machines
+hostname="$(hostname)"
+if [[ "$hostname" =~ MacBook-Air ]]
+then
+  machine="Home Laptop"
+elif [[ "$hostname" =~ mistewar-mn ]]
+then
+  machine="Work Laptop"
+else
+  echo_err "Machine '$hostname' has not been configured for this script"
+  exit 1
+fi
 
 echo "Applications"
 
@@ -104,80 +66,96 @@ kill-proc-name "zoom.us"
 kill-proc-name "App Store"
 kill-proc-name "Discord"
 
-# kill and restart some things
-kill-proc-name "Outlook"
-# if successful, sometimes that will bring up a dialog about force quitting, whatever, don't care, kill that too
-sleep 0.5
-kill-proc-name "Microsoft Error Reporting"
-sleep 0.5
-run-app-path "/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook"
+if [ "$machine" == "Work Laptop" ]
+then
+  # kill and restart some things
+  kill-proc-name "Outlook"
+  # if successful, sometimes that will bring up a dialog about force quitting, whatever, don't care, kill that too
+  sleep 0.5
+  kill-proc-name "Microsoft Error Reporting"
+  sleep 0.5
+  run-app-path "/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook"
 
-kill-proc-name "Slack"
-sleep 0.5
-run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
+  kill-proc-name "Slack"
+  sleep 0.5
+  run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
+fi
 
 echo "Homebrew"
 
 # update homebrew before upgrading things
-wait-for-command brew update
+@wait-for-command brew update
 
 # upgrade things installed via homebrew
-wait-for-command brew upgrade bats-core
-wait-for-command brew upgrade git
-wait-for-command brew upgrade git-gui
-wait-for-command brew upgrade macvim # upgrading vim is handled by macvim
-wait-for-command brew upgrade terminal-notifier
-wait-for-command brew upgrade youtube-dl
+@wait-for-command brew upgrade bats-core
+@wait-for-command brew upgrade git
+@wait-for-command brew upgrade git-gui
+@wait-for-command brew upgrade macvim # upgrading vim is handled by macvim
+@wait-for-command brew upgrade terminal-notifier
+@wait-for-command brew upgrade youtube-dl
 
 # OSS repos
 
 echo "Dotfiles"
-
 cd "$HOME/dotfiles/"
-# pull, rebase, push
+# pull, rebase, push to sync anything I've changed recently
 gpr && gp
 
-# TODO: do that for any more repos?
+echo "Badash"
+cd "/usr/local/lib/badash/"
+# just pull and rebase, to stay current with master
+gpr
+
+# TODO: any more repos?
 
 
-# check that I am connected to VPN, and pause & wait for keypress
-if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
+if [ "$machine" == "Work Laptop" ]
 then
-  echo_ack "Looks like you're connected to VPN"
-else
-  echo_err "Not connected to VPN"
-  echo "Please connect to VPN, then press any key to continue..."
-  read -n1 -s
+  # check that I am connected to VPN, and pause & wait for keypress
+  if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
+  then
+    echo_ack "Looks like you're connected to VPN"
+  else
+    echo_err "Not connected to VPN"
+    echo "Please connect to VPN, then press any key to continue..."
+    read -n1 -s
+  fi
+
+  echo "Engtools"
+
+  # update engtools
+  @wait-for-command brew engtools install
+
+  # LI repos
+
+  echo "Voyager Web"
+
+  cd "$HOME/src/li/voyager-web_trunk/"
+  # if not on the master branch, checkout master, pull, and rebase
+  branch_name="$(current_git_branch)"
+  # TODO: check for "main" as well?
+  if [ "$branch_name" != "master" ]; then
+    do_git checkout master
+    # pull and rebase from master
+    gpr
+    # go back to the original branch
+    do_git checkout "$branch_name"
+  else
+    # pull and rebase from master
+    gpr
+  fi
+
+  # TODO: any more repos?
 fi
-
-echo "Engtools"
-
-# update engtools
-wait-for-command brew engtools install
-
-# LI repos
-
-echo "Voyager Web"
-
-cd "$HOME/src/li/voyager-web_trunk/"
-# if not on the master branch, checkout master, pull, and rebase
-branch_name="$(current_git_branch)"
-# TODO: check for "main" as well?
-if [ "$branch_name" != "master" ]; then
-  do_git checkout master
-  # pull and rebase from master
-  gpr
-  # go back to the original branch
-  do_git checkout "$branch_name"
-else
-  # pull and rebase from master
-  gpr
-fi
-
-# TODO: do that for any more repos?
 
 # end on a happy note
 echo_ack ""
 echo_ack "Good Morning!"
 echo_ack ""
-imgcat /usr/local/SyncThing/SyncImages/coffee.jpg
+if [ "$machine" == "Work Laptop" ]
+then
+  imgcat /usr/local/SyncThing/SyncImages/coffee.jpg
+elif [ "$machine" == "Home Laptop" ]
+then
+  imgcat "$HOME/SyncImages/coffee.jpg"
+fi
