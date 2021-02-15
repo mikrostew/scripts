@@ -94,6 +94,7 @@ echo "Homebrew"
 @wait-for-command brew upgrade bats-core
 @wait-for-command brew upgrade git
 @wait-for-command brew upgrade git-gui
+@wait-for-command brew upgrade jq
 @wait-for-command brew upgrade macvim # upgrading vim is handled by macvim
 @wait-for-command brew upgrade terminal-notifier
 @wait-for-command brew upgrade youtube-dl
