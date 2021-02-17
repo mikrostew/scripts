@@ -3,6 +3,8 @@
 
 # this is a good reference for using osascript:
 # https://eastmanreference.com/how-to-automate-your-keyboard-in-mac-os-x-with-applescript
+# also this
+# http://macbiblioblog.blogspot.com/2014/12/key-codes-for-function-and-special-keys.html
 
 # make sure Chrome window has focus
 osascript -e 'tell application "Google Chrome" to activate'
@@ -10,13 +12,26 @@ osascript -e 'tell application "Google Chrome" to activate'
 echo "Populating interview feedback text..."
 
 # emulate keystrokes to type the formatted text into the field
+# (but first, clear out the existing text and fix the formatting)
   osascript <<EOF
 tell application "System Events"
+  keystroke "a" using command down
+  delay 0.1
+  key code 51
+  delay 0.1
+  keystroke "clear formatting"
+  delay 0.1
+  keystroke "a" using command down
+  delay 0.1
+  key code 51
+  delay 0.1
+
   keystroke "b" using command down
   keystroke "Overall"
   keystroke "b" using command down
   keystroke ":" & return
   keystroke "- TODO" & return
+  delay 0.2
 
   keystroke "b" using command down
   keystroke "Good"
