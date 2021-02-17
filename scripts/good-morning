@@ -94,6 +94,7 @@ echo "Homebrew"
 #@wait-for-command brew upgrade bash # that messes up this process
 @wait-for-command brew upgrade bats-core
 @wait-for-command brew upgrade expect
+@wait-for-command brew upgrade gh
 @wait-for-command brew upgrade git
 @wait-for-command brew upgrade git-gui
 @wait-for-command brew upgrade jq
