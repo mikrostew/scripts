@@ -1,4 +1,4 @@
 #!/usr/bin/env badash
 # git - checkout branch/tag/hash (git checkout)
 
-@wait-for-command git checkout "$1"
+@wait-for-command --show-output git checkout "$1"

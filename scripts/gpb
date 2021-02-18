@@ -20,5 +20,6 @@ in_git_repo ()
 if in_git_repo
 then
   branch_name=$(current_git_branch)
-  @wait-for-command git push -u origin "$branch_name"
+  # show the output, because there will be a URL to create a PR
+  @wait-for-command --show-output git push -u origin "$branch_name"
 fi
