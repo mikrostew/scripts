@@ -85,6 +85,8 @@ echo "Homebrew"
 @wait-for-command brew upgrade wget
 @wait-for-command brew upgrade youtube-dl
 
+# TODO: make sure syncthing is running
+
 # OSS repos
 
 echo "Dotfiles"
