@@ -81,6 +81,7 @@ echo "Homebrew"
 @wait-for-command brew upgrade moreutils
 @wait-for-command brew upgrade terminal-notifier
 @wait-for-command brew upgrade tmux
+@wait-for-command brew upgrade watch
 @wait-for-command brew upgrade wget
 @wait-for-command brew upgrade youtube-dl
 
