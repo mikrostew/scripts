@@ -136,6 +136,9 @@ then
   fi
 
   # TODO: any more repos?
+
+  # blog pages I want to work on a little every day
+  open https://pages.linkedin.githubprivate.com/mistewar/blog/about
 fi
 
 # end on a happy note
