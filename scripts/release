@@ -4,7 +4,7 @@
 #  - update version in package.json
 #  - commit with version in commit message
 #  - [optional] publish to npm
-# (adapted from https://github.com/stefanpenner/dotfiles/blob/master/.config/fish/config.fish)
+# (adapted from https://github.com/stefanpenner/dotfiles/)
 
 # colors
 COLOR_FG_BOLD_BLUE='\033[1;34m'
@@ -72,6 +72,7 @@ then
   fi
 
   do_git commit -m "release v$tag"
+  # TODO: this should be an annotated tag --> `git tag -a`
   do_git tag "v$tag"
   git log -n1
   do_git push origin "$current_branch" "v$tag"
