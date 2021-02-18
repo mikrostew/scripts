@@ -13,27 +13,6 @@ current_git_branch ()
 {
     echo "$(git rev-parse --abbrev-ref HEAD)"
 }
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
-}
 echo_ack ()
 {
     echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
@@ -146,11 +125,11 @@ then
   branch_name="$(current_git_branch)"
   # TODO: check for "main" as well?
   if [ "$branch_name" != "master" ]; then
-    do_git checkout master
+    gc master
     # pull and rebase from master
     gpr
     # go back to the original branch
-    do_git checkout "$branch_name"
+    gc "$branch_name"
   else
     # pull and rebase from master
     gpr
