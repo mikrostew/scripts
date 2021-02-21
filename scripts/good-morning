@@ -70,6 +70,7 @@ echo "Homebrew"
 @wait-for-command brew update
 
 # upgrade things installed via homebrew
+# TODO: check if things are installed, like what check-min-version (or whatever it's called) does
 #@wait-for-command brew upgrade bash # that messes up this process
 @wait-for-command brew upgrade bats-core
 @wait-for-command brew upgrade expect
