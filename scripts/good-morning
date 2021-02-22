@@ -64,6 +64,10 @@ then
   run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
 fi
 
+# TODO: command line tools?
+#  $ xcode-select --install
+#  xcode-select: error: command line tools are already installed, use "Software Update" to install updates
+
 echo "Homebrew"
 
 # update homebrew before upgrading things
