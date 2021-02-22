@@ -102,6 +102,8 @@ gpr
 
 # TODO: any more repos?
 
+# TODO: any blog pages I want to open here?
+
 
 if [ "$machine" == "Work Laptop" ]
 then
@@ -142,8 +144,10 @@ then
   # TODO: any more repos?
 
   # blog pages I want to work on a little every day
-  open https://pages.linkedin.githubprivate.com/mistewar/blog/about
+  open https://pages.linkedin.githubprivate.com/mistewar/blog
 fi
+
+# TODO: collect error count, and display at the end?
 
 # end on a happy note
 echo_ack ""
