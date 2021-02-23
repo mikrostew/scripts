@@ -15,7 +15,7 @@ app-run-info() {
   # likely the app name, display that to be nice
   app_name="${app_path##*/}"
 
-  echo -e -n " ${COLOR_FG_BOLD_GREEN}$action${COLOR_RESET} $app_name..."
+  echo -e -n "  ${COLOR_FG_BOLD_GREEN}$action${COLOR_RESET} $app_name..."
 }
 app-started() {
   echo -e "[${COLOR_FG_GREEN}OK${COLOR_RESET}]"

@@ -12,7 +12,7 @@ proc-kill-info() {
   action="$1"
   details="$2"
 
-  echo -e -n " ${COLOR_FG_BOLD_GREEN}$action${COLOR_RESET} $details..."
+  echo -e -n "  ${COLOR_FG_BOLD_GREEN}$action${COLOR_RESET} $details..."
 }
 proc-killed() {
   echo -e "[${COLOR_FG_GREEN}OK${COLOR_RESET}]"
