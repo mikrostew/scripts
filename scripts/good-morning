@@ -38,6 +38,18 @@ echo ""
 echo -e "Running for '${COLOR_FG_BOLD_BLUE}$machine${COLOR_RESET}' ($HOST_NAME)"
 echo ""
 
+# some things need a password, so do that first
+if [ "$machine" == "Work Laptop" ]
+then
+  echo "(TODO: password setup)"
+  echo ""
+  ldap_pass="$(security find-generic-password -ga ldap_pass -w)"
+  if [ -z "$ldap_pass" ]
+  then
+    echo_err "Unable to get LDAP password - you will be prompted for that later..."
+  fi
+fi
+
 echo "Applications"
 
 # open activity monitor (after making sure it's not running)
@@ -123,7 +135,19 @@ then
 
   echo "Engtools"
 
-  # update engtools
+  # this prompts for my password
+  # so use some applescript shenanigans to paste in the password to that
+  (
+    sleep 8;
+    # make sure iTerm2 is in the foreground for this
+    osascript -e 'tell application "Iterm" to activate'
+    osascript <<EOF
+set the clipboard to "$ldap_pass"
+tell application "System Events" to keystroke "v" using command down
+tell application "System Events" to keystroke return
+set the clipboard to ""
+EOF
+  ) &
   @wait-for-command brew engtools install
 
   # LI repos
