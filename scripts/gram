@@ -1,14 +1,11 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gram, and run 'generate-scripts.sh'
-###########################################################################
-#3fa59cae15e62ad4d844de77b0f3cc4a
+# [git] Rebase current branch against master (Git Rebase Against Master)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 current_git_branch ()
 {
     echo "$(git rev-parse --abbrev-ref HEAD)"
@@ -62,43 +59,25 @@ not_on_git_branch ()
 {
     [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
 }
-show_help_msg() {
-  echo "gram - [git] Rebase current branch against master (Git Rebase Against Master)"
-  echo 'Usage: gram [options]'
-  echo ''
-  echo 'Options:'
-  echo '  -h               Show this help message'
-}
-while getopts ":h" opt
-do
-  case $opt in
-    h)
-      show_help_msg && exit 0
-      ;;
-    \?)
-      echo_err "$0: invalid option '-$OPTARG'"
-      exit 1
-      ;;
-    :)
-      echo_err "$0: option '-$OPTARG' requires an argument"
-      exit 1
-      ;;
-  esac
-done
-shift $((OPTIND-1))
-@uses_cmds gpr
+
+
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
   branch_name=$(current_git_branch)
   need_to_remove_orig_files='no'
-  do_git checkout master && gpr
-  @exit_on_error "Failed to pull and rebase master" 'do_git checkout "$branch_name"'
-  do_git checkout "$branch_name" && do_git rebase master
+  gc master && gpr
+  @exit_on_error "Failed to pull and rebase master" 'gc "$branch_name"'
+  gc "$branch_name" && do_git rebase master
   while [ "$?" -ne 0 ]; do
     @wait_for_keypress 'Press any key to continue... '
     need_to_remove_orig_files='yes'
+    # TODO: if I fix conflicts so there have been no changes, need to do `git rebase --skip` here
+    # (have to detect that from the output of `git rebase --continue`)
     gmt && do_git rebase --continue
+    # TODO: how to detect that I should abort?
   done
+
+  # delete any *.orig files leftover from merge conflicts
   if [ "$need_to_remove_orig_files" == 'yes' ]; then
     echo_info "Cleaning up .orig files from merge conflicts..."
     grmorig
