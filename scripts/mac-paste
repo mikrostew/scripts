@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
+# Paste chars from the clipboard using system event keystrokes
+
+# initial delay by using `say`, so it doesn't catch any of the keyboard shortcut chars I'm holding down for this
+# (otherwise they will occasionally be part of what is initially pasted, which results in random behavior)
+
+# slight pause every 30 characters so this is fast but not super fast
 
 osascript <<EOScript
+set charcount to 0
+say "can't stop me"
 tell application "System Events"
   repeat with char in the characters of (the clipboard)
     keystroke char
-    delay 0.02
+    set charcount to charcount + 1
+    if charcount = 30
+      set charcount to 0
+      delay 0.1
+    end if
   end repeat
 end tell
 EOScript
