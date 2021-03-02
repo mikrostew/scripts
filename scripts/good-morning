@@ -158,13 +158,16 @@ then
   # so use some applescript shenanigans to paste in the password to that
   (
     sleep 8;
-    echo "using password '$ldap_pass'"
     # make sure iTerm2 is in the foreground for this
     osascript -e 'tell application "Iterm" to activate'
     # and give it a little time before copy-paste
     sleep 1;
+    # try to backspace a few times to clear out anything in stdin (?)
     osascript <<EOF
 set the clipboard to "$ldap_pass"
+tell application "System Events" to key code 51
+tell application "System Events" to key code 51
+tell application "System Events" to key code 51
 tell application "System Events" to keystroke "v" using command down
 tell application "System Events" to keystroke return
 set the clipboard to ""
