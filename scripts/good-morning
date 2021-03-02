@@ -152,6 +152,9 @@ then
     read -n1 -s
   fi
 
+  # update this homebrew as well
+  @wait-for-command /usr/local/linkedin/Homebrew/bin/brew update
+
   echo "Engtools"
 
   # this prompts for my password
