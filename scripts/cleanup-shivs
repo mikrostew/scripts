@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Cleanup old dirs in the ~/.shiv/ directory
+
+# show what's there
+#du -shx "$HOME/.shiv"
+#ls "$HOME/.shiv"
+#ls "$HOME/.shiv" | sed 's/_.*//'
+
+# map of what exists for each executable
+# ASSUMPTION: no spaces in directory names
+declare -A shivs
+
+# counters
+num_deleted_dirs=0
+
+cd "$HOME/.shiv/"
+
+# figure out what's there
+for dirname in *
+do
+  exec_name="$(echo $dirname | sed 's/_.*//')"
+  #echo "$exec_name: $dirname"
+
+  if [ -z "${shivs[$exec_name]}" ]
+  then
+    # none of these yet, add the first one
+    shivs["$exec_name"]="$dirname"
+  else
+    # already have some of these, append to the "list"
+    shivs["$exec_name"]="${shivs[$exec_name]} $dirname"
+  fi
+done
+
+# remove everything but the most recent directory
+for shiv_name in "${!shivs[@]}"
+do
+  # convert to an array
+  shiv_dirs=( ${shivs[$shiv_name]} )
+  num_dirs="${#shiv_dirs[@]}"
+
+  # don't worry about shivs that only have on directory
+  echo "$shiv_name: $num_dirs dir(s)"
+  if [ "$num_dirs" == 1 ]
+  then
+    echo "(skipping)"
+    continue
+  fi
+
+  # figure out which dir is the most recent, and delete the other ones
+  last_mod_time=0
+  last_mod_dir=""
+  for shiv_dir in "${shiv_dirs[@]}"
+  do
+    # last modification time
+    mod_time="$(stat -f%c $shiv_dir)"
+    #echo "$shiv_name: $mod_time $shiv_dir"
+
+    if [ "$mod_time" -gt "$last_mod_time" ]
+    then
+      # this is the most recent so far
+
+      # first, need to remove the previous recent dir
+      # (but first, a sanity check)
+      if [ -n "$last_mod_dir" ] && [ "$last_mod_dir" != "/" ]
+      then
+        echo "rm -rf $last_mod_dir"
+        rm -rf "$last_mod_dir"
+        (( num_deleted_dirs+=1 ))
+      fi
+
+      last_mod_time="$mod_time"
+      last_mod_dir="$shiv_dir"
+    else
+      # not the most recent, so delete it
+      # (but first, a sanity check)
+      if [ -n "$shiv_dir" ] && [ "$shiv_dir" != "/" ]
+      then
+        echo "rm -rf $shiv_dir"
+        rm -rf "$shiv_dir"
+        (( num_deleted_dirs+=1 ))
+      fi
+    fi
+  done
+
+  echo "keep: $last_mod_dir ($last_mod_time)"
+done
+
+echo ""
+echo "removed $num_deleted_dirs" directories
