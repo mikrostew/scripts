@@ -12,8 +12,8 @@ echo_err ()
 }
 
 show_help_msg() {
-  echo "make_dotfile_links - Create links for dotfiles"
-  echo 'Usage: make_dotfile_links [options] [checkout_dir]'
+  echo "make-dotfile-links - Create links for dotfiles"
+  echo 'Usage: make-dotfile-links [options] [checkout_dir]'
   echo ''
   echo 'Options:'
   echo '  -h               Show this help message'
@@ -41,7 +41,7 @@ done
 shift $((OPTIND-1))
 
 # optional arg of where the repo is checked out
-checkout_dir="${1:-$HOME/dotfiles}"
+checkout_dir="${1:-$HOME/src/gh/dotfiles}"
 
 # use bash 4.x associative arrays
 declare -A links
