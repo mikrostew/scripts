@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Cleanup old dirs in the ~/.shiv/ directory
 
+# TODO: --verbose option
+
 # show what's there
 #du -shx "$HOME/.shiv"
 #ls "$HOME/.shiv"
@@ -39,10 +41,10 @@ do
   num_dirs="${#shiv_dirs[@]}"
 
   # don't worry about shivs that only have on directory
-  echo "$shiv_name: $num_dirs dir(s)"
+  #echo "$shiv_name: $num_dirs dir(s)"
   if [ "$num_dirs" == 1 ]
   then
-    echo "(skipping)"
+    #echo "(skipping)"
     continue
   fi
 
@@ -63,7 +65,7 @@ do
       # (but first, a sanity check)
       if [ -n "$last_mod_dir" ] && [ "$last_mod_dir" != "/" ]
       then
-        echo "rm -rf $last_mod_dir"
+        #echo "rm -rf $last_mod_dir"
         rm -rf "$last_mod_dir"
         (( num_deleted_dirs+=1 ))
       fi
@@ -75,15 +77,15 @@ do
       # (but first, a sanity check)
       if [ -n "$shiv_dir" ] && [ "$shiv_dir" != "/" ]
       then
-        echo "rm -rf $shiv_dir"
+        #echo "rm -rf $shiv_dir"
         rm -rf "$shiv_dir"
         (( num_deleted_dirs+=1 ))
       fi
     fi
   done
 
-  echo "keep: $last_mod_dir ($last_mod_time)"
+  #echo "keep: $last_mod_dir ($last_mod_time)"
 done
 
-echo ""
+#echo ""
 echo "removed $num_deleted_dirs" directories
