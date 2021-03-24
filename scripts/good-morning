@@ -118,7 +118,8 @@ brew-install-or-upgrade watch watch
 brew-install-or-upgrade wget wget
 brew-install-or-upgrade youtube-dl youtube-dl
 
-# TODO: verify dotfile links, like what verify-dotfile-links does
+# verify that dotfile links haven't been changed
+verify-dotfile-links "$HOME/src/gh/dotfiles"
 
 # TODO: make sure syncthing is running
 
