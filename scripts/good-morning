@@ -122,22 +122,24 @@ brew-install-or-upgrade youtube-dl youtube-dl
 
 # TODO: make sure syncthing is running
 
-# OSS repos
+if [ "$machine" == "Home Laptop" ]
+then
+  # OSS repos
 
-echo "Dotfiles"
-cd "$HOME/dotfiles/"
-# pull, rebase, push to sync anything I've changed recently
-gpr && gp
+  echo "Dotfiles"
+  cd "$HOME/dotfiles/"
+  # pull, rebase, push to sync anything I've changed recently
+  gpr && gp
 
-echo "Badash"
-cd "/usr/local/lib/badash/"
-# just pull and rebase, to stay current with master
-gpr
+  echo "Badash"
+  cd "/usr/local/lib/badash/"
+  # just pull and rebase, to stay current with master
+  gpr
 
-# TODO: any more repos?
+  # TODO: any more repos?
 
-# TODO: any blog pages I want to open here?
-
+  # TODO: any blog pages I want to open here?
+fi
 
 if [ "$machine" == "Work Laptop" ]
 then
@@ -167,6 +169,19 @@ then
   # so use some applescript shenanigans to paste in the password to that
   ( sleep 10; paste-term-password "$ldap_pass" ) &
   @wait-for-command brew engtools install
+
+  # OSS repos
+  # (because git is routed over the VPN, ugh)
+
+  echo "Dotfiles"
+  cd "$HOME/dotfiles/"
+  # pull, rebase, push to sync anything I've changed recently
+  gpr && gp
+
+  echo "Badash"
+  cd "/usr/local/lib/badash/"
+  # just pull and rebase, to stay current with master
+  gpr
 
   # LI repos
 
