@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Cleanup old dirs in the ~/.shiv/ directory
 
-# TODO: --verbose option
+# Arguments
+# TODO: --verbose option?
+sudo_password="$1"
 
 # show what's there
 #du -shx "$HOME/.shiv"
@@ -65,6 +67,10 @@ do
       # (but first, a sanity check)
       if [ -n "$last_mod_dir" ] && [ "$last_mod_dir" != "/" ]
       then
+        # make sure I have ownership, to delete the files
+        ( sleep 2; paste-term-password "$sudo_password" ) &
+        sudo chown -R mistewar:staff "$last_mod_dir"
+
         #echo "rm -rf $last_mod_dir"
         rm -rf "$last_mod_dir"
         (( num_deleted_dirs+=1 ))
@@ -77,6 +83,10 @@ do
       # (but first, a sanity check)
       if [ -n "$shiv_dir" ] && [ "$shiv_dir" != "/" ]
       then
+        # make sure I have ownership, to delete the files
+        ( sleep 2; paste-term-password "$sudo_password" ) &
+        sudo chown -R mistewar:staff "$shiv_dir"
+
         #echo "rm -rf $shiv_dir"
         rm -rf "$shiv_dir"
         (( num_deleted_dirs+=1 ))
@@ -89,3 +99,6 @@ done
 
 #echo ""
 echo "removed $num_deleted_dirs" directories
+
+# clear any extra passwords typed into stdin
+read -t 1 -n 1024 discard
