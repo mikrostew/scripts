@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# run git-gui in citool mode, to make a commit and exit
+
+# first, get current SHA
+sha_before="$(git rev-parse HEAD)"
+
+# then run the GUI
+git gui citool
+# NOTE: the exit code used to be 0 if there was a commit, but that changed :(
+
+# if the SHA changed, show a log of what was committed
+sha_after="$(git rev-parse HEAD)"
+
+if [ "$sha_before" != "$sha_after" ]
+then
+  git log -n1
+else
+  echo "(no commit)"
+fi
