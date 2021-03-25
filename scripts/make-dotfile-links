@@ -75,20 +75,26 @@ links[".rubocop.yml"]=".rubocop.yml"
 # karabiner elements
 links[".config/karabiner"]="karabiner"
 
-# platform-specific
-if [ "$(uname -s | tr [:upper:] [:lower:])" == "darwin" ]
+# machine-specific
+host_name="$(hostname)"
+if [[ "$host_name" =~ MacBook-Air ]]
 then
-  # ssh
-  # TODO: support something like ".ssh/config|.ssh/config.custom", like the verify script
+  # home laptop
   links[".ssh/config"]=".ssh-config-mac"
-elif [ "$(uname -s | tr [:upper:] [:lower:])" == "linux" ]
+elif [[ "$host_name" =~ mistewar-mn ]]
 then
-  # ssh
-  links[".ssh/config"]=".ssh-config-linux"
+  # work laptop
+  links[".ssh/config.custom"]=".ssh-config-mac"
+elif [[ "$host_name" =~ mistewar-ld ]]
+then
+  # work vm
+  links[".ssh/config.custom"]=".ssh-config-linux"
+else
+  echo_err "Machine '$host_name' has not been configured for this script"
+  exit 1
 fi
 
 # create the links
-# TODO: support config.custom, like the verify script
 for i in "${!links[@]}"
 do
   echo -n "$HOME/$i => $checkout_dir/${links[$i]}"

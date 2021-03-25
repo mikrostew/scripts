@@ -40,7 +40,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-checkout_dir="${1:-$HOME/dotfiles}"
+checkout_dir="${1:-$HOME/src/gh/dotfiles}"
 
 # check dependent commands
 @uses_cmds readlink
@@ -74,49 +74,38 @@ links[".bundle"]=".bundle"
 # rubocop
 links[".rubocop.yml"]=".rubocop.yml"
 
-# SSH is platform-specific, and can be linked from a couple of places now, ugh
-if @system_is_darwin?
+# karabiner elements
+links[".config/karabiner"]="karabiner"
+
+# machine-specific checks
+host_name="$(hostname)"
+if [[ "$host_name" =~ MacBook-Air ]]
 then
-  # Mac
-  links[".ssh/config|.ssh/config.custom"]=".ssh-config-mac"
-elif @system_is_linux?
+  # home laptop
+  links[".ssh/config"]=".ssh-config-mac"
+elif [[ "$host_name" =~ mistewar-mn ]]
 then
-  # Linux
-  links[".ssh/config|.ssh/config.custom"]=".ssh-config-linux"
+  # work laptop
+  links[".ssh/config.custom"]=".ssh-config-mac"
+elif [[ "$host_name" =~ mistewar-ld ]]
+then
+  # work vm
+  links[".ssh/config.custom"]=".ssh-config-linux"
+else
+  echo_err "Machine '$host_name' has not been configured for this script"
+  exit 1
 fi
 
 # verify the links
 for i in "${!links[@]}"
 do
-  # special case for things which can be linked from either of 2 places (only SSH right now)
-  # (if key contains '|', then split on that, and check that either one exists)
-  if [[ "$i" == *"|"* ]]
-  then
-    # get the first location (delete everything after & including the delimiter)
-    first_location="${i%|*}"
-    # get the second location (delete everything before & including the delimiter)
-    second_location="${i#*|}"
-  else
-    # default, only one location this can link from
-    first_location="$i"
-    second_location=""
-  fi
-
-  if [ -L "$HOME/$first_location" ]
+  if [ -L "$HOME/$i" ]
   then
     # symlink exists, check if it points to the right place
-    link_target="$(readlink $HOME/$first_location)"
+    link_target="$(readlink $HOME/$i)"
     if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
     then
-      echo_err "symlink '$HOME/$first_location => $checkout_dir/${links[$i]}' has been changed!"
-    fi
-  elif [ -L "$HOME/$second_location" ]
-  then
-    # symlink exists, check if it points to the right place
-    link_target="$(readlink $HOME/$second_location)"
-    if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
-    then
-      echo_err "symlink '$HOME/$second_location => $checkout_dir/${links[$i]}' has been changed!"
+      echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' has been changed!"
     fi
   else
     echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' does not exist!"
