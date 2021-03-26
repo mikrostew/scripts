@@ -79,7 +79,7 @@ links[".config/karabiner"]="karabiner"
 
 # machine-specific checks
 host_name="$(hostname)"
-if [[ "$host_name" =~ MacBook-Air ]]
+if [[ "$host_name" =~ (MacBook-Air|Michaels-Air) ]]
 then
   # home laptop
   links[".ssh/config"]=".ssh-config-mac"
@@ -97,6 +97,7 @@ else
 fi
 
 # verify the links
+link_errors=0
 for i in "${!links[@]}"
 do
   if [ -L "$HOME/$i" ]
@@ -105,9 +106,12 @@ do
     link_target="$(readlink $HOME/$i)"
     if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
     then
-      echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' has been changed!"
+      echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' is the wrong target!"
+      echo_err "        (points to '$link_target')"
+      (( link_errors+=1 ))
     fi
   else
     echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' does not exist!"
   fi
 done
+exit $link_errors
