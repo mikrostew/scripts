@@ -128,7 +128,7 @@ then
   # OSS repos
 
   echo "Dotfiles"
-  cd "$HOME/dotfiles/"
+  cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
   gpr && gp
 
@@ -175,7 +175,7 @@ then
   # (because git is routed over the VPN, ugh)
 
   echo "Dotfiles"
-  cd "$HOME/dotfiles/"
+  cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
   gpr && gp
 
