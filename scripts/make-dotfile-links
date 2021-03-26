@@ -77,7 +77,7 @@ links[".config/karabiner"]="karabiner"
 
 # machine-specific
 host_name="$(hostname)"
-if [[ "$host_name" =~ MacBook-Air ]]
+if [[ "$host_name" =~ (MacBook-Air|Michaels-Air) ]]
 then
   # home laptop
   links[".ssh/config"]=".ssh-config-mac"
@@ -98,16 +98,31 @@ fi
 for i in "${!links[@]}"
 do
   echo -n "$HOME/$i => $checkout_dir/${links[$i]}"
+
   if [ -L "$HOME/$i" ]
   then
-    echo -e " ${COLOR_FG_YELLOW}(symlink already exists, skipping)${COLOR_RESET}"
-    continue
-  fi
-  if [ -e "$HOME/$i" ]
+    # link exists, check that it points to the right location
+    link_target="$(readlink $HOME/$i)"
+    if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
+    then
+      # wrong location, so remove that
+      rm "$HOME/$i"
+      echo -n " (changed)"
+    else
+      # location is right, all good, skip it
+      echo -e " [${COLOR_FG_YELLOW}skip${COLOR_RESET}]"
+      continue
+    fi
+  elif [ -e "$HOME/$i" ]
   then
-    echo -ne " ${COLOR_FG_BOLD_BLUE}(file exists, renamed to '$HOME/$i-old')${COLOR_RESET}"
+    # file exists, rename it
     mv "$HOME/$i" "$HOME/$i-old"
+    echo -ne " ${COLOR_FG_BOLD_BLUE}(exists, rename to '$HOME/$i-old')${COLOR_RESET}"
+  else
+    # no symlink, no file
+    echo -n " (create)"
   fi
+  # make the link
   ln -s "$checkout_dir/${links[$i]}" "$HOME/$i"
   echo -e " [${COLOR_FG_GREEN}OK${COLOR_RESET}]"
 done
