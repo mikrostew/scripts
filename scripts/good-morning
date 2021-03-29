@@ -45,6 +45,9 @@ then
 elif [[ "$HOST_NAME" =~ mistewar-mn ]]
 then
   machine="Work Laptop"
+elif [[ "$HOST_NAME" =~ mistewar-ld ]]
+then
+  machine="Work VM"
 else
   echo_err "Machine '$HOST_NAME' has not been configured for this script"
   exit 1
@@ -65,16 +68,19 @@ then
   fi
 fi
 
-echo "Applications"
+if [[ "$machine" =~ Laptop ]]
+then
+  echo "Applications"
 
-# open activity monitor (after making sure it's not running)
-kill-proc-name "Activity Monitor"
-#run-app-path "/System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor"
+  # open activity monitor (after making sure it's not running)
+  kill-proc-name "Activity Monitor"
+  #run-app-path "/System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor"
 
-# kill any programs that I don't want to be running
-kill-proc-name "zoom.us"
-kill-proc-name "App Store"
-kill-proc-name "Discord"
+  # kill any programs that I don't want to be running
+  kill-proc-name "zoom.us"
+  kill-proc-name "App Store"
+  kill-proc-name "Discord"
+fi
 
 if [ "$machine" == "Work Laptop" ]
 then
@@ -91,32 +97,35 @@ then
   run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
 fi
 
-# TODO: command line tools?
-#  $ xcode-select --install
-#  xcode-select: error: command line tools are already installed, use "Software Update" to install updates
-#  $ echo $?
-#  1
+if [[ "$machine" =~ Laptop ]]
+then
+  # TODO: command line tools?
+  #  $ xcode-select --install
+  #  xcode-select: error: command line tools are already installed, use "Software Update" to install updates
+  #  $ echo $?
+  #  1
 
-echo "Homebrew"
+  echo "Homebrew"
 
-# update homebrew before upgrading things
-@wait-for-command brew update
+  # update homebrew before upgrading things
+  @wait-for-command brew update
 
-# install or upgrade things installed via homebrew
-brew-install-or-upgrade bats bats-core
-brew-install-or-upgrade expect expect
-brew-install-or-upgrade gh gh
-brew-install-or-upgrade git git
-brew-install-or-upgrade git-gui git-gui
-brew-install-or-upgrade jq jq
-# TODO: this is failing to compile
-#brew-install-or-upgrade mvim macvim # upgrading vim is handled by macvim
-brew-install-or-upgrade sponge moreutils
-brew-install-or-upgrade terminal-notifier terminal-notifier
-brew-install-or-upgrade tmux tmux
-brew-install-or-upgrade watch watch
-brew-install-or-upgrade wget wget
-brew-install-or-upgrade youtube-dl youtube-dl
+  # install or upgrade things installed via homebrew
+  brew-install-or-upgrade bats bats-core
+  brew-install-or-upgrade expect expect
+  brew-install-or-upgrade gh gh
+  brew-install-or-upgrade git git
+  brew-install-or-upgrade git-gui git-gui
+  brew-install-or-upgrade jq jq
+  # TODO: this is failing to compile
+  #brew-install-or-upgrade mvim macvim # upgrading vim is handled by macvim
+  brew-install-or-upgrade sponge moreutils
+  brew-install-or-upgrade terminal-notifier terminal-notifier
+  brew-install-or-upgrade tmux tmux
+  brew-install-or-upgrade watch watch
+  brew-install-or-upgrade wget wget
+  brew-install-or-upgrade youtube-dl youtube-dl
+fi
 
 # verify that dotfile links haven't been changed
 @wait-for-command verify-dotfile-links "$HOME/src/gh/dotfiles"
@@ -142,11 +151,14 @@ then
   # TODO: any blog pages I want to open here?
 fi
 
-if [ "$machine" == "Work Laptop" ]
+if [[ "$machine" =~ Work ]]
 then
   # clean up old stuff in $HOME/.shiv/
   @wait-for-command cleanup-shivs "$ldap_pass"
+fi
 
+if [ "$machine" == "Work Laptop" ]
+then
   # check that I am connected to VPN, and pause & wait for keypress
   if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
   then
@@ -224,6 +236,46 @@ then
 
   # blog pages I want to work on a little every day
   open https://pages.linkedin.githubprivate.com/mistewar/blog
+fi
+
+if [ "$machine" == "Work VM" ]
+then
+  echo "Engtools"
+
+  # this prompts for my password
+  sudo yum install usr-local-linkedin-dist
+
+  # OSS repos
+
+  echo "Dotfiles"
+  cd "$HOME/src/gh/dotfiles/"
+  # pull, rebase, push to sync anything I've changed recently
+  gpr && gp
+
+  echo "Badash"
+  cd "/usr/local/lib/badash/"
+  # just pull and rebase, to stay current with master
+  gpr
+
+  # LI repos
+
+  echo "Voyager Web"
+
+  cd "$HOME/src/li/voyager-web_trunk/"
+  # if not on the master branch, checkout master, pull, and rebase
+  # TODO: figure out the default branch name
+  branch_name="$(current_git_branch)"
+  # TODO: check for "main" as well?
+  if [ "$branch_name" != "master" ]; then
+    gc master
+    # pull and rebase from master
+    gpr
+    # go back to the original branch
+    gc "$branch_name"
+  else
+    # otherwise, we are on master, so just pull and rebase
+    gpr
+  fi
 fi
 
 # TODO: collect error count, and display at the end
