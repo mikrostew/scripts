@@ -43,7 +43,7 @@ shift $((OPTIND-1))
 checkout_dir="${1:-$HOME/src/gh/dotfiles}"
 
 # check dependent commands
-@uses_cmds readlink
+@uses-cmds readlink
 
 # use bash 4.x associative arrays
 declare -A links
@@ -114,4 +114,5 @@ do
     echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' does not exist!"
   fi
 done
+
 exit $link_errors
