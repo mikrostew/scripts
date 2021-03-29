@@ -119,7 +119,7 @@ brew-install-or-upgrade wget wget
 brew-install-or-upgrade youtube-dl youtube-dl
 
 # verify that dotfile links haven't been changed
-verify-dotfile-links "$HOME/src/gh/dotfiles"
+@wait-for-command verify-dotfile-links "$HOME/src/gh/dotfiles"
 
 # TODO: make sure syncthing is running
 
@@ -145,9 +145,7 @@ fi
 if [ "$machine" == "Work Laptop" ]
 then
   # clean up old stuff in $HOME/.shiv/
-  # TODO: will this leak the password in the output?
-  # (might need a '--hide-args' option?)
-  #@wait-for-command --show-output cleanup-shivs "$ldap_pass"
+  @wait-for-command cleanup-shivs "$ldap_pass"
 
   # check that I am connected to VPN, and pause & wait for keypress
   if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
@@ -228,7 +226,7 @@ then
   open https://pages.linkedin.githubprivate.com/mistewar/blog
 fi
 
-# TODO: collect error count, and display at the end?
+# TODO: collect error count, and display at the end
 
 # end on a happy note
 echo_ack ""

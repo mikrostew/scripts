@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
 # Cleanup old dirs in the ~/.shiv/ directory
 
 # Arguments
@@ -73,6 +73,7 @@ do
 
         #echo "rm -rf $last_mod_dir"
         rm -rf "$last_mod_dir"
+        @exit-on-error "could not remove directory $last_mod_dir"
         (( num_deleted_dirs+=1 ))
       fi
 
@@ -89,6 +90,7 @@ do
 
         #echo "rm -rf $shiv_dir"
         rm -rf "$shiv_dir"
+        @exit-on-error "could not remove directory $shiv_dir"
         (( num_deleted_dirs+=1 ))
       fi
     fi
@@ -102,3 +104,6 @@ echo "removed $num_deleted_dirs" directories
 
 # clear any extra passwords typed into stdin
 read -t 1 -n 1024 discard
+
+# read returns non-zero exit code if it hits EOF (and I don't care about that), so make sure we exit cleanly
+exit 0
