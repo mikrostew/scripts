@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Paste a check mark ✅
+
+# initial delay to this doesn't capture the keyboard shortcut chars
+sleep 0.5
+
+# use the clipboard
+osascript <<EOF
+set the clipboard to "✅"
+tell application "System Events" to keystroke "v" using command down
+EOF
