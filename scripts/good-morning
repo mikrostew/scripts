@@ -7,17 +7,14 @@ COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
-current_git_branch ()
-{
-    echo "$(git rev-parse --abbrev-ref HEAD)"
+current_git_branch () {
+  git rev-parse --abbrev-ref HEAD
 }
-echo_ack ()
-{
-    echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
+echo_ack () {
+  echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
 }
-echo_err ()
-{
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+echo_err () {
+  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 
 # check if something is installed - if so, upgrade it, if not, `brew install` it
@@ -31,11 +28,16 @@ brew-install-or-upgrade() {
   if [ -z "$install_path" ]; then
     # not installed, so install it
     @wait-for-command brew install "$brew_package"
+    if [ "$?" != 0 ]; then errors+=("brew install $brew_package"); fi
   else
     # already installed, so try to upgrade it
     @wait-for-command brew upgrade "$brew_package"
+    if [ "$?" != 0 ]; then errors+=("brew upgrade $brew_package"); fi
   fi
 }
+
+# collect errors, and display at the end
+errors=()
 
 # different things for different machines
 HOST_NAME="$(hostname)"
@@ -109,6 +111,7 @@ then
 
   # update homebrew before upgrading things
   @wait-for-command brew update
+  if [ "$?" != 0 ]; then errors+=('brew update'); fi
 
   # install or upgrade things installed via homebrew
   brew-install-or-upgrade bats bats-core
@@ -129,6 +132,7 @@ fi
 
 # verify that dotfile links haven't been changed
 @wait-for-command verify-dotfile-links "$HOME/src/gh/dotfiles"
+if [ "$?" != 0 ]; then errors+=('verify-dotfile-links'); fi
 
 # TODO: make sure syncthing is running
 
@@ -140,11 +144,13 @@ then
   cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
   gpr && gp
+  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, and push'); fi
 
   echo "Badash"
   cd "/usr/local/lib/badash/"
   # just pull and rebase, to stay current with master
   gpr
+  if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
 
   # TODO: any more repos?
 
@@ -153,8 +159,10 @@ fi
 
 if [[ "$machine" =~ Work ]]
 then
+  echo "Cleanup shivs"
   # clean up old stuff in $HOME/.shiv/
   @wait-for-command cleanup-shivs "$ldap_pass"
+  if [ "$?" != 0 ]; then errors+=('cleanup shivs'); fi
 fi
 
 if [ "$machine" == "Work Laptop" ]
@@ -162,9 +170,9 @@ then
   # check that I am connected to VPN, and pause & wait for keypress
   if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
   then
-    echo_ack "Looks like you're connected to VPN"
+    echo_ack "(Connected to VPN)"
   else
-    echo_err "Not connected to VPN"
+    echo_err "(Not connected to VPN)"
     # make sure iTerm is shown, so I see this
     osascript -e 'tell application "Iterm" to activate'
     echo "Please connect to VPN, then press any key to continue..."
@@ -173,6 +181,7 @@ then
 
   # update this homebrew as well
   @wait-for-command brew engtools update
+  if [ "$?" != 0 ]; then errors+=('brew engtools update'); fi
 
   echo "Engtools"
 
@@ -180,6 +189,7 @@ then
   # so use some applescript shenanigans to paste in the password to that
   ( sleep 10; paste-term-password "$ldap_pass" ) &
   @wait-for-command brew engtools install
+  if [ "$?" != 0 ]; then errors+=('brew engtools install'); fi
 
   # OSS repos
   # (because git is routed over the VPN, ugh)
@@ -188,16 +198,17 @@ then
   cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
   gpr && gp
+  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, and push'); fi
 
   echo "Badash"
   cd "/usr/local/lib/badash/"
   # just pull and rebase, to stay current with master
   gpr
+  if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
 
   # LI repos
 
   echo "Voyager Web"
-
   cd "$HOME/src/li/voyager-web_trunk/"
   # if not on the master branch, checkout master, pull, and rebase
   # TODO: figure out the default branch name
@@ -207,11 +218,13 @@ then
     gc master
     # pull and rebase from master
     gpr
+    if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
     # go back to the original branch
     gc "$branch_name"
   else
     # otherwise, we are on master, so just pull and rebase
     gpr
+    if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
   fi
 
   echo "Blog"
@@ -225,17 +238,19 @@ then
     gc master
     # pull and rebase from master
     gpr
+    if [ "$?" != 0 ]; then errors+=('blog - pull and rebase'); fi
     # go back to the original branch
     gc "$branch_name"
   else
     # otherwise, we are on master, so just pull and rebase
     gpr
+    if [ "$?" != 0 ]; then errors+=('blog - pull and rebase'); fi
   fi
 
   # TODO: any more repos?
 
-  # blog pages I want to work on a little every day
-  open https://pages.linkedin.githubprivate.com/mistewar/blog
+  # current blog post I'm working on
+  open https://pages.linkedin.githubprivate.com/mistewar/blog/interviewing
 fi
 
 if [ "$machine" == "Work VM" ]
@@ -244,6 +259,7 @@ then
 
   # this prompts for my password
   sudo yum install usr-local-linkedin-dist
+  if [ "$?" != 0 ]; then errors+=('yum install usr-local-linkedin-dist'); fi
 
   # OSS repos
 
@@ -251,16 +267,17 @@ then
   cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
   gpr && gp
+  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, and push'); fi
 
   echo "Badash"
   cd "/usr/local/lib/badash/"
   # just pull and rebase, to stay current with master
   gpr
+  if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
 
   # LI repos
 
   echo "Voyager Web"
-
   cd "$HOME/src/li/voyager-web_trunk/"
   # if not on the master branch, checkout master, pull, and rebase
   # TODO: figure out the default branch name
@@ -270,15 +287,26 @@ then
     gc master
     # pull and rebase from master
     gpr
+    if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
     # go back to the original branch
     gc "$branch_name"
   else
     # otherwise, we are on master, so just pull and rebase
     gpr
+    if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
   fi
 fi
 
-# TODO: collect error count, and display at the end
+# display any errors encountered
+if [ "${#errors[@]}" -gt 0 ]
+then
+  echo_err ""
+  echo_err "There were ${#errors[@]} error(s):"
+  for error in "${errors[@]}"
+  do
+    echo_err "$error"
+  done
+fi
 
 # end on a happy note
 echo_ack ""
