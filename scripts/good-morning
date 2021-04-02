@@ -130,6 +130,7 @@ then
   brew-install-or-upgrade youtube-dl youtube-dl
 fi
 
+echo "Dotfile links"
 # verify that dotfile links haven't been changed
 @wait-for-command verify-dotfile-links "$HOME/src/gh/dotfiles"
 if [ "$?" != 0 ]; then errors+=('verify-dotfile-links'); fi
@@ -161,7 +162,8 @@ if [[ "$machine" =~ Work ]]
 then
   echo "Cleanup shivs"
   # clean up old stuff in $HOME/.shiv/
-  @wait-for-command cleanup-shivs "$ldap_pass"
+  # (hide the args, so this doesn't show the password)
+  @wait-for-command --hide-args cleanup-shivs "$ldap_pass"
   if [ "$?" != 0 ]; then errors+=('cleanup shivs'); fi
 fi
 
