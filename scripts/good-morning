@@ -101,11 +101,11 @@ fi
 
 if [[ "$machine" =~ Laptop ]]
 then
-  # TODO: command line tools?
-  #  $ xcode-select --install
-  #  xcode-select: error: command line tools are already installed, use "Software Update" to install updates
-  #  $ echo $?
-  #  1
+  # TODO: make sure xcodebuild is using the full Xcode install, instead of just command line tools
+  # (https://stackoverflow.com/questions/17980759/xcode-select-active-developer-directory-error)
+  #echo "Xcode"
+  #( sleep 10; paste-term-password "$ldap_pass" ) &
+  #sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
   echo "Homebrew"
 
@@ -120,8 +120,7 @@ then
   brew-install-or-upgrade git git
   brew-install-or-upgrade git-gui git-gui
   brew-install-or-upgrade jq jq
-  # TODO: this is failing to compile
-  #brew-install-or-upgrade mvim macvim # upgrading vim is handled by macvim
+  brew-install-or-upgrade mvim macvim # upgrading vim is handled by macvim
   brew-install-or-upgrade sponge moreutils
   brew-install-or-upgrade terminal-notifier terminal-notifier
   brew-install-or-upgrade tmux tmux
