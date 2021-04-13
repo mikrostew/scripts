@@ -1,0 +1,83 @@
+#!/usr/bin/env node
+
+// first, download the JSON data for the most recent 50 items on Moment Garden
+// https://momentgarden.com/moments/gardens/$id/
+// (based on the AJAX requests made by that pag)
+
+// How to use this:
+//  $ moment-garden-download
+//
+// TODO: command-line options
+
+const https = require('https');
+const path = require('path');
+
+// TODO: different paths for different machines
+const SYNC_DIR = path.join('Users', 'mikrostew', 'SyncImages', 'MomentGarden');
+
+// TODO: do I need to update this, or just keep the same time for all requests?
+const TIMESTAMP = new Date().getTime();
+
+// other things
+// TODO: automate these later
+const PAGE_NUMBER="1"
+const PER_PAGE="50"
+
+// config for this stuff
+// (so I don't commit secrets to the repo)
+const mgConfig = require(path.join(SYNC_DIR, '.mg-config.js'));
+console.log(mgConfig);
+
+// make the request to moment garden
+function getThings(gardenID, pageNumber, perPage, timestamp, cookies) {
+  const options = {
+    method: 'GET',
+    hostname: 'momentgarden.com',
+    port: 443, // default
+    path: `/moments/more/${gardenID}/${pageNumber}/${perPage}/desc?_=${timestamp}`,
+    headers: {
+      'Accept': '*/*',
+      'Accept-Language': 'en-US,en;q=0.5',
+      'Referer': 'https://momentgarden.com/moments/gardens',
+      'X-Requested-With': 'XMLHttpRequest',
+      // TODO: how can I update this periodically?
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:87.0) Gecko/20100101 Firefox/87.0',
+      'Cookie': cookies.join('; '),
+    },
+  };
+
+  return new Promise((resolve, reject) => {
+    let data = '';
+
+    const req = https.request(options, (res) => {
+      //console.log('statusCode:', res.statusCode);
+      //console.log('headers:', res.headers);
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => {
+        //console.log(`BODY: ${chunk}`);
+        data += chunk;
+      });
+      res.on('end', () => {
+        //console.log('No more data in response.');
+        resolve(JSON.parse(data));
+      });
+    });
+
+    req.on('error', (e) => {
+      console.error(e);
+      reject(e);
+    });
+    req.end();
+  });
+}
+
+(async function() {
+  const someData = await getThings(mgConfig.gardenId, 1, 50, TIMESTAMP, mgConfig.cookies);
+
+  console.log(someData);
+
+  // TODO: go thru each object in that array, and write it to disk,
+  // like 12347890.json, in a single directory (should be fine for the number of files there are)
+
+  console.log("DONE!");
+})();
