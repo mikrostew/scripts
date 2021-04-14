@@ -13,7 +13,7 @@ const https = require('https');
 const path = require('path');
 
 // TODO: different paths for different machines
-const SYNC_DIR = path.join('Users', 'mikrostew', 'SyncImages', 'MomentGarden');
+const SYNC_DIR = path.join('/', 'Users', 'mikrostew', 'SyncImages', 'MomentGarden');
 
 // TODO: do I need to update this, or just keep the same time for all requests?
 const TIMESTAMP = new Date().getTime();
@@ -25,8 +25,17 @@ const PER_PAGE="50"
 
 // config for this stuff
 // (so I don't commit secrets to the repo)
+// format is:
+// [
+//   {
+//     name: 'Name',
+//     cookies: [ 'CAKEPHP=1234', 'CakeCookie[Auth][User]=ABCD',
+//     gardenId: '12345',
+//   },
+//   ...
+// ]
 const mgConfig = require(path.join(SYNC_DIR, '.mg-config.js'));
-console.log(mgConfig);
+//console.log(mgConfig);
 
 // make the request to moment garden
 function getThings(gardenID, pageNumber, perPage, timestamp, cookies) {
@@ -72,12 +81,15 @@ function getThings(gardenID, pageNumber, perPage, timestamp, cookies) {
 }
 
 (async function() {
-  const someData = await getThings(mgConfig.gardenId, 1, 50, TIMESTAMP, mgConfig.cookies);
+  for (const garden of mgConfig) {
+    console.log(`Garden: ${garden.name} (${garden.gardenId})`);
+    const someData = await getThings(garden.gardenId, 1, 50, TIMESTAMP, garden.cookies);
 
-  console.log(someData);
+    console.log(`Got ${someData.length} metadata objects`);
 
-  // TODO: go thru each object in that array, and write it to disk,
-  // like 12347890.json, in a single directory (should be fine for the number of files there are)
+    // TODO: go thru each object in that array, and write it to disk,
+    // like 12347890.json, in a single directory (should be fine for the number of files there are)
+  }
 
   console.log("DONE!");
 })();
