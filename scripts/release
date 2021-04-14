@@ -62,7 +62,7 @@ on_main_branch() {
 
 if in_git_repo && on_main_branch
 then
-  tag="${1:?Must include a tag argument}"
+  tag="${1:?Must include a version argument}"
   current_branch="$(current_git_branch)"
 
   if [ -f package.json ]; then
@@ -72,13 +72,16 @@ then
   fi
 
   do_git commit -m "release v$tag"
-  # TODO: this should be an annotated tag --> `git tag -a`
-  do_git tag "v$tag"
+  # using annotated tags, which are a little nicer than plain tags
+  do_git tag -a "v$tag"
   git log -n1
-  do_git push origin "$current_branch" "v$tag"
+  do_git push origin "$current_branch"
+  do_git push --tags
 
-  # TODO: add a prompt or cmd line flag for this
+  # TODO: add a prompt or cmd line flag for this?
   if [ -f package.json ]; then
+    # I don't run this script very often, so I always need to login
+    do_cmd npm login
     do_cmd npm publish
   fi
 
