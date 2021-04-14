@@ -115,7 +115,7 @@ then
 
   # install or upgrade things installed via homebrew
   brew-install-or-upgrade bats bats-core
-  brew-install-or-upgrade convert imagemagick
+  brew-install-or-upgrade magick imagemagick
   brew-install-or-upgrade expect expect
   brew-install-or-upgrade gh gh
   brew-install-or-upgrade gimp gimp
