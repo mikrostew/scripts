@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+# see https://www.emergeinteractive.com/insights/detail/the-essentials-of-favicons/
+#     https://stackoverflow.com/questions/4014823/does-a-favicon-have-to-be-32x32-or-16x16
+#     https://stackoverflow.com/questions/18301745/how-to-set-up-a-favicon/26768184
+#     (and there are many other things linked there, but whatever...)
+
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+
+# for help, and when I forget how to use this in a month or so
+print-usage() {
+  echo ""
+  echo "Usage: favicon-generator <path/to/input/image.ext> <path/to/repo> <relative/path/to/images/in/repo>"
+}
+
+# Arguments
+#  - input file
+#  - path to base repo dir (for favicon.ico)
+#  - path to repo for the generated images
+if [ "$#" -lt 3 ]
+then
+  echo -e "${COLOR_FG_RED}Come on!! Expected 3 arguments to this, but only got $#${COLOR_RESET}"
+  print-usage
+  exit 1
+fi
+
+input_image_file="$1"
+path_to_repo="$2"
+relative_path_to_images="$3"
+
+# TODO: check that input image is square?
+
+# create all these icons, using input path and repo path
+# (https://stackoverflow.com/questions/3185677/converting-gifs-pngs-and-jpgs-to-ico-files-using-imagemagick)
+
+# basic favicon
+magick convert "$input_image_file" -define icon:auto-resize=32 "${path_to_repo}/favicon.ico"
+
+# favicons of all the various sizes that things use, as PNGs
+# (https://imagemagick.org/script/convert.php)
+# (https://imagemagick.org/script/command-line-options.php#resize)
+# (https://imagemagick.org/script/command-line-processing.php#geometry)
+
+magick convert "$input_image_file" -resize '32x32!' "${path_to_repo}/${relative_path_to_images}/favicon-32.png"
+magick convert "$input_image_file" -resize '57x57!' "${path_to_repo}/${relative_path_to_images}/favicon-57.png"
+magick convert "$input_image_file" -resize '76x76!' "${path_to_repo}/${relative_path_to_images}/favicon-76.png"
+magick convert "$input_image_file" -resize '96x96!' "${path_to_repo}/${relative_path_to_images}/favicon-96.png"
+magick convert "$input_image_file" -resize '128x128!' "${path_to_repo}/${relative_path_to_images}/favicon-128.png"
+magick convert "$input_image_file" -resize '192x192!' "${path_to_repo}/${relative_path_to_images}/favicon-192.png"
+magick convert "$input_image_file" -resize '228x228!' "${path_to_repo}/${relative_path_to_images}/favicon-228.png"
+magick convert "$input_image_file" -resize '196x196!' "${path_to_repo}/${relative_path_to_images}/favicon-196.png"
+magick convert "$input_image_file" -resize '120x120!' "${path_to_repo}/${relative_path_to_images}/favicon-120.png"
+magick convert "$input_image_file" -resize '152x152!' "${path_to_repo}/${relative_path_to_images}/favicon-152.png"
+magick convert "$input_image_file" -resize '180x180!' "${path_to_repo}/${relative_path_to_images}/favicon-180.png"
+
+# the HTML to copy/paste into the template or whatever
+echo "Copy this into the template:"
+echo ""
+echo "<!-- generic -->"
+echo "<link rel=\"shortcut icon\" href=\"{{ 'favicon.ico' | relative_url }}\">"
+echo "<link rel=\"icon\" href=\"{{ '${relative_path_to_images}/favicon-32.png' | relative_url }}\" sizes=\"32x32\">"
+echo "<link rel=\"icon\" href=\"{{ '${relative_path_to_images}/favicon-57.png' | relative_url }}\" sizes=\"57x57\">"
+echo "<link rel=\"icon\" href=\"{{ '${relative_path_to_images}/favicon-76.png' | relative_url }}\" sizes=\"76x76\">"
+echo "<link rel=\"icon\" href=\"{{ '${relative_path_to_images}/favicon-96.png' | relative_url }}\" sizes=\"96x96\">"
+echo "<link rel=\"icon\" href=\"{{ '${relative_path_to_images}/favicon-128.png' | relative_url }}\" sizes=\"128x128\">"
+echo "<link rel=\"icon\" href=\"{{ '${relative_path_to_images}/favicon-192.png' | relative_url }}\" sizes=\"192x192\">"
+echo "<link rel=\"icon\" href=\"{{ '${relative_path_to_images}/favicon-228.png' | relative_url }}\" sizes=\"228x228\">"
+echo "<!-- android -->"
+echo "<link rel=\"shortcut icon\" href=\"{{ '${relative_path_to_images}/favicon-196.png' | relative_url }}\" sizes=\"196x196\">"
+echo "<!-- ios -->"
+echo "<link rel=\"apple-touch-icon\" href=\"{{ '${relative_path_to_images}/favicon-120.png' | relative_url }}\" sizes=\"120x120\">"
+echo "<link rel=\"apple-touch-icon\" href=\"{{ '${relative_path_to_images}/favicon-152.png' | relative_url }}\" sizes=\"152x152\">"
+echo "<link rel=\"apple-touch-icon\" href=\"{{ '${relative_path_to_images}/favicon-180.png' | relative_url }}\" sizes=\"180x180\">"
+echo ""
+
