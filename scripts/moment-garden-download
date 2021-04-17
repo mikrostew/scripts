@@ -2,25 +2,26 @@
 
 // first, download the JSON data for the most recent 50 items on Moment Garden
 // https://momentgarden.com/moments/gardens/$id/
-// (based on the AJAX requests made by that pag)
+// (based on the AJAX requests made by that page)
 
 // How to use this:
 //  $ moment-garden-download
 //
 // TODO: command-line options
+//  --full   --> go thru the whole garden, download everything to check if I missed something
+//  --local, or --no-cache    --> don't query the MG site, just download anything that doesn't exist locally
 
+const fs = require('fs').promises;
 const https = require('https');
 const path = require('path');
 
 // TODO: different paths for different machines
 const SYNC_DIR = path.join('/', 'Users', 'mikrostew', 'SyncImages', 'MomentGarden');
 
-// TODO: do I need to update this, or just keep the same time for all requests?
+// seems to work if I just use the same timestamp for all requests
 const TIMESTAMP = new Date().getTime();
 
-// other things
-// TODO: automate these later
-const PAGE_NUMBER="1"
+// this is the default for the web interface
 const PER_PAGE="50"
 
 // config for this stuff
@@ -29,16 +30,15 @@ const PER_PAGE="50"
 // [
 //   {
 //     name: 'Name',
-//     cookies: [ 'CAKEPHP=1234', 'CakeCookie[Auth][User]=ABCD',
+//     cookies: [ 'CAKEPHP=1234...', 'CakeCookie[Auth][User]=ABCD...',
 //     gardenId: '12345',
 //   },
 //   ...
 // ]
 const mgConfig = require(path.join(SYNC_DIR, '.mg-config.js'));
-//console.log(mgConfig);
 
 // make the request to moment garden
-function getThings(gardenID, pageNumber, perPage, timestamp, cookies) {
+function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
   const options = {
     method: 'GET',
     hostname: 'momentgarden.com',
@@ -80,15 +80,68 @@ function getThings(gardenID, pageNumber, perPage, timestamp, cookies) {
   });
 }
 
+// write each item in the input array to disk
+// return count of new (previously un-cached) items
+async function cacheItems(items, cacheDir) {
+  let newlyCachedItems = 0;
+
+  for (const item of items) {
+    const id = item.id;
+    const itemCacheFile = path.join(cacheDir, `${id}.json`);
+
+    // ensure that directory exists
+    await fs.mkdir(cacheDir, { recursive: true });
+
+    // check if cache file already exists
+    try {
+      // this will throw/reject if files doesn't exist
+      await fs.access(itemCacheFile);
+      // console.log(`File ${itemCacheFile} exists, skipping`);
+    } catch(error) {
+      if (error.code == 'ENOENT') {
+        await fs.writeFile(itemCacheFile, JSON.stringify(item));
+        // console.log(`Wrote new file ${itemCacheFile}`);
+        newlyCachedItems++;
+      } else {
+        console.log(error.code);
+        throw error;
+      }
+    }
+  }
+  return newlyCachedItems;
+}
+
 (async function() {
   for (const garden of mgConfig) {
+    const cacheDir = path.join(SYNC_DIR, garden.name, 'cache');
     console.log(`Garden: ${garden.name} (${garden.gardenId})`);
-    const someData = await getThings(garden.gardenId, 1, 50, TIMESTAMP, garden.cookies);
+    console.log(`(caching to dir ${cacheDir})`);
 
-    console.log(`Got ${someData.length} metadata objects`);
+    // TODO: this should probably be a function - cacheMomentMetadata
+    let currentPage = 1;
+    while (true) {
+      const someMoments = await requestMoments(garden.gardenId, currentPage, PER_PAGE, TIMESTAMP, garden.cookies);
 
-    // TODO: go thru each object in that array, and write it to disk,
-    // like 12347890.json, in a single directory (should be fine for the number of files there are)
+      console.log(`(page ${currentPage}) Downloaded info for ${someMoments.length} moments`);
+
+      if (someMoments.length == 0) {
+        console.log('No more moments to download');
+        break;
+      }
+
+      // go thru each object in that array, and write it to disk,
+      // like 12347890.json, in a single directory (should be fine for the number of files there are)
+      const newItems = await cacheItems(someMoments, cacheDir);
+      console.log(`found ${newItems} new items`);
+
+      // TODO: if no new items (on first 2 pages?), exit (unless --full?)
+
+      // wait for 5 seconds between API requests, to be nice to the server
+      await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+      currentPage++;
+    }
+
+    // TODO: verify that all media (images, videos, etc.) have been downloaded for all cached metadata
   }
 
   console.log("DONE!");
