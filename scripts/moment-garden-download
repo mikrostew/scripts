@@ -10,6 +10,7 @@
 // TODO: command-line options
 //  --full   --> go thru the whole garden, download everything to check if I missed something
 //  --local, or --no-cache    --> don't query the MG site, just download anything that doesn't exist locally
+//  --verbose    --> log everything
 
 const fs = require('fs').promises;
 const https = require('https');
@@ -134,7 +135,12 @@ async function cacheItems(items, cacheDir) {
       const newItems = await cacheItems(someMoments, cacheDir);
       console.log(`found ${newItems} new items`);
 
-      // TODO: if no new items (on first 2 pages?), exit (unless --full?)
+      // if no new items after checking at least 2 pages, exit
+      // TODO: unless --full
+      if (newItems == 0 && currentPage >= 2) {
+        console.log('No more new items found');
+        break;
+      }
 
       // wait for 5 seconds between API requests, to be nice to the server
       await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
