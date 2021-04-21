@@ -83,7 +83,7 @@ function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
 
 // write each item in the input array to disk
 // return count of new (previously un-cached) items
-async function cacheItems(items, cacheDir) {
+async function cacheMetadata(items, cacheDir) {
   let newlyCachedItems = 0;
 
   for (const item of items) {
@@ -112,40 +112,49 @@ async function cacheItems(items, cacheDir) {
   return newlyCachedItems;
 }
 
+// download any new metadata for recent moments
+async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
+  let currentPage = 1;
+
+  while (true) {
+    const someMoments = await requestMoments(gardenId, currentPage, PER_PAGE, TIMESTAMP, cookies);
+
+    console.log(`(page ${currentPage}) Downloaded info for ${someMoments.length} moments`);
+
+    if (someMoments.length == 0) {
+      console.log('No more moments to download');
+      break;
+    }
+
+    // go thru each object in that array, and write it to disk,
+    // like 12347890.json, in a single directory (should be fine for the number of files there are)
+    const newItems = await cacheMetadata(someMoments, metadataDir);
+    console.log(`found ${newItems} new items`);
+
+    // if no new items after checking at least 2 pages, exit
+    // TODO: unless --full
+    if (newItems == 0 && currentPage >= 2) {
+      console.log('No more new items found');
+      break;
+    }
+
+    // wait for 5 seconds between API requests, to be nice to the server
+    await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+    currentPage++;
+  }
+}
+
+
 (async function() {
   for (const garden of mgConfig) {
-    const cacheDir = path.join(SYNC_DIR, garden.name, 'cache');
     console.log(`Garden: ${garden.name} (${garden.gardenId})`);
-    console.log(`(caching to dir ${cacheDir})`);
 
-    // TODO: this should probably be a function - cacheMomentMetadata
-    let currentPage = 1;
-    while (true) {
-      const someMoments = await requestMoments(garden.gardenId, currentPage, PER_PAGE, TIMESTAMP, garden.cookies);
+    const metadataDir = path.join(SYNC_DIR, garden.name, 'metadata');
+    const imageDir = path.join(SYNC_DIR, garden.name, 'image');
+    const videoDir = path.join(SYNC_DIR, garden.name, 'video');
 
-      console.log(`(page ${currentPage}) Downloaded info for ${someMoments.length} moments`);
-
-      if (someMoments.length == 0) {
-        console.log('No more moments to download');
-        break;
-      }
-
-      // go thru each object in that array, and write it to disk,
-      // like 12347890.json, in a single directory (should be fine for the number of files there are)
-      const newItems = await cacheItems(someMoments, cacheDir);
-      console.log(`found ${newItems} new items`);
-
-      // if no new items after checking at least 2 pages, exit
-      // TODO: unless --full
-      if (newItems == 0 && currentPage >= 2) {
-        console.log('No more new items found');
-        break;
-      }
-
-      // wait for 5 seconds between API requests, to be nice to the server
-      await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
-      currentPage++;
-    }
+    console.log(`Downloading metadata to dir '${metadataDir}'...`);
+    await downloadMomentMetadata(garden.gardenId, garden.cookies, metadataDir);
 
     // TODO: verify that all media (images, videos, etc.) have been downloaded for all cached metadata
   }
