@@ -1,7 +1,21 @@
 #!/usr/bin/env bash
-# Opens new Firefox window
+# Opens new Firefox window, in the current desktop/space
 
-# open a new Firefox window (and bring it to the front with focus)
-# (I'm running nightly version)
-osascript -e 'tell application "Firefox Nightly" to activate'
-osascript -e 'tell application "System Events" to keystroke "n" using command down'
+# from https://stackoverflow.com/a/19645776/999442
+# programmatically click the menu item to create a new window, then bring it to the front
+osascript <<EOF
+tell application "System Events"
+  tell process "Firefox Nightly"
+    click menu item "New Window" of menu "File" of menu bar 1
+  end tell
+end tell
+tell application "Firefox Nightly"
+  activate
+end tell
+EOF
+
+# this method is not great
+# (it first switches to a desktop where a Firefox window already exists to create a new window)
+# open a new Firefox Nightly window, and bring it to the front with focus
+#osascript -e 'tell application "Firefox Nightly" to activate'
+#osascript -e 'tell application "System Events" to keystroke "n" using command down'
