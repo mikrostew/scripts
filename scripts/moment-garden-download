@@ -60,7 +60,7 @@ function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
     let data = '';
 
     const req = https.request(options, (res) => {
-      //console.log('statusCode:', res.statusCode);
+      console.log('statusCode:', res.statusCode);
       //console.log('headers:', res.headers);
       res.setEncoding('utf8');
       res.on('data', (chunk) => {
@@ -69,7 +69,14 @@ function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
       });
       res.on('end', () => {
         //console.log('No more data in response.');
-        resolve(JSON.parse(data));
+        try {
+          const parsed = JSON.parse(data);
+          resolve(parsed);
+        } catch(err) {
+          console.error('DATA:');
+          console.error(data);
+          reject(err);
+        }
       });
     });
 
@@ -144,19 +151,27 @@ async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
   }
 }
 
+// verify that all media (images, videos, etc.) have been downloaded for all cached metadata
+async function downloadMedia(metadataDir, mediaDir) {
+  // TODO
+  // see printIfNotDownloaded() in file select-urls-to-dl
+  // (item types, how to get things out, etc.)
+  return true;
+}
+
 
 (async function() {
   for (const garden of mgConfig) {
     console.log(`Garden: ${garden.name} (${garden.gardenId})`);
 
     const metadataDir = path.join(SYNC_DIR, garden.name, 'metadata');
-    const imageDir = path.join(SYNC_DIR, garden.name, 'image');
-    const videoDir = path.join(SYNC_DIR, garden.name, 'video');
+    const mediaDir = path.join(SYNC_DIR, garden.name);
 
     console.log(`Downloading metadata to dir '${metadataDir}'...`);
     await downloadMomentMetadata(garden.gardenId, garden.cookies, metadataDir);
 
-    // TODO: verify that all media (images, videos, etc.) have been downloaded for all cached metadata
+    console.log(`Downloading media to dir '${mediaDir}'...`);
+    await downloadMedia(metadataDir, mediaDir);
   }
 
   console.log("DONE!");
