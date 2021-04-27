@@ -24,6 +24,8 @@ brew-install-or-upgrade() {
   brew_package="$2"
   # TODO: cask or keg, maybe?
 
+  (( total_tasks++ ))
+
   install_path=$(which "$executable_name")
   if [ -z "$install_path" ]; then
     # not installed, so install it
@@ -36,7 +38,8 @@ brew-install-or-upgrade() {
   fi
 }
 
-# collect errors, and display at the end
+# collect stats, and display at the end
+total_tasks=0
 errors=()
 
 # different things for different machines
@@ -87,16 +90,17 @@ fi
 if [ "$machine" == "Work Laptop" ]
 then
   # kill and restart some things
-  kill-proc-name "Outlook"
+  # - well, I used to restart these, but that's kinda annoying, so I'm trying just to run them if they're not already running
+  #kill-proc-name "Outlook"
   # if successful, sometimes that will bring up a dialog about force quitting, whatever, don't care, kill that too
-  sleep 0.5
-  kill-proc-name "Microsoft Error Reporting"
-  sleep 0.5
-  run-app-path "/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook"
+  #sleep 0.5
+  #kill-proc-name "Microsoft Error Reporting"
+  #sleep 0.5
+  pgrep "Outlook" || run-app-path "/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook"
 
-  kill-proc-name "Slack"
-  sleep 0.5
-  run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
+  #kill-proc-name "Slack"
+  #sleep 0.5
+  pgrep "Slack" || run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
 fi
 
 if [[ "$machine" =~ Laptop ]]
@@ -112,6 +116,7 @@ then
   # update homebrew before upgrading things
   @wait-for-command brew update
   if [ "$?" != 0 ]; then errors+=('brew update'); fi
+  (( total_tasks++ ))
 
   # install or upgrade things installed via homebrew
   brew-install-or-upgrade bats bats-core
@@ -135,6 +140,7 @@ echo "Dotfile links"
 # verify that dotfile links haven't been changed
 @wait-for-command verify-dotfile-links "$HOME/src/gh/dotfiles"
 if [ "$?" != 0 ]; then errors+=('verify-dotfile-links'); fi
+(( total_tasks++ ))
 
 # TODO: make sure syncthing is running
 
@@ -143,16 +149,19 @@ then
   # OSS repos
 
   echo "Dotfiles"
+  # TODO: check that directory exists
   cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
   gpr && gp
   if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, and push'); fi
+  (( total_tasks++ ))
 
   echo "Badash"
   cd "/usr/local/lib/badash/"
   # just pull and rebase, to stay current with master
   gpr
   if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
+  (( total_tasks++ ))
 
   # TODO: any more repos?
 
@@ -166,6 +175,7 @@ then
   # (hide the args, so this doesn't show the password)
   @wait-for-command --hide-args cleanup-shivs "$ldap_pass"
   if [ "$?" != 0 ]; then errors+=('cleanup shivs'); fi
+  (( total_tasks++ ))
 fi
 
 if [ "$machine" == "Work Laptop" ]
@@ -185,6 +195,7 @@ then
   # update this homebrew as well
   @wait-for-command brew engtools update
   if [ "$?" != 0 ]; then errors+=('brew engtools update'); fi
+  (( total_tasks++ ))
 
   echo "Engtools"
 
@@ -193,6 +204,7 @@ then
   ( sleep 10; paste-term-password "$ldap_pass" ) &
   @wait-for-command brew engtools install
   if [ "$?" != 0 ]; then errors+=('brew engtools install'); fi
+  (( total_tasks++ ))
 
   # OSS repos
   # (because git is routed over the VPN, ugh)
@@ -202,12 +214,14 @@ then
   # pull, rebase, push to sync anything I've changed recently
   gpr && gp
   if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, and push'); fi
+  (( total_tasks++ ))
 
   echo "Badash"
   cd "/usr/local/lib/badash/"
   # just pull and rebase, to stay current with master
   gpr
   if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
+  (( total_tasks++ ))
 
   # LI repos
 
@@ -222,12 +236,14 @@ then
     # pull and rebase from master
     gpr
     if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
+    (( total_tasks++ ))
     # go back to the original branch
     gc "$branch_name"
   else
     # otherwise, we are on master, so just pull and rebase
     gpr
     if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
+    (( total_tasks++ ))
   fi
 
   echo "Blog"
@@ -242,12 +258,14 @@ then
     # pull and rebase from master
     gpr
     if [ "$?" != 0 ]; then errors+=('blog - pull and rebase'); fi
+    (( total_tasks++ ))
     # go back to the original branch
     gc "$branch_name"
   else
     # otherwise, we are on master, so just pull and rebase
     gpr
     if [ "$?" != 0 ]; then errors+=('blog - pull and rebase'); fi
+    (( total_tasks++ ))
   fi
 
   # TODO: any more repos?
@@ -263,6 +281,7 @@ then
   # this prompts for my password
   sudo yum install usr-local-linkedin-dist
   if [ "$?" != 0 ]; then errors+=('yum install usr-local-linkedin-dist'); fi
+  (( total_tasks++ ))
 
   # OSS repos
 
@@ -271,12 +290,14 @@ then
   # pull, rebase, push to sync anything I've changed recently
   gpr && gp
   if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, and push'); fi
+  (( total_tasks++ ))
 
   echo "Badash"
   cd "/usr/local/lib/badash/"
   # just pull and rebase, to stay current with master
   gpr
   if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
+  (( total_tasks++ ))
 
   # LI repos
 
@@ -291,14 +312,21 @@ then
     # pull and rebase from master
     gpr
     if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
+    (( total_tasks++ ))
     # go back to the original branch
     gc "$branch_name"
   else
     # otherwise, we are on master, so just pull and rebase
     gpr
     if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
+    (( total_tasks++ ))
   fi
 fi
+
+# stats
+
+echo ""
+echo "Ran ${total_tasks} task(s)"
 
 # display any errors encountered
 if [ "${#errors[@]}" -gt 0 ]
@@ -309,6 +337,8 @@ then
   do
     echo_err "$error"
   done
+else
+  echo "(no errors)"
 fi
 
 # end on a happy note
