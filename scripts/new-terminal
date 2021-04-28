@@ -9,5 +9,5 @@ then
   osascript -e 'tell application "iTerm" to create window with default profile'
 else
   # iTerm2 not running - have to start it
-  osascript -e 'tell application "Iterm" to activate'
+  osascript -e 'tell application "iTerm" to activate'
 fi
