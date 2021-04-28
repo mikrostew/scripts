@@ -85,6 +85,7 @@ then
   kill-proc-name "zoom.us"
   kill-proc-name "App Store"
   kill-proc-name "Discord"
+  kill-proc-name "Microsoft Word"
 fi
 
 if [ "$machine" == "Work Laptop" ]
@@ -96,11 +97,11 @@ then
   #sleep 0.5
   #kill-proc-name "Microsoft Error Reporting"
   #sleep 0.5
-  pgrep "Outlook" || run-app-path "/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook"
+  pgrep "Outlook" >/dev/null || run-app-path "/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook"
 
   #kill-proc-name "Slack"
   #sleep 0.5
-  pgrep "Slack" || run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
+  pgrep "Slack" >/dev/null || run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
 fi
 
 if [[ "$machine" =~ Laptop ]]
@@ -270,8 +271,8 @@ then
 
   # TODO: any more repos?
 
-  # current blog post I'm working on
-  open https://pages.linkedin.githubprivate.com/mistewar/blog/interviewing
+  # list of blog post ideas, and posts I'm working on
+  open https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit#
 fi
 
 if [ "$machine" == "Work VM" ]
