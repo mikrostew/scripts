@@ -342,6 +342,17 @@ else
   echo "(no errors)"
 fi
 
+# clean up any stray stuff on stdin (from pasting in passwords, etc.)
+cleaned_up_lines=0
+while read -t 1 -n 1024 discard
+do
+  (( cleaned_up_lines++ ))
+done
+if [ "$cleaned_up_lines" > 0 ]
+then
+  echo "(cleaned up $cleaned_up_lines stray input lines)"
+fi
+
 # end on a happy note
 echo_ack ""
 echo_ack "Good Morning!"
