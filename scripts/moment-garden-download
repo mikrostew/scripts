@@ -12,7 +12,8 @@
 //  --local, or --no-cache    --> don't query the MG site, just download anything that doesn't exist locally
 //  --verbose    --> log everything
 
-const fs = require('fs').promises;
+const fs = require('fs');
+const fsPromises = require('fs').promises;
 const https = require('https');
 const path = require('path');
 
@@ -24,6 +25,13 @@ const TIMESTAMP = new Date().getTime();
 
 // this is the default for the web interface
 const PER_PAGE="50"
+
+// types of moments
+const TYPE_TEXT = 1;
+const TYPE_IMAGE = 2;
+// TODO: what is type 3?
+const TYPE_VIDEO = 4;
+const TYPE_EVENT = 5;
 
 // config for this stuff
 // (so I don't commit secrets to the repo)
@@ -37,6 +45,11 @@ const PER_PAGE="50"
 //   ...
 // ]
 const mgConfig = require(path.join(SYNC_DIR, '.mg-config.js'));
+
+function dateFromTimestamp(unix_timestamp) {
+  // ISO date format is YYYY-MM-DDTHH:mm:ss.sssZ - just return the date part
+  return new Date(unix_timestamp * 1000).toISOString().split('T')[0];
+}
 
 // make the request to moment garden
 function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
@@ -98,16 +111,16 @@ async function cacheMetadata(items, cacheDir) {
     const itemCacheFile = path.join(cacheDir, `${id}.json`);
 
     // ensure that directory exists
-    await fs.mkdir(cacheDir, { recursive: true });
+    await fsPromises.mkdir(cacheDir, { recursive: true });
 
     // check if cache file already exists
     try {
       // this will throw/reject if files doesn't exist
-      await fs.access(itemCacheFile);
+      await fsPromises.access(itemCacheFile);
       // console.log(`File ${itemCacheFile} exists, skipping`);
     } catch(error) {
       if (error.code == 'ENOENT') {
-        await fs.writeFile(itemCacheFile, JSON.stringify(item));
+        await fsPromises.writeFile(itemCacheFile, JSON.stringify(item));
         // console.log(`Wrote new file ${itemCacheFile}`);
         newlyCachedItems++;
       } else {
@@ -153,10 +166,149 @@ async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
 
 // verify that all media (images, videos, etc.) have been downloaded for all cached metadata
 async function downloadMedia(metadataDir, mediaDir) {
-  // TODO
-  // see printIfNotDownloaded() in file select-urls-to-dl
-  // (item types, how to get things out, etc.)
-  return true;
+  const allFiles = await fsPromises.readdir(metadataDir);
+
+  // output directories
+  const imageDir = path.join(mediaDir, 'image');
+  const videoDir = path.join(mediaDir, 'video');
+
+  // ensure the output directories exist
+  await fsPromises.mkdir(imageDir, { recursive: true });
+  await fsPromises.mkdir(videoDir, { recursive: true });
+
+  for (file of allFiles) {
+    //console.log(`Found file ${file}`);
+    const contents = await fsPromises.readFile(path.join(metadataDir, file), 'utf8');
+    const item = JSON.parse(contents);
+    //console.log(item.type);
+    if (item.type == TYPE_TEXT) {
+      // don't need to download - already have the text info in the JSON file
+      console.log("Text type - nothing to do here");
+    } else if (item.type == TYPE_IMAGE) {
+      console.log("TODO: image to download...");
+      await maybeDownloadImage(item, imageDir);
+      break;
+    } else if (item.type == TYPE_VIDEO) {
+      console.log("TODO: video to download...");
+      await maybeDownloadVideo(item, videoDir);
+      break;
+    } else if (item.type == TYPE_EVENT) {
+      // don't need to download - already have the text info in the JSON file
+      console.log("Event type - nothing to do here");
+    } else {
+      // unknown type
+      console.error(`Unknown item type ${item.type}`);
+      throw new Error(`Unknown item type ${item.type}`);
+    }
+  }
+}
+
+// TODO: keep stats on this stuff
+async function maybeDownloadImage(item, imageDir) {
+  if (item.meta && item.meta.montage) {
+    console.log("Montage!!");
+    // montage, which has multiple possible images to download
+    const id = item.id;
+    // like the other images, get the full resolution
+    const main_path = item.path.replace('moments-large', 'moments-full');
+    const urls = [ main_path ];
+    const date = dateFromTimestamp(item.unix_timestamp);
+    const url_path = path.dirname(main_path);
+    urls = urls.concat(item.meta.montage.split(',').map(img => `${url_path}/${img}`));
+    for(let i = 0; i < urls.length; i++) {
+      const url = urls[i];
+      const filePath = outputFilePath(date, url, imageDir);
+      if (!await isDownloaded(filePath)) {
+        console.log(`File ${filePath} has not been downloaded...`);
+        await downloadItem(url, filePath);
+      } else {
+        console.log(`File ${filePath} has been downloaded...`);
+      }
+    }
+  } else {
+    // just a single URL to download
+    const id = item.id;
+    // this will be something like https://s3.amazonaws.com/moments-large/9212055_4w2w6r5gqqeb42w47ulwfcjs6.JPG
+    // change to https://s3.amazonaws.com/moments-full/9212055_4w2w6r5gqqeb42w47ulwfcjs6.JPG
+    // which is full resolution
+    const url = item.path.replace('moments-large', 'moments-full');
+    const date = dateFromTimestamp(item.unix_timestamp);
+    const filePath = outputFilePath(date, url, imageDir);
+    if (!await isDownloaded(filePath)) {
+      console.log(`File ${filePath} has not been downloaded...`);
+      await downloadItem(url, filePath);
+    } else {
+      console.log(`File ${filePath} has been downloaded`);
+    }
+  }
+}
+
+// TODO: keep stats on this stuff
+async function maybeDownloadVideo(item, videoDir) {
+  const id = item.id;
+  const date = dateFromTimestamp(item.unix_timestamp);
+  if (item.meta && item.meta.video_path_hd) {
+    const url = item.meta.video_path_hd;
+    const filePath = outputFilePath(date, url, videoDir);
+    if (!await isDownloaded(filePath)) {
+      console.log(`File ${filePath} has not been downloaded...`);
+      await downloadItem(url, filePath);
+    } else {
+      console.log(`File ${filePath} has been downloaded`);
+    }
+  } else {
+    // TODO: what if there is no HD video?
+    console.error(`[${id}] item does not have ".meta.video_path_hd" property`);
+    throw new Error(`[${id}] item does not have ".meta.video_path_hd" property`);
+  }
+}
+
+function outputFilePath(date, url, dir) {
+  // strip off the first part of the URL, leaving just the file name
+  const basename = path.basename(url);
+  return path.join(dir, `${date}_${basename}`);
+}
+
+async function isDownloaded(filePath) {
+  try {
+    await fsPromises.access(filePath)
+    // if that works, the file exists, yay
+    return true;
+  } catch(err) {
+    // that throws if the file doesn't exist
+    return false;
+  }
+}
+
+async function downloadItem(url, filePath) {
+  // adapted from https://stackoverflow.com/a/62056725
+  return new Promise((resolve, reject) => {
+    const fileStream = fs.createWriteStream(filePath);
+
+    const request = https.get(url, (response) => {
+      if (response.statusCode !== 200) {
+        reject(new Error(`Failed to GET '${url}' (status: ${response.statusCode})`));
+        return;
+      }
+      // pipe the download stream to the file
+      response.pipe(fileStream);
+    });
+
+    // don't resolve on the end of the response
+    // wait to resolve until this finishes, which is after the response completes
+    fileStream.on('finish', () => resolve());
+
+    request.on('error', (err) => {
+      fs.unlink(filePath, () => reject(err));
+    });
+
+    fileStream.on('error', (err) => {
+      fs.unlink(filePath, () => reject(err));
+    });
+
+    // do the reqest
+    request.end();
+  });
 }
 
 
