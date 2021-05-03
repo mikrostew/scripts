@@ -15,10 +15,19 @@
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const https = require('https');
+const os = require('os');
 const path = require('path');
 
-// TODO: different paths for different machines
-const SYNC_DIR = path.join('/', 'Users', 'mikrostew', 'SyncImages', 'MomentGarden');
+// different paths for different machines
+let SYNC_DIR;
+const HOST_NAME = os.hostname();
+if (/MacBook-Air/.test(HOST_NAME) || /Michaels-Air/.test(HOST_NAME)) {
+  // home laptop
+  SYNC_DIR = path.join('/', 'Users', 'mikrostew', 'SyncImages', 'MomentGarden');
+} else if (/mistewar-mn/.test(HOST_NAME)) {
+  // work laptop
+  SYNC_DIR = path.join('/', 'usr', 'local', 'SyncThing', 'SyncImages', 'MomentGarden');
+}
 
 // seems to work if I just use the same timestamp for all requests
 const TIMESTAMP = new Date().getTime();
