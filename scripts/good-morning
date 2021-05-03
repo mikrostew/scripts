@@ -336,6 +336,19 @@ then
   (( total_tasks++ ))
 fi
 
+# TODO: free disk space
+# (do this for everything)
+
+if [[ "$machine" =~ Laptop ]]
+then
+  df -h | grep /System/Volumes/Data$ | awk '{ print $5 }'
+else
+  # TODO: not sure if this will work...
+  df -h | grep /System/Volumes/Data$ | awk '{ print $5 }'
+fi
+
+
+
 # stats
 
 echo ""
