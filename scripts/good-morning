@@ -44,7 +44,7 @@ brew-install-or-upgrade() {
 
 # different things for different machines
 HOST_NAME="$(hostname)"
-if [[ "$HOST_NAME" =~ MacBook-Air ]]
+if [[ "$HOST_NAME" =~ MacBook-Air ]] || [[ "$HOST_NAME" =~ Michaels-Air ]]
 then
   machine="Home Laptop"
 elif [[ "$HOST_NAME" =~ mistewar-mn ]]
