@@ -1,6 +1,16 @@
 #!/usr/bin/env badash
 # Automatically do things that I use to do manually every morning
 
+# TODO: instead of hardcoding a bunch of if's here, use a config
+# could `source` a config file with just vars...
+# https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
+# or use something like `jq` for a JSON config
+# https://unix.stackexchange.com/questions/175648/use-config-file-for-my-shell-script
+# (or there is `yq` for YAML, so I get comments ¯\_(ツ)_/¯)
+# https://github.com/mikefarah/yq  (brew install yq)
+#
+# OR, just use a different language that can handle YAML/JSON/whatever much better...
+
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -203,6 +213,7 @@ then
 
   # this prompts for my password
   # so use some applescript shenanigans to paste in the password to that
+  # TODO: better way to make sure the right window is in the foreground
   ( sleep 10; paste-term-password "$ldap_pass" ) &
   @wait-for-command brew engtools install
   if [ "$?" != 0 ]; then errors+=('brew engtools install'); fi
@@ -347,6 +358,9 @@ else
   df -h | grep /System/Volumes/Data$ | awk '{ print $5 }'
 fi
 
+
+# TODO: people I should reach out to every couple days, or week, or month, etc.
+# (ex. cflor)
 
 
 # stats
