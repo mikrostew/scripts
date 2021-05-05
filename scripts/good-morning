@@ -147,6 +147,11 @@ then
   brew-install-or-upgrade wget wget
   brew-install-or-upgrade youtube-dl youtube-dl
   brew-install-or-upgrade ruby-install
+
+  echo "Rust"
+  @wait-for-command rustup update
+  if [ "$?" != 0 ]; then errors+=('rustup update'); fi
+  (( total_tasks++ ))
 fi
 
 echo "Dotfile links"
