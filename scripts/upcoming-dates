@@ -1,0 +1,131 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const os = require('os');
+
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const TODAY = new Date();
+const THIS_YEAR = TODAY.getFullYear();
+const NEXT_YEAR = THIS_YEAR + 1;
+
+// different paths for different machines
+function getConfig() {
+  const hostName = os.hostname();
+
+  let syncDir;
+  if (/MacBook-Air/.test(hostName) || /Michaels-Air/.test(hostName)) {
+    // home laptop
+    syncDir = path.join('/', 'Users', 'mikrostew', 'SyncDocs');
+  } else if (/mistewar-mn/.test(hostName)) {
+    // work laptop
+    syncDir = path.join('/', 'usr', 'local', 'SyncThing', 'SyncDocs');
+  }
+
+  const dateConfig = require(path.join(syncDir, '.upcoming-dates.js'));
+  return dateConfig;
+}
+
+function daysFromToday(date) {
+  return Math.ceil((date - TODAY) / MS_PER_DAY);
+}
+
+function isRecurring(d) {
+  return d.split('/').length === 2;
+}
+
+function toDate(fromStr, year) {
+  let parts = fromStr.split('/');
+  if (parts.length === 2) {
+    // recurring, have to add year
+    // (month is zero-index)
+    return new Date(year, parts[0]-1, parts[1]);
+  } else if (parts.length === 3) {
+    // (month is zero-index)
+    return new Date(parts[0], parts[1]-1, parts[2]);
+  }
+}
+
+function addDates(d) {
+  d._year = THIS_YEAR;
+  d._dateObj = toDate(d.date, THIS_YEAR);
+  // account for recurring dates coming next year
+  if (isRecurring(d.date)) {
+    let d2 = Object.assign({}, d);
+    d2._year = NEXT_YEAR;
+    d2._dateObj = toDate(d.date, NEXT_YEAR);
+    // normalize dates to YYYY/MM/DD
+    d.date = `${THIS_YEAR}/${d.date}`;
+    d2.date = `${NEXT_YEAR}/${d2.date}`;
+    return [d, d2];
+  } else {
+    return d;
+  }
+}
+
+function daysAway(d) {
+  d._daysAway = daysFromToday(d._dateObj);
+  return d;
+}
+
+function inTheNearFuture(d) {
+  return d._daysAway >= 0 && d._daysAway <= 90;
+}
+
+function soonestDateFirst(a, b) {
+  return a._daysAway - b._daysAway;
+}
+
+function formatNotes(d) {
+  if (d.notes === undefined) {
+    d.notes = "";
+  } else {
+    if (d.anniversary_year !== undefined) {
+      let anniversary_num = d._year - d.anniversary_year;
+      d.notes += "anniversary #" + anniversary_num;
+    }
+    d.notes = `[${d.notes}]`;
+  }
+  return d;
+}
+
+function tableData(data) {
+  return "<td style='border: 1px solid black; padding: 3px;'>" + data + "</td>";
+}
+
+function formatDate(d) {
+  return `${d.name} (${d._daysAway} days) ${d._dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} ${d.notes}`
+}
+
+// flattens one level
+Object.defineProperty(Array.prototype, 'flatten', {
+  value: function() {
+    // from https://stackoverflow.com/questions/10865025/
+    return [].concat.apply([], this);
+  }
+});
+
+// for debug
+// run the input function for each thing in the array, then return the original array
+Object.defineProperty(Array.prototype, 'tap', {
+  value: function(f) {
+    this.forEach(d => f(d));
+    return this;
+  }
+});
+
+
+// printout
+
+console.log("Upcoming Dates");
+
+const dateConfig = getConfig();
+dateConfig
+  .map(addDates)
+  .flatten()
+  .map(daysAway)
+  .filter(inTheNearFuture)
+  .sort(soonestDateFirst)
+  .map(formatNotes)
+  .map(formatDate)
+  .forEach(d => console.log(d));
