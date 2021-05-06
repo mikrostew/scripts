@@ -146,7 +146,7 @@ then
   brew-install-or-upgrade watch watch
   brew-install-or-upgrade wget wget
   brew-install-or-upgrade youtube-dl youtube-dl
-  brew-install-or-upgrade ruby-install
+  brew-install-or-upgrade ruby-install ruby-install
 
   echo "Rust"
   @wait-for-command rustup update
