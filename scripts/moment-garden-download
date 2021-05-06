@@ -186,29 +186,30 @@ async function downloadMedia(metadataDir, mediaDir) {
   await fsPromises.mkdir(imageDir, { recursive: true });
   await fsPromises.mkdir(videoDir, { recursive: true });
 
-  for (file of allFiles) {
+  for (const file of allFiles) {
     // console.log(`Found file ${file}`);
     const contents = await fsPromises.readFile(path.join(metadataDir, file), 'utf8');
     const item = JSON.parse(contents);
-    // console.log(item.type);
-    if (item.type === TYPE_TEXT) {
+    const type = parseInt(item.type, 10);
+    // console.log(type);
+    if (type === TYPE_TEXT) {
       // don't need to download - already have the text info in the JSON file
       console.log('Text type - nothing to do here');
-    } else if (item.type === TYPE_IMAGE) {
+    } else if (type === TYPE_IMAGE) {
       console.log('TODO: image to download...');
       await maybeDownloadImage(item, imageDir);
       break;
-    } else if (item.type === TYPE_VIDEO) {
+    } else if (type === TYPE_VIDEO) {
       console.log('TODO: video to download...');
       await maybeDownloadVideo(item, videoDir);
       break;
-    } else if (item.type === TYPE_EVENT) {
+    } else if (type === TYPE_EVENT) {
       // don't need to download - already have the text info in the JSON file
       console.log('Event type - nothing to do here');
     } else {
       // unknown type
-      console.error(`Unknown item type ${item.type}`);
-      throw new Error(`Unknown item type ${item.type}`);
+      console.error(`Unknown item type ${type}`);
+      throw new Error(`Unknown item type ${type}`);
     }
   }
 }
@@ -218,10 +219,10 @@ async function maybeDownloadImage(item, imageDir) {
   if (item.meta && item.meta.montage) {
     console.log('Montage!!');
     // montage, which has multiple possible images to download
-    const id = item.id;
+    // const id = item.id;
     // like the other images, get the full resolution
     const mainPath = item.path.replace('moments-large', 'moments-full');
-    const urls = [mainPath];
+    let urls = [mainPath];
     const date = dateFromTimestamp(item.unix_timestamp);
     const urlPath = path.dirname(mainPath);
     urls = urls.concat(item.meta.montage.split(',').map((img) => `${urlPath}/${img}`));
@@ -237,7 +238,7 @@ async function maybeDownloadImage(item, imageDir) {
     }
   } else {
     // just a single URL to download
-    const id = item.id;
+    // const id = item.id;
     // this will be something like https://s3.amazonaws.com/moments-large/9212055_4w2w6r5gqqeb42w47ulwfcjs6.JPG
     // change to https://s3.amazonaws.com/moments-full/9212055_4w2w6r5gqqeb42w47ulwfcjs6.JPG
     // which is full resolution
