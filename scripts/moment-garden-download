@@ -33,7 +33,7 @@ if (/MacBook-Air/.test(HOST_NAME) || /Michaels-Air/.test(HOST_NAME)) {
 const TIMESTAMP = new Date().getTime();
 
 // this is the default for the web interface
-const PER_PAGE="50"
+const PER_PAGE = '50';
 
 // types of moments
 const TYPE_TEXT = 1;
@@ -55,9 +55,10 @@ const TYPE_EVENT = 5;
 // ]
 const mgConfig = require(path.join(SYNC_DIR, '.mg-config.js'));
 
-function dateFromTimestamp(unix_timestamp) {
+function dateFromTimestamp(unixTimestamp) {
   // ISO date format is YYYY-MM-DDTHH:mm:ss.sssZ - just return the date part
-  return new Date(unix_timestamp * 1000).toISOString().split('T')[0];
+  return new Date(unixTimestamp * 1000).toISOString()
+    .split('T')[0];
 }
 
 // make the request to moment garden
@@ -68,13 +69,13 @@ function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
     port: 443, // default
     path: `/moments/more/${gardenID}/${pageNumber}/${perPage}/desc?_=${timestamp}`,
     headers: {
-      'Accept': '*/*',
+      Accept: '*/*',
       'Accept-Language': 'en-US,en;q=0.5',
-      'Referer': 'https://momentgarden.com/moments/gardens',
+      Referer: 'https://momentgarden.com/moments/gardens',
       'X-Requested-With': 'XMLHttpRequest',
       // TODO: how can I update this periodically?
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:87.0) Gecko/20100101 Firefox/87.0',
-      'Cookie': cookies.join('; '),
+      Cookie: cookies.join('; '),
     },
   };
 
@@ -83,18 +84,18 @@ function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
 
     const req = https.request(options, (res) => {
       console.log('statusCode:', res.statusCode);
-      //console.log('headers:', res.headers);
+      // console.log('headers:', res.headers);
       res.setEncoding('utf8');
       res.on('data', (chunk) => {
-        //console.log(`BODY: ${chunk}`);
+        // console.log(`BODY: ${chunk}`);
         data += chunk;
       });
       res.on('end', () => {
-        //console.log('No more data in response.');
+        // console.log('No more data in response.');
         try {
           const parsed = JSON.parse(data);
           resolve(parsed);
-        } catch(err) {
+        } catch (err) {
           console.error('DATA:');
           console.error(data);
           reject(err);
@@ -127,8 +128,8 @@ async function cacheMetadata(items, cacheDir) {
       // this will throw/reject if files doesn't exist
       await fsPromises.access(itemCacheFile);
       // console.log(`File ${itemCacheFile} exists, skipping`);
-    } catch(error) {
-      if (error.code == 'ENOENT') {
+    } catch (error) {
+      if (error.code === 'ENOENT') {
         await fsPromises.writeFile(itemCacheFile, JSON.stringify(item));
         // console.log(`Wrote new file ${itemCacheFile}`);
         newlyCachedItems++;
@@ -150,7 +151,7 @@ async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
 
     console.log(`(page ${currentPage}) Downloaded info for ${someMoments.length} moments`);
 
-    if (someMoments.length == 0) {
+    if (someMoments.length === 0) {
       console.log('No more moments to download');
       break;
     }
@@ -162,7 +163,7 @@ async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
 
     // if no new items after checking at least 2 pages, exit
     // TODO: unless --full
-    if (newItems == 0 && currentPage >= 2) {
+    if (newItems === 0 && currentPage >= 2) {
       console.log('No more new items found');
       break;
     }
@@ -186,24 +187,24 @@ async function downloadMedia(metadataDir, mediaDir) {
   await fsPromises.mkdir(videoDir, { recursive: true });
 
   for (file of allFiles) {
-    //console.log(`Found file ${file}`);
+    // console.log(`Found file ${file}`);
     const contents = await fsPromises.readFile(path.join(metadataDir, file), 'utf8');
     const item = JSON.parse(contents);
-    //console.log(item.type);
-    if (item.type == TYPE_TEXT) {
+    // console.log(item.type);
+    if (item.type === TYPE_TEXT) {
       // don't need to download - already have the text info in the JSON file
-      console.log("Text type - nothing to do here");
-    } else if (item.type == TYPE_IMAGE) {
-      console.log("TODO: image to download...");
+      console.log('Text type - nothing to do here');
+    } else if (item.type === TYPE_IMAGE) {
+      console.log('TODO: image to download...');
       await maybeDownloadImage(item, imageDir);
       break;
-    } else if (item.type == TYPE_VIDEO) {
-      console.log("TODO: video to download...");
+    } else if (item.type === TYPE_VIDEO) {
+      console.log('TODO: video to download...');
       await maybeDownloadVideo(item, videoDir);
       break;
-    } else if (item.type == TYPE_EVENT) {
+    } else if (item.type === TYPE_EVENT) {
       // don't need to download - already have the text info in the JSON file
-      console.log("Event type - nothing to do here");
+      console.log('Event type - nothing to do here');
     } else {
       // unknown type
       console.error(`Unknown item type ${item.type}`);
@@ -215,16 +216,16 @@ async function downloadMedia(metadataDir, mediaDir) {
 // TODO: keep stats on this stuff
 async function maybeDownloadImage(item, imageDir) {
   if (item.meta && item.meta.montage) {
-    console.log("Montage!!");
+    console.log('Montage!!');
     // montage, which has multiple possible images to download
     const id = item.id;
     // like the other images, get the full resolution
-    const main_path = item.path.replace('moments-large', 'moments-full');
-    const urls = [ main_path ];
+    const mainPath = item.path.replace('moments-large', 'moments-full');
+    const urls = [mainPath];
     const date = dateFromTimestamp(item.unix_timestamp);
-    const url_path = path.dirname(main_path);
-    urls = urls.concat(item.meta.montage.split(',').map(img => `${url_path}/${img}`));
-    for(let i = 0; i < urls.length; i++) {
+    const urlPath = path.dirname(mainPath);
+    urls = urls.concat(item.meta.montage.split(',').map((img) => `${urlPath}/${img}`));
+    for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
       const filePath = outputFilePath(date, url, imageDir);
       if (!await isDownloaded(filePath)) {
@@ -280,10 +281,10 @@ function outputFilePath(date, url, dir) {
 
 async function isDownloaded(filePath) {
   try {
-    await fsPromises.access(filePath)
+    await fsPromises.access(filePath);
     // if that works, the file exists, yay
     return true;
-  } catch(err) {
+  } catch (err) {
     // that throws if the file doesn't exist
     return false;
   }
@@ -335,5 +336,5 @@ async function downloadItem(url, filePath) {
     await downloadMedia(metadataDir, mediaDir);
   }
 
-  console.log("DONE!");
+  console.log('DONE!');
 })();

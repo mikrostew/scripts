@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// show upcoming dates, from the input config file
+
 const path = require('path');
 const os = require('os');
 
@@ -35,14 +37,14 @@ function isRecurring(d) {
 }
 
 function toDate(fromStr, year) {
-  let parts = fromStr.split('/');
+  const parts = fromStr.split('/');
   if (parts.length === 2) {
     // recurring, have to add year
     // (month is zero-index)
-    return new Date(year, parts[0]-1, parts[1]);
+    return new Date(year, parts[0] - 1, parts[1]);
   } else if (parts.length === 3) {
     // (month is zero-index)
-    return new Date(parts[0], parts[1]-1, parts[2]);
+    return new Date(parts[0], parts[1] - 1, parts[2]);
   }
 }
 
@@ -51,7 +53,7 @@ function addDates(d) {
   d._dateObj = toDate(d.date, THIS_YEAR);
   // account for recurring dates coming next year
   if (isRecurring(d.date)) {
-    let d2 = Object.assign({}, d);
+    const d2 = Object.assign({}, d);
     d2._year = NEXT_YEAR;
     d2._dateObj = toDate(d.date, NEXT_YEAR);
     // normalize dates to YYYY/MM/DD
@@ -78,11 +80,11 @@ function soonestDateFirst(a, b) {
 
 function formatNotes(d) {
   if (d.notes === undefined) {
-    d.notes = "";
+    d.notes = '';
   } else {
     if (d.anniversary_year !== undefined) {
-      let anniversary_num = d._year - d.anniversary_year;
-      d.notes += "anniversary #" + anniversary_num;
+      const anniversaryNum = d._year - d.anniversary_year;
+      d.notes += 'anniversary #' + anniversaryNum;
     }
     d.notes = `[${d.notes}]`;
   }
@@ -90,42 +92,25 @@ function formatNotes(d) {
 }
 
 function tableData(data) {
-  return "<td style='border: 1px solid black; padding: 3px;'>" + data + "</td>";
+  return "<td style='border: 1px solid black; padding: 3px;'>" + data + '</td>';
 }
 
 function formatDate(d) {
-  return `${d.name} (${d._daysAway} days) ${d._dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} ${d.notes}`
+  return `${d.name} (${d._daysAway} days) ${d._dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} ${d.notes}`;
 }
-
-// flattens one level
-Object.defineProperty(Array.prototype, 'flatten', {
-  value: function() {
-    // from https://stackoverflow.com/questions/10865025/
-    return [].concat.apply([], this);
-  }
-});
-
-// for debug
-// run the input function for each thing in the array, then return the original array
-Object.defineProperty(Array.prototype, 'tap', {
-  value: function(f) {
-    this.forEach(d => f(d));
-    return this;
-  }
-});
 
 
 // printout
 
-console.log("Upcoming Dates");
+console.log('Upcoming Dates');
 
 const dateConfig = getConfig();
 dateConfig
   .map(addDates)
-  .flatten()
+  .flat()
   .map(daysAway)
   .filter(inTheNearFuture)
   .sort(soonestDateFirst)
   .map(formatNotes)
   .map(formatDate)
-  .forEach(d => console.log(d));
+  .forEach((d) => console.log(d));
