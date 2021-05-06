@@ -368,6 +368,12 @@ fi
 # TODO: people I should reach out to every couple days, or week, or month, etc.
 # (ex. cflor)
 
+# show a quote of the day
+quote-of-the-day
+
+# show something to remember
+remember
+
 # show upcoming dates
 upcoming-dates
 echo ""
