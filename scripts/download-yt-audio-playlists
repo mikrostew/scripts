@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# download audio playlists from youtube
+
+# different paths for different machines
+HOST_NAME="$(hostname)"
+if [[ "$HOST_NAME" =~ MacBook-Air ]] || [[ "$HOST_NAME" =~ Michaels-Air ]]
+then
+  BASE_DIR="/Users/mikrostew/SyncPhone/Music"
+elif [[ "$HOST_NAME" =~ mistewar-mn ]]
+then
+  BASE_DIR="/usr/local/SyncThing/SyncPhone/Music"
+else
+  echo_err "Machine '$HOST_NAME' has not been configured for script $0"
+  exit 1
+fi
+
+# read config
+playlist_config=$(<"$BASE_DIR/.config.json")
+
+download_playlist() {
+  # arguments
+  local playlist_name="$1"
+  local playlist_url="https://www.youtube.com/playlist?list=$2"
+  local download_dir="$3"
+
+  echo ""
+  echo "Downloading playlist '$playlist_name' to $download_dir..."
+  echo ""
+
+  # options:
+  # - download best audio versions of all files from the playlist,
+  # - sleep for 5 seconds between each download
+  youtube-dl \
+    --extract-audio \
+    --audio-format best \
+    -o "$download_dir/%(title)s.%(ext)s" \
+    --sleep-interval 5 \
+    "$playlist_url"
+
+  # TODO: parse the output of that ^^ command to tell how many songs were downloaded
+}
+
+# download songs in the configured playlists
+
+# base64 encode each config object so I can safely loop over them
+# (using raw output so it doesn't add quotes around the base64 data)
+for playlist in $(echo "$playlist_config" | jq -r '.[] | @base64')
+do
+  # TODO: refactor this duplication to a function?
+  name="$(echo $playlist | base64 --decode | jq -r '.name')"
+  list_id="$(echo $playlist | base64 --decode | jq -r '.playlistID')"
+
+  download_dir="$BASE_DIR/$name"
+  download_playlist "$name" "$list_id" "$download_dir"
+  open "$download_dir"
+done
