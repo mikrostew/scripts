@@ -369,12 +369,16 @@ fi
 # (ex. cflor)
 
 # show a quote of the day
+echo ""
+echo "Quote of the day:"
 quote-of-the-day
 
 # show something to remember
+echo ""
 remember
 
 # show upcoming dates
+echo ""
 upcoming-dates
 echo ""
 
