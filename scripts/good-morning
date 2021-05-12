@@ -355,13 +355,15 @@ fi
 
 # TODO: free disk space
 # (do this for everything)
+echo ""
+echo "Free Disk Space"
 
 if [[ "$machine" =~ Laptop ]]
 then
   df -h | grep /System/Volumes/Data$ | awk '{ print $5 }'
 else
-  # TODO: not sure if this will work...
-  df -h | grep /System/Volumes/Data$ | awk '{ print $5 }'
+  # this works on the VM...
+  df -h | grep ' /$' | awk '{ print $5 }'
 fi
 
 
