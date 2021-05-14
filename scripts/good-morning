@@ -116,12 +116,24 @@ fi
 
 if [[ "$machine" =~ Laptop ]]
 then
-  # TODO: make sure xcodebuild is using the full Xcode install, instead of just command line tools
-  #xcode-select --print-path
-  # (https://stackoverflow.com/questions/17980759/xcode-select-active-developer-directory-error)
-  #echo "Xcode"
-  #( sleep 10; paste-term-password "$ldap_pass" ) &
-  #sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+  echo "Xcode"
+  (( total_tasks++ ))
+  # make sure xcodebuild is using the full Xcode install, instead of just command line tools
+  xcode_path="$(xcode-select --print-path)"
+  if [ "$xcode_path" != "/Applications/Xcode.app/Contents/Developer" ]
+  then
+    ( sleep 10; paste-term-password "$ldap_pass" ) &
+    sudo xcode-select -s "/Applications/Xcode.app/Contents/Developer"
+    xcode_path="$(xcode-select --print-path)"
+    if [ "$xcode_path" != "/Applications/Xcode.app/Contents/Developer" ]
+    then
+      echo "❌ $xcode_path"
+    else
+      echo "✅ $xcode_path"
+    fi
+  else
+    echo "✅ $xcode_path"
+  fi
 
   echo "Homebrew"
 
