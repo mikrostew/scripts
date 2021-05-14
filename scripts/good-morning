@@ -353,17 +353,26 @@ then
   (( total_tasks++ ))
 fi
 
-# TODO: free disk space
-# (do this for everything)
+# check free disk space
+
 echo ""
 echo "Free Disk Space"
 
+(( total_tasks++ ))
 if [[ "$machine" =~ Laptop ]]
 then
-  df -h | grep /System/Volumes/Data$ | awk '{ print $5 }'
+  percentage="$(df -h | grep /System/Volumes/Data$ | awk '{ print $5 }')"
 else
   # this works on the VM...
-  df -h | grep ' /$' | awk '{ print $5 }'
+  percentage="$(df -h | grep ' /$' | awk '{ print $5 }')"
+fi
+percent="$( [[ "$percentage" =~ ^([0-9]+)% ]] && echo "${BASH_REMATCH[1]}" )"
+if [ -z "$percent" ] || [ "$percent" -le 80 ]
+then
+  echo "✅ $percentage"
+else
+  echo "❌ $percentage"
+  errors+=('free disk space')
 fi
 
 
