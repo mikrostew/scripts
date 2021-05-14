@@ -1,0 +1,19 @@
+#!/usr/bin/env badash
+# git - create new branch that tracks origin/(main|master)
+
+new_branch_name="${1?:Must provide name of new branch}"
+
+# is the default branch main or master?
+# see https://stackoverflow.com/q/5167957
+if git show-ref --verify --quiet refs/heads/main
+then
+  default_branch="main"
+elif git show-ref --verify --quiet refs/heads/master
+then
+  default_branch="master"
+else
+  echo "Error: default branch is not 'main' or 'master'"
+  exit 1
+fi
+
+@wait-for-command git checkout -b "$1" "origin/$default_branch"
