@@ -79,7 +79,7 @@ curl_pid="$!"
 spinner -m "Querying $github_license_api for license info..." $curl_pid
 licenses_info="$(cat <&3)"
 wait $curl_pid
-@exit_on_error 'API call failed' 'echo "JSON output: $licenses_info"'
+@exit-on-error 'API call failed' 'echo "JSON output: $licenses_info"'
 readarray -t license_names <<< "$(echo "$licenses_info" | jq -r '.[] | .name')"
 readarray -t license_urls <<< "$(echo "$licenses_info" | jq -r '.[] | .url')"
 num_licenses="${#license_names[@]}"
@@ -111,7 +111,7 @@ then
   spinner -m "Getting text of $license_name from $license_url..." $curl_pid
   license_info="$(cat <&3)"
   wait $curl_pid
-  @exit_on_error 'API call failed' 'echo "JSON output: $license_info"'
+  @exit-on-error 'API call failed' 'echo "JSON output: $license_info"'
   echo "$license_info" | jq -r '.body' | sed -e "s/\[year\]/$current_year/" -e "s/\[fullname\]/$my_name/" > LICENSE
   do_git add LICENSE
 else

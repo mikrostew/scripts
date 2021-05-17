@@ -54,9 +54,9 @@ if in_git_repo && not_on_git_branch 'master'
 then
   branch_name="$(current_git_branch)"
   merge_base="$(git merge-base master "$branch_name")"
-  @exit_on_error 'Error running git merge-base' 'echo "Output was: $merge_base"'
+  @exit-on-error 'Error running git merge-base' 'echo "Output was: $merge_base"'
   merge_tree_output="$(git merge-tree $merge_base master "$branch_name")"
-  @exit_on_error 'Error running git merge-tree' 'echo "Output was: $merge_tree_output"'
+  @exit-on-error 'Error running git merge-tree' 'echo "Output was: $merge_tree_output"'
   blue="$(echo -e $COLOR_FG_BOLD_BLUE)"
   red="$(echo -e $COLOR_FG_BOLD_RED)"
   reset="$(echo -e $COLOR_RESET)"

@@ -112,7 +112,7 @@ fi
 echo_ack "(curl -X POST -u '$my_username:XXXXX' 'https://api.github.com/repos/$username/$repo_name/forks')"
 output="$(curl -X POST -u "$my_username:$api_token" "https://api.github.com/repos/$username/$repo_name/forks")"
 # (Note that running that multiple times won't create multiple forks)
-@exit_on_error 'API call to fork the repository failed' 'echo "JSON output: $output"'
+@exit-on-error 'API call to fork the repository failed' 'echo "JSON output: $output"'
 
 # TODO - check 'output' for error
 
@@ -137,7 +137,7 @@ then
   sleep 10
   do_git clone "$ssh_url" "$repo_name"
   # if it failed again then something is wrong
-  @exit_on_error 'Failed to clone the repository - check if https://github.com/$my_username/$repo_name exists'
+  @exit-on-error 'Failed to clone the repository - check if https://github.com/$my_username/$repo_name exists'
 fi
 
 # cd into that folder && set upstream to the original repo

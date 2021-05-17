@@ -38,9 +38,9 @@ done
 shift $((OPTIND-1))
 @uses_cmds curl jq e2d
 data="$(curl -sS https://oncall.prod.linkedin.com/api/v0/users/$(whoami)/upcoming)"
-@exit_on_error "Error running curl"
+@exit-on-error "Error running curl"
 json_data="$(echo "$data" | jq -r '.[]|"\(.team) \(.role) \(.start)"')"
-@exit_on_error "Error running jq"
+@exit-on-error "Error running jq"
 while read team role ts
 do
   formatted_time="$(echo $ts | e2d)"

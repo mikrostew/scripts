@@ -159,7 +159,7 @@ in_mint_submit_repo() {
 
 branch_name="$(current_git_branch)"
 review_id="$(git_review_board_id $branch_name)"
-@exit_on_error "Dang it! Getting the review board ID failed"
+@exit-on-error "Dang it! Getting the review board ID failed"
 
 echo_info "Submitting RB $review_id..."
 review_title="$(get_li_rb_title $review_id)"
@@ -204,27 +204,27 @@ then
   echo_info ""
   # squash changes on this branch
   squash-branch "$commit_msg" "$commit_msg_extra_line"
-  @exit_on_error "Dang it! squashing failed (should probably do some kind of recovery here...)"
+  @exit-on-error "Dang it! squashing failed (should probably do some kind of recovery here...)"
 
   if not_on_git_branch 'master'
   then
     # rebase current branch against master
     gram
-    @exit_on_error "Failed to rebase against master"
+    @exit-on-error "Failed to rebase against master"
     # merge into master
     gmm
-    @exit_on_error "Merge into master failed - good luck"
+    @exit-on-error "Merge into master failed - good luck"
   fi
 
   gpr
-  @exit_on_error "Failed to pull and rebase master"
+  @exit-on-error "Failed to pull and rebase master"
 
   # apply the RB to the commit
   # if this fails, means I don't have the necessary ACLs (for git submit repos)
   # NOTE: this does not seem to be writing the RB ID info correctly anymore?
   do_git review dcommit -r "$review_id"
   # if dcommit failed, probably missing a shipit from ACL
-  @exit_on_error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
+  @exit-on-error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
 
   # NOTE: because dcommit ^^ stopped doing this correctly for me
   # (I _think_ it's adding the config before amending the commit, so the config is gone)
@@ -232,7 +232,7 @@ then
   do_git config branch.master.reviewid "$review_id"
   if [ "$?" -ne 0 ]
   then
-    @wait_for_keypress 'That ^^ failed. Try adding it to the config manually, then press any key to continue...'
+    @wait-for-keypress 'That ^^ failed. Try adding it to the config manually, then press any key to continue...'
   fi
 
   # git submit

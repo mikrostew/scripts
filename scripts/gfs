@@ -77,7 +77,7 @@ then
     do_git checkout master
   fi
   do_git fetch upstream
-  @exit_on_error "" "echo_err \"Error: Looks like 'upstream' is not setup - use 'git remote add upstream <repo>' to set it\""
+  @exit-on-error "" "echo_err \"Error: Looks like 'upstream' is not setup - use 'git remote add upstream <repo>' to set it\""
   do_git merge "upstream/master" && do_git push
   if [ "$branch_name" != "master" ]
   then
