@@ -31,27 +31,6 @@ echo_err () {
   echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 
-# check if something is installed - if so, upgrade it, if not, `brew install` it
-brew-install-or-upgrade() {
-  # arguments
-  executable_name="$1"
-  brew_package="$2"
-  # TODO: cask or keg, maybe?
-
-  (( total_tasks++ ))
-
-  install_path=$(which "$executable_name")
-  if [ -z "$install_path" ]; then
-    # not installed, so install it
-    @wait-for-command brew install "$brew_package"
-    if [ "$?" != 0 ]; then errors+=("brew install $brew_package"); fi
-  else
-    # already installed, so try to upgrade it
-    @wait-for-command brew upgrade "$brew_package"
-    if [ "$?" != 0 ]; then errors+=("brew upgrade $brew_package"); fi
-  fi
-}
-
 # different things for different machines
 HOST_NAME="$(hostname)"
 if [[ "$HOST_NAME" =~ MacBook-Air ]] || [[ "$HOST_NAME" =~ Michaels-Air ]]
@@ -143,22 +122,7 @@ then
   (( total_tasks++ ))
 
   # install or upgrade things installed via homebrew
-  brew-install-or-upgrade bats bats-core
-  brew-install-or-upgrade magick imagemagick
-  brew-install-or-upgrade expect expect
-  brew-install-or-upgrade gh gh
-  brew-install-or-upgrade gimp gimp
-  brew-install-or-upgrade git git
-  brew-install-or-upgrade git-gui git-gui
-  brew-install-or-upgrade jq jq
-  brew-install-or-upgrade mvim macvim # upgrading vim is handled by macvim
-  brew-install-or-upgrade sponge moreutils
-  brew-install-or-upgrade terminal-notifier terminal-notifier
-  brew-install-or-upgrade tmux tmux
-  brew-install-or-upgrade watch watch
-  brew-install-or-upgrade wget wget
-  brew-install-or-upgrade youtube-dl youtube-dl
-  brew-install-or-upgrade ruby-install ruby-install
+  good-morning-tasks.ts
 
   echo "Rust"
   @wait-for-command rustup update
