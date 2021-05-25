@@ -12,6 +12,7 @@
 //  --local, or --no-cache    --> don't query the MG site, just download anything that doesn't exist locally
 //  --verbose    --> log everything
 
+const chalk = require('chalk');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const https = require('https');
@@ -83,7 +84,9 @@ function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
     let data = '';
 
     const req = https.request(options, (res) => {
-      console.log('statusCode:', res.statusCode);
+      if (res.statusCode != 200) {
+        console.log('statusCode:', res.statusCode);
+      }
       // console.log('headers:', res.headers);
       res.setEncoding('utf8');
       res.on('data', (chunk) => {
@@ -145,26 +148,28 @@ async function cacheMetadata(items, cacheDir) {
 // download any new metadata for recent moments
 async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
   let currentPage = 1;
+  let newItemsFound = 0;
 
   while (true) {
     const someMoments = await requestMoments(gardenId, currentPage, PER_PAGE, TIMESTAMP, cookies);
 
-    console.log(`(page ${currentPage}) Downloaded info for ${someMoments.length} moments`);
+    //console.log(`(page ${currentPage}) Downloaded info for ${someMoments.length} moments`);
 
     if (someMoments.length === 0) {
-      console.log('No more moments to download');
+      //console.log('No more moments to download');
       break;
     }
 
     // go thru each object in that array, and write it to disk,
     // like 12347890.json, in a single directory (should be fine for the number of files there are)
     const newItems = await cacheMetadata(someMoments, metadataDir);
-    console.log(`found ${newItems} new items`);
+    //console.log(`found ${newItems} new item(s)`);
+    newItemsFound += newItems;
 
     // if no new items after checking at least 2 pages, exit
     // TODO: unless --full
     if (newItems === 0 && currentPage >= 2) {
-      console.log('No more new items found');
+      //console.log('No more new items found');
       break;
     }
 
@@ -172,6 +177,8 @@ async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
     await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
     currentPage++;
   }
+
+  console.log(`Found ${newItemsFound} new item(s)`);
 }
 
 // verify that all media (images, videos, etc.) have been downloaded for all cached metadata
@@ -186,38 +193,61 @@ async function downloadMedia(metadataDir, mediaDir) {
   await fsPromises.mkdir(imageDir, { recursive: true });
   await fsPromises.mkdir(videoDir, { recursive: true });
 
-  for (const file of allFiles) {
-    // console.log(`Found file ${file}`);
-    const contents = await fsPromises.readFile(path.join(metadataDir, file), 'utf8');
-    const item = JSON.parse(contents);
-    const type = parseInt(item.type, 10);
-    // console.log(type);
-    if (type === TYPE_TEXT) {
-      // don't need to download - already have the text info in the JSON file
-      console.log('Text type - nothing to do here');
-    } else if (type === TYPE_IMAGE) {
-      console.log('TODO: image to download...');
-      await maybeDownloadImage(item, imageDir);
-      break;
-    } else if (type === TYPE_VIDEO) {
-      console.log('TODO: video to download...');
-      await maybeDownloadVideo(item, videoDir);
-      break;
-    } else if (type === TYPE_EVENT) {
-      // don't need to download - already have the text info in the JSON file
-      console.log('Event type - nothing to do here');
-    } else {
-      // unknown type
-      console.error(`Unknown item type ${type}`);
-      throw new Error(`Unknown item type ${type}`);
+  let numFilesDownloaded = 0;
+
+  try {
+    for (const file of allFiles) {
+      let didDownload = false;
+
+      // console.log(`Found file ${file}`);
+      const contents = await fsPromises.readFile(path.join(metadataDir, file), 'utf8');
+      const item = JSON.parse(contents);
+      const type = parseInt(item.type, 10);
+      // console.log(type);
+      if (type === TYPE_TEXT) {
+        // don't need to download - already have the text info in the JSON file
+        //console.log(`${chalk.yellow('(skip)')} Text type - nothing to do here`);
+      } else if (type === TYPE_IMAGE) {
+        //console.log('TODO: image to download...');
+        didDownload = await maybeDownloadImage(item, imageDir);
+        //break;
+      } else if (type === TYPE_VIDEO) {
+        //console.log('TODO: video to download...');
+        didDownload = await maybeDownloadVideo(item, videoDir);
+        //break;
+      } else if (type === TYPE_EVENT) {
+        // don't need to download - already have the text info in the JSON file
+        //console.log(`${chalk.yellow('(skip)')} Event type - nothing to do here`);
+      } else {
+        // unknown type
+        console.error(`Unknown item type ${type}`);
+        throw new Error(`Unknown item type ${type}`);
+      }
+
+      if (didDownload) {
+        numFilesDownloaded++;
+        // wait between files, so I'm not overloading the wifi here
+        await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+      }
+
+      // TODO: configurable limit to number of downloaded files
+      if (numFilesDownloaded >= 20) {
+        break;
+      }
     }
+  } catch(err) {
+    console.log(`Error: something failed when downloading`);
+    console.log('');
+    console.log(err);
   }
+
+  console.log(`Downloaded ${numFilesDownloaded} files`);
 }
 
-// TODO: keep stats on this stuff
+// TODO: keep stats on this stuff - return something like 'downloaded | skipped | somethingelse'
+// returns whether something was downloaded or not
 async function maybeDownloadImage(item, imageDir) {
   if (item.meta && item.meta.montage) {
-    console.log('Montage!!');
     // montage, which has multiple possible images to download
     // const id = item.id;
     // like the other images, get the full resolution
@@ -230,10 +260,12 @@ async function maybeDownloadImage(item, imageDir) {
       const url = urls[i];
       const filePath = outputFilePath(date, url, imageDir);
       if (!await isDownloaded(filePath)) {
-        console.log(`File ${filePath} has not been downloaded...`);
+        //console.log(`Downloading ${url}...`);
         await downloadItem(url, filePath);
+        return true;
       } else {
-        console.log(`File ${filePath} has been downloaded...`);
+        //console.log(`${chalk.yellow('(skip)')} ${url}`);
+        return false;
       }
     }
   } else {
@@ -246,31 +278,42 @@ async function maybeDownloadImage(item, imageDir) {
     const date = dateFromTimestamp(item.unix_timestamp);
     const filePath = outputFilePath(date, url, imageDir);
     if (!await isDownloaded(filePath)) {
-      console.log(`File ${filePath} has not been downloaded...`);
+      //console.log(`Downloading ${url}...`);
       await downloadItem(url, filePath);
+      return true;
     } else {
-      console.log(`File ${filePath} has been downloaded`);
+      //console.log(`${chalk.yellow('(skip)')} ${url}`);
+      return false;
     }
   }
 }
 
-// TODO: keep stats on this stuff
+// TODO: keep stats on this stuff - return something like 'downloaded | skipped | somethingelse'
+// returns whether something was downloaded or not
 async function maybeDownloadVideo(item, videoDir) {
   const id = item.id;
   const date = dateFromTimestamp(item.unix_timestamp);
+  // figure out the URL
+  let url;
   if (item.meta && item.meta.video_path_hd) {
-    const url = item.meta.video_path_hd;
-    const filePath = outputFilePath(date, url, videoDir);
-    if (!await isDownloaded(filePath)) {
-      console.log(`File ${filePath} has not been downloaded...`);
-      await downloadItem(url, filePath);
-    } else {
-      console.log(`File ${filePath} has been downloaded`);
-    }
+    url = item.meta.video_path_hd;
+  } else if (item.meta && item.meta.video_path) {
+    url = item.meta.video_path;
   } else {
-    // TODO: what if there is no HD video?
-    console.error(`[${id}] item does not have ".meta.video_path_hd" property`);
-    throw new Error(`[${id}] item does not have ".meta.video_path_hd" property`);
+    // where is the video URL?
+    console.error(`[${id}] item does not have ".meta.video_path_hd" or ".meta.video_path"`);
+    console.error(item);
+    throw new Error(`[${id}] item does not have ".meta.video_path_hd" or ".meta.video_path"`);
+  }
+
+  const filePath = outputFilePath(date, url, videoDir);
+  if (!await isDownloaded(filePath)) {
+    //console.log(`Downloading ${url}...`);
+    await downloadItem(url, filePath);
+    return true;
+  } else {
+    //console.log(`${chalk.yellow('(skip)')} ${url}`);
+    return false;
   }
 }
 
@@ -307,7 +350,10 @@ async function downloadItem(url, filePath) {
 
     // don't resolve on the end of the response
     // wait to resolve until this finishes, which is after the response completes
-    fileStream.on('finish', () => resolve());
+    fileStream.on('finish', () => {
+      console.log(`✅ ${url}`);
+      resolve();
+    });
 
     request.on('error', (err) => {
       fs.unlink(filePath, () => reject(err));
@@ -330,10 +376,10 @@ async function downloadItem(url, filePath) {
     const metadataDir = path.join(SYNC_DIR, garden.name, 'metadata');
     const mediaDir = path.join(SYNC_DIR, garden.name);
 
-    console.log(`Downloading metadata to dir '${metadataDir}'...`);
+    //console.log(`Downloading metadata to dir '${metadataDir}'...`);
     await downloadMomentMetadata(garden.gardenId, garden.cookies, metadataDir);
 
-    console.log(`Downloading media to dir '${mediaDir}'...`);
+    //console.log(`Downloading media to dir '${mediaDir}'...`);
     await downloadMedia(metadataDir, mediaDir);
   }
 
