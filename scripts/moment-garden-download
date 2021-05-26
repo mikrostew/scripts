@@ -57,13 +57,16 @@ const TYPE_EVENT = 5;
 // ]
 const mgConfig = require(path.join(SYNC_DIR, '.mg-config.js'));
 
+// TODO: configurable limit to number of downloaded files
+const DOWNLOAD_FILE_LIMIT = 20;
+
 function dateFromTimestamp(unixTimestamp) {
   // ISO date format is YYYY-MM-DDTHH:mm:ss.sssZ - just return the date part
   return new Date(unixTimestamp * 1000).toISOString().split('T')[0];
 }
 
 // make the request to moment garden
-function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
+async function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
   const options = {
     method: 'GET',
     hostname: 'momentgarden.com',
@@ -81,9 +84,9 @@ function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
     },
   };
 
-  return new Promise((resolve, reject) => {
-    let data = '';
+  let data = '';
 
+  return new Promise((resolve) => {
     const req = https.request(options, (res) => {
       if (res.statusCode != 200) {
         console.log('statusCode:', res.statusCode);
@@ -102,14 +105,14 @@ function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
         } catch (err) {
           console.error('DATA:');
           console.error(data);
-          reject(err);
+          throw err;
         }
       });
     });
 
     req.on('error', (e) => {
-      console.error(e);
-      reject(e);
+      //console.error(e);
+      throw e;
     });
     req.end();
   });
@@ -152,7 +155,9 @@ async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
   let newItemsFound = 0;
 
   while (true) {
+    const requestSpinner = ora(`${chalk.yellow('request')}: moment metadata`).start();
     const someMoments = await requestMoments(gardenId, currentPage, PER_PAGE, TIMESTAMP, cookies);
+    requestSpinner.stop();
 
     //console.log(`(page ${currentPage}) Downloaded info for ${someMoments.length} moments`);
 
@@ -175,9 +180,7 @@ async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
     }
 
     // wait for 5 seconds between API requests, to be nice to the server
-    const waitSpinner = ora('Waiting between API requests').start();
-    await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
-    waitSpinner.stop();
+    await countdownSpinner(5, `${chalk.yellow('wait')}: between API requests`);
     currentPage++;
   }
 
@@ -229,15 +232,15 @@ async function downloadMedia(metadataDir, mediaDir) {
 
       if (didDownload) {
         numFilesDownloaded++;
-        // wait between files, so I'm not overloading the wifi here
-        const waitSpinner = ora('Waiting between files').start();
-        await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
-        waitSpinner.stop();
-      }
+        if (numFilesDownloaded >= DOWNLOAD_FILE_LIMIT) {
+          break;
+        }
 
-      // TODO: configurable limit to number of downloaded files
-      if (numFilesDownloaded >= 20) {
-        break;
+        // wait between files, so I'm not overloading the wifi here
+        await countdownSpinner(
+          5,
+          `${chalk.yellow('wait')}: downloaded ${numFilesDownloaded}, waiting between files`
+        );
       }
     }
   } catch (err) {
@@ -247,6 +250,28 @@ async function downloadMedia(metadataDir, mediaDir) {
   }
 
   console.log(`Downloaded ${numFilesDownloaded} files`);
+  console.log('');
+}
+
+// countdown spinner for the input number of seconds, showing the input message
+async function countdownSpinner(seconds, message) {
+  let secondsRemaining = seconds;
+  const waitSpinner = ora(`${message} (${secondsRemaining} seconds)`).start();
+
+  await new Promise((resolve) => {
+    // update the spinner message every second
+    const intervalId = setInterval(() => {
+      secondsRemaining--;
+      if (secondsRemaining <= 0) {
+        // all done
+        clearInterval(intervalId);
+        resolve(undefined);
+      } else {
+        waitSpinner.text = `${message} (${secondsRemaining} seconds)`;
+      }
+    }, 1000);
+  });
+  waitSpinner.stop();
 }
 
 // TODO: keep stats on this stuff - return something like 'downloaded | skipped | somethingelse'
@@ -254,7 +279,7 @@ async function downloadMedia(metadataDir, mediaDir) {
 async function maybeDownloadImage(item, imageDir) {
   if (item.meta && item.meta.montage) {
     // montage, which has multiple possible images to download
-    // const id = item.id;
+    const id = item.id;
     // like the other images, get the full resolution
     const mainPath = item.path.replace('moments-large', 'moments-full');
     let urls = [mainPath];
@@ -266,7 +291,7 @@ async function maybeDownloadImage(item, imageDir) {
       const filePath = outputFilePath(date, url, imageDir);
       if (!(await isDownloaded(filePath))) {
         //console.log(`Downloading ${url}...`);
-        await downloadItem(url, filePath);
+        await downloadItem(url, filePath, { id, date });
         return true;
       } else {
         //console.log(`${chalk.yellow('(skip)')} ${url}`);
@@ -275,7 +300,7 @@ async function maybeDownloadImage(item, imageDir) {
     }
   } else {
     // just a single URL to download
-    // const id = item.id;
+    const id = item.id;
     // this will be something like https://s3.amazonaws.com/moments-large/9212055_4w2w6r5gqqeb42w47ulwfcjs6.JPG
     // change to https://s3.amazonaws.com/moments-full/9212055_4w2w6r5gqqeb42w47ulwfcjs6.JPG
     // which is full resolution
@@ -284,7 +309,7 @@ async function maybeDownloadImage(item, imageDir) {
     const filePath = outputFilePath(date, url, imageDir);
     if (!(await isDownloaded(filePath))) {
       //console.log(`Downloading ${url}...`);
-      await downloadItem(url, filePath);
+      await downloadItem(url, filePath, { id, date });
       return true;
     } else {
       //console.log(`${chalk.yellow('(skip)')} ${url}`);
@@ -314,7 +339,7 @@ async function maybeDownloadVideo(item, videoDir) {
   const filePath = outputFilePath(date, url, videoDir);
   if (!(await isDownloaded(filePath))) {
     //console.log(`Downloading ${url}...`);
-    await downloadItem(url, filePath);
+    await downloadItem(url, filePath, { id, date });
     return true;
   } else {
     //console.log(`${chalk.yellow('(skip)')} ${url}`);
@@ -339,17 +364,17 @@ async function isDownloaded(filePath) {
   }
 }
 
-async function downloadItem(url, filePath) {
+// itemInfo is: { id, date }
+async function downloadItem(url, filePath, itemInfo) {
   // adapted from https://stackoverflow.com/a/62056725
-  return new Promise((resolve, reject) => {
-    const fileStream = fs.createWriteStream(filePath);
+  const fileStream = fs.createWriteStream(filePath);
+  const downloadSpinner = ora(`${chalk.yellow('download')}: ${itemInfo.date} - ${url}`).start();
 
-    const downloadSpinner = ora(url).start();
+  return new Promise((resolve) => {
     const request = https.get(url, (response) => {
       if (response.statusCode !== 200) {
         downloadSpinner.fail();
-        reject(new Error(`Failed to GET '${url}' (status: ${response.statusCode})`));
-        return;
+        throw new Error(`Failed to GET '${url}' (status: ${response.statusCode})`);
       }
       // pipe the download stream to the file
       response.pipe(fileStream);
@@ -358,20 +383,24 @@ async function downloadItem(url, filePath) {
     // don't resolve on the end of the response
     // wait to resolve until this finishes, which is after the response completes
     fileStream.on('finish', () => {
-      //console.log(`✅ ${url}`);
-      downloadSpinner.succeed();
+      // don't need to show success for every file
+      downloadSpinner.stop();
       // TODO: send anything back here?
       resolve('ok');
     });
 
     request.on('error', (err) => {
       downloadSpinner.fail();
-      fs.unlink(filePath, () => reject(err));
+      fs.unlink(filePath, () => {
+        throw err;
+      });
     });
 
     fileStream.on('error', (err) => {
       downloadSpinner.fail();
-      fs.unlink(filePath, () => reject(err));
+      fs.unlink(filePath, () => {
+        throw err;
+      });
     });
 
     // do the reqest
@@ -381,7 +410,7 @@ async function downloadItem(url, filePath) {
 
 (async function () {
   for (const garden of mgConfig) {
-    console.log(`Garden: ${garden.name} (${garden.gardenId})`);
+    console.log(`Garden: ${garden.name}`);
 
     const metadataDir = path.join(SYNC_DIR, garden.name, 'metadata');
     const mediaDir = path.join(SYNC_DIR, garden.name);
@@ -393,5 +422,5 @@ async function downloadItem(url, filePath) {
     await downloadMedia(metadataDir, mediaDir);
   }
 
-  console.log('DONE!');
+  //console.log('DONE!');
 })();
