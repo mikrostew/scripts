@@ -16,6 +16,7 @@ const chalk = require('chalk');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const https = require('https');
+const ora = require('ora');
 const os = require('os');
 const path = require('path');
 
@@ -58,8 +59,7 @@ const mgConfig = require(path.join(SYNC_DIR, '.mg-config.js'));
 
 function dateFromTimestamp(unixTimestamp) {
   // ISO date format is YYYY-MM-DDTHH:mm:ss.sssZ - just return the date part
-  return new Date(unixTimestamp * 1000).toISOString()
-    .split('T')[0];
+  return new Date(unixTimestamp * 1000).toISOString().split('T')[0];
 }
 
 // make the request to moment garden
@@ -75,7 +75,8 @@ function requestMoments(gardenID, pageNumber, perPage, timestamp, cookies) {
       Referer: 'https://momentgarden.com/moments/gardens',
       'X-Requested-With': 'XMLHttpRequest',
       // TODO: how can I update this periodically?
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:87.0) Gecko/20100101 Firefox/87.0',
+      'User-Agent':
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:87.0) Gecko/20100101 Firefox/87.0',
       Cookie: cookies.join('; '),
     },
   };
@@ -174,7 +175,9 @@ async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
     }
 
     // wait for 5 seconds between API requests, to be nice to the server
+    const waitSpinner = ora('Waiting between API requests').start();
     await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+    waitSpinner.stop();
     currentPage++;
   }
 
@@ -227,7 +230,9 @@ async function downloadMedia(metadataDir, mediaDir) {
       if (didDownload) {
         numFilesDownloaded++;
         // wait between files, so I'm not overloading the wifi here
+        const waitSpinner = ora('Waiting between files').start();
         await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
+        waitSpinner.stop();
       }
 
       // TODO: configurable limit to number of downloaded files
@@ -235,7 +240,7 @@ async function downloadMedia(metadataDir, mediaDir) {
         break;
       }
     }
-  } catch(err) {
+  } catch (err) {
     console.log(`Error: something failed when downloading`);
     console.log('');
     console.log(err);
@@ -259,7 +264,7 @@ async function maybeDownloadImage(item, imageDir) {
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
       const filePath = outputFilePath(date, url, imageDir);
-      if (!await isDownloaded(filePath)) {
+      if (!(await isDownloaded(filePath))) {
         //console.log(`Downloading ${url}...`);
         await downloadItem(url, filePath);
         return true;
@@ -277,7 +282,7 @@ async function maybeDownloadImage(item, imageDir) {
     const url = item.path.replace('moments-large', 'moments-full');
     const date = dateFromTimestamp(item.unix_timestamp);
     const filePath = outputFilePath(date, url, imageDir);
-    if (!await isDownloaded(filePath)) {
+    if (!(await isDownloaded(filePath))) {
       //console.log(`Downloading ${url}...`);
       await downloadItem(url, filePath);
       return true;
@@ -307,7 +312,7 @@ async function maybeDownloadVideo(item, videoDir) {
   }
 
   const filePath = outputFilePath(date, url, videoDir);
-  if (!await isDownloaded(filePath)) {
+  if (!(await isDownloaded(filePath))) {
     //console.log(`Downloading ${url}...`);
     await downloadItem(url, filePath);
     return true;
@@ -339,8 +344,10 @@ async function downloadItem(url, filePath) {
   return new Promise((resolve, reject) => {
     const fileStream = fs.createWriteStream(filePath);
 
+    const downloadSpinner = ora(url).start();
     const request = https.get(url, (response) => {
       if (response.statusCode !== 200) {
+        downloadSpinner.fail();
         reject(new Error(`Failed to GET '${url}' (status: ${response.statusCode})`));
         return;
       }
@@ -351,15 +358,19 @@ async function downloadItem(url, filePath) {
     // don't resolve on the end of the response
     // wait to resolve until this finishes, which is after the response completes
     fileStream.on('finish', () => {
-      console.log(`✅ ${url}`);
-      resolve();
+      //console.log(`✅ ${url}`);
+      downloadSpinner.succeed();
+      // TODO: send anything back here?
+      resolve('ok');
     });
 
     request.on('error', (err) => {
+      downloadSpinner.fail();
       fs.unlink(filePath, () => reject(err));
     });
 
     fileStream.on('error', (err) => {
+      downloadSpinner.fail();
       fs.unlink(filePath, () => reject(err));
     });
 
@@ -368,8 +379,7 @@ async function downloadItem(url, filePath) {
   });
 }
 
-
-(async function() {
+(async function () {
   for (const garden of mgConfig) {
     console.log(`Garden: ${garden.name} (${garden.gardenId})`);
 
