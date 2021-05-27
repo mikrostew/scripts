@@ -77,6 +77,9 @@ links[".rubocop.yml"]=".rubocop.yml"
 # karabiner elements
 links[".config/karabiner"]="karabiner"
 
+# typescript
+links["tsconfig.json"]="tsconfig.json"
+
 # machine-specific checks
 host_name="$(hostname)"
 if [[ "$host_name" =~ (MacBook-Air|Michaels-Air) ]]
