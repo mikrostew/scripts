@@ -153,8 +153,9 @@ then
   # TODO: check that directory exists
   cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
-  gpr && gp
-  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, and push'); fi
+  # and install any updated dependencies
+  gpr && gp && yarn install
+  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
   (( total_tasks++ ))
 
   echo "Badash"
@@ -214,8 +215,9 @@ then
   echo "Dotfiles"
   cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
-  gpr && gp
-  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, and push'); fi
+  # and install any updated dependencies
+  gpr && gp && yarn install
+  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
   (( total_tasks++ ))
 
   echo "Badash"
@@ -290,8 +292,9 @@ then
   echo "Dotfiles"
   cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
-  gpr && gp
-  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, and push'); fi
+  # and install any updated dependencies
+  gpr && gp && yarn install
+  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
   (( total_tasks++ ))
 
   echo "Badash"
