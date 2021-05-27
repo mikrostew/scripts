@@ -85,7 +85,9 @@ function doTaskThings(task: ConfigTask) {
     title: task.title,
     task: () => {
       // convert all the configured homebrew packages to tasks
-      return new Listr(task.packages.map((pkg) => homebrewPackageToTask(pkg)).flat());
+      return new Listr(task.packages.map((pkg) => homebrewPackageToTask(pkg)).flat(), {
+        exitOnError: false,
+      });
     },
   };
 }
