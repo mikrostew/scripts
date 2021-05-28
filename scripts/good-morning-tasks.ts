@@ -3,16 +3,18 @@
 // TODO: start transitioning tasks here
 
 import execa from 'execa';
-import Listr, { ListrContext } from 'listr';
+import Listr, { ListrContext, ListrTask } from 'listr';
 import which from 'which';
 
 enum TaskType {
   HOMEBREW = 'homebrew',
+  VOLTA_PACKAGE = 'volta-package',
 }
 
-interface ConfigTask {
-  title: string;
-  type: TaskType;
+type ConfigTask = HomebrewTask | VoltaPackageTask;
+
+interface HomebrewTask {
+  type: TaskType.HOMEBREW;
   packages: HomebrewPackage[];
 }
 
@@ -23,10 +25,18 @@ interface HomebrewPackage {
   executable: string;
 }
 
+interface VoltaPackageTask {
+  type: TaskType.VOLTA_PACKAGE;
+  packages: VoltaPackage[];
+}
+
+interface VoltaPackage {
+  name: string;
+}
+
 // TODO: read config file for this
 const config: ConfigTask[] = [
   {
-    title: 'Homebrew',
     type: TaskType.HOMEBREW,
     packages: [
       { name: 'bats-core', executable: 'bats' },
@@ -47,52 +57,91 @@ const config: ConfigTask[] = [
       { name: 'youtube-dl', executable: 'youtube-dl' },
     ],
   },
+  {
+    type: TaskType.VOLTA_PACKAGE,
+    packages: [
+      { name: '@11ty/eleventy' },
+      { name: 'backstopjs' },
+      { name: 'cowsay' },
+      { name: 'ember-cli' },
+      { name: 'eslint' },
+      { name: 'gulp' },
+      { name: 'ts-node' },
+      { name: 'typescript' },
+    ],
+  },
 ];
 
 // return if the input executable is installed or not
-async function isInstalled(executable: string): Promise<boolean> {
+async function isExecutableInstalled(executable: string): Promise<boolean> {
   return which(executable)
     .then(() => true)
     .catch(() => false);
 }
 
 // convert homebrew packages to list of tasks for install/upgrade
-function homebrewPackageToTask(pkg: HomebrewPackage) {
-  return [
-    {
-      title: `check if ${pkg.name} is installed (${pkg.executable})`,
-      task: async (ctx: ListrContext) => {
-        ctx[pkg.name] = await isInstalled(pkg.executable);
-      },
-    },
-    {
-      title: `install ${pkg.name}`,
-      enabled: (ctx: ListrContext) => ctx[pkg.name] === false,
-      task: () => execa('brew', ['install', pkg.name]),
-    },
-    {
-      title: `upgrade ${pkg.name}`,
-      enabled: (ctx: ListrContext) => ctx[pkg.name] === true,
-      task: () => execa('brew', ['upgrade', pkg.name]),
-    },
-  ];
-}
-
-// TODO: convert tasks to things
-function doTaskThings(task: ConfigTask) {
-  // TODO: use task.type to figure out how to populate this
+function homebrewPackageToTask(pkg: HomebrewPackage): ListrTask {
   return {
-    title: task.title,
-    task: () => {
-      // convert all the configured homebrew packages to tasks
-      return new Listr(task.packages.map((pkg) => homebrewPackageToTask(pkg)).flat(), {
-        exitOnError: false,
-      });
+    title: `install or upgrade ${pkg.name} (${pkg.executable})`,
+    task: async () => {
+      if (await isExecutableInstalled(pkg.executable)) {
+        return execa('brew', ['upgrade', pkg.name]);
+      } else {
+        return execa('brew', ['install', pkg.name]);
+      }
     },
   };
 }
 
-const tasks: Listr = new Listr(config.map((task) => doTaskThings(task)));
+// just install missing packages - don't automatically upgrade
+function voltaPackageToTask(pkg: VoltaPackage): ListrTask {
+  return {
+    title: `ensure ${pkg.name} is installed`,
+    task: async () => {
+      if (!(await isVoltaPackageInstalled(pkg.name))) {
+        return execa('npm', ['i', '-g', pkg.name]);
+      }
+    },
+  };
+}
+
+async function isVoltaPackageInstalled(name: string): Promise<boolean> {
+  const { stdout } = await execa('volta', ['list', name]);
+  if (stdout === undefined) {
+    return false;
+  }
+  return /No tools or packages installed/.test(stdout) ? false : true;
+}
+
+// convert a task from config to tasks that listr can use
+function configTaskToListrTask(task: ConfigTask): ListrTask {
+  switch (task.type) {
+    case TaskType.HOMEBREW:
+      return {
+        title: 'Homebrew',
+        task: () => {
+          // convert all the configured homebrew packages to tasks
+          return new Listr(
+            task.packages.map((pkg) => homebrewPackageToTask(pkg)),
+            { exitOnError: false }
+          );
+        },
+      };
+    case TaskType.VOLTA_PACKAGE:
+      return {
+        title: 'Volta Packages',
+        task: () => {
+          // convert all the configured homebrew packages to tasks
+          return new Listr(
+            task.packages.map((pkg) => voltaPackageToTask(pkg)),
+            { exitOnError: false }
+          );
+        },
+      };
+  }
+}
+
+const tasks: Listr = new Listr(config.map((task) => configTaskToListrTask(task)));
 
 tasks.run().catch((err) => {
   // TODO: when does this error?
