@@ -14,6 +14,9 @@ else
   exit 1
 fi
 
+# save downloaded IDs here
+ARCHIVE_FILE="$BASE_DIR/archive.txt"
+
 # read config
 playlist_config=$(<"$BASE_DIR/.config.json")
 
@@ -35,6 +38,7 @@ download_playlist() {
     --audio-format best \
     -o "$download_dir/%(title)s.%(ext)s" \
     --sleep-interval 5 \
+    --download-archive "$ARCHIVE_FILE" \
     "$playlist_url"
 
   # TODO: parse the output of that ^^ command to tell how many songs were downloaded
