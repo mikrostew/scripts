@@ -81,16 +81,19 @@ if [ "$machine" == "Work Laptop" ]
 then
   # kill and restart some things
   # - well, I used to restart these, but that's kinda annoying, so I'm trying just to run them if they're not already running
-  #kill-proc-name "Outlook"
+  # - actually, just kill these - I'll start them when I need them
+  kill-proc-name "Outlook"
   # if successful, sometimes that will bring up a dialog about force quitting, whatever, don't care, kill that too
+  sleep 0.5
+  kill-proc-name "Microsoft Error Reporting"
   #sleep 0.5
-  #kill-proc-name "Microsoft Error Reporting"
-  #sleep 0.5
-  pgrep "Outlook" >/dev/null || run-app-path "/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook"
+  #pgrep "Outlook" >/dev/null || run-app-path "/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook"
 
-  #kill-proc-name "Slack"
+  kill-proc-name "Slack"
   #sleep 0.5
-  pgrep "Slack" >/dev/null || run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
+  #pgrep "Slack" >/dev/null || run-app-path "/Applications/Slack.app/Contents/MacOS/Slack"
+
+  kill-proc-name "Microsoft Teams"
 fi
 
 if [[ "$machine" =~ Laptop ]]
