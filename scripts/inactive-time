@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# the number of nano-seconds since the last time the user interacted with the computer
+
+# for example,
+#  $ for step in {0..3}; do inactive-time; sleep 1; done
+#  44708838
+#  1096300183
+#  2141108965
+#  3191583022
+
+# adapted from https://www.dssw.co.uk/blog/2015-01-21-inactivity-and-idle-time/
+# (because I don't want to use Perl)
+#
+# > OS X has a timer that tracks the last time you moved the mouse, typed a key, or interacted with the computer.
+# >
+# > In technical terms, the timer goes by the name HIDIdleTime and is part of IOKit's IOHIDSystem.
+
+# get the line with this info
+info_line="$(ioreg -c IOHIDSystem | grep HIDIdleTime)"
+#echo "info_line: '$info_line'"
+
+# pull out that inactivity value
+if [[ "$info_line" =~ \ =\ ([0-9]+) ]]
+then
+  # number of matches - useful for debugging
+  #echo "${#BASH_REMATCH[*]}"
+  echo "${BASH_REMATCH[1]}"
+else
+  echo "$0: regex failed to match '$info_line'!" >&2
+  exit 1
+fi
