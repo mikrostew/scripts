@@ -35,6 +35,7 @@ interface VoltaPackage {
 }
 
 // TODO: read config file for this
+// TODO: link machine names/IDs to the tasks they should run
 const config: ConfigTask[] = [
   {
     type: TaskType.HOMEBREW,
@@ -93,6 +94,14 @@ function homebrewPackageToTask(pkg: HomebrewPackage): ListrTask {
   };
 }
 
+// first need to update homebrew
+function mainHomebrewTask(): ListrTask {
+  return {
+    title: 'brew update',
+    task: () => execa('brew', ['update']),
+  };
+}
+
 // just install missing packages - don't automatically upgrade
 function voltaPackageToTask(pkg: VoltaPackage): ListrTask {
   return {
@@ -122,7 +131,7 @@ function configTaskToListrTask(task: ConfigTask): ListrTask {
         task: () => {
           // convert all the configured homebrew packages to tasks
           return new Listr(
-            task.packages.map((pkg) => homebrewPackageToTask(pkg)),
+            [mainHomebrewTask()].concat(task.packages.map((pkg) => homebrewPackageToTask(pkg))),
             { exitOnError: false }
           );
         },

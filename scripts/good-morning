@@ -10,6 +10,7 @@
 # https://github.com/mikefarah/yq  (brew install yq)
 #
 # OR, just use a different language that can handle YAML/JSON/whatever much better...
+# that ^^^
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_BOLD_GREEN='\033[1;32m'
@@ -117,14 +118,7 @@ then
     echo "✅ $xcode_path"
   fi
 
-  echo "Homebrew"
-
-  # update homebrew before upgrading things
-  @wait-for-command brew update
-  if [ "$?" != 0 ]; then errors+=('brew update'); fi
-  (( total_tasks++ ))
-
-  # install or upgrade things installed via homebrew
+  # install or upgrade things installed via Homebrew and Volta
   good-morning-tasks.ts
 
   echo "Rust"
