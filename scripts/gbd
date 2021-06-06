@@ -70,7 +70,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-@uses_cmds sed, git
+@uses-cmds sed, git
 if in_git_repo
 then
   all_branches=( $(all_git_branches | sed '/^master$/d' | sort) )

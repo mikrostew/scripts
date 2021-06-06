@@ -2,7 +2,7 @@
 # Provides a way for syntastic in vim to query the locally installed eslint version
 # (from from https://github.com/vim-syntastic/syntastic/issues/2102)
 
-@uses_cmds npx
+@uses-cmds npx
 
 # run eslint if it's installed globally or locally in node_modules/.bin/
 # don't install eslint if it's not available (this makes vim startup super slow)

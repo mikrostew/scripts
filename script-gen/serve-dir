@@ -6,7 +6,7 @@
 
 @import_var { COLOR_RESET, COLOR_FG_BOLD_BLUE } from .bash_colors
 
-@uses_cmds ifconfig awk ruby
+@uses-cmds ifconfig awk ruby
 
 address="$(ifconfig | awk '/inet / && $2 != "127.0.0.1"{print $2}')"
 echo -e "Current directory: ${COLOR_FG_BOLD_BLUE}$PWD${COLOR_RESET}"

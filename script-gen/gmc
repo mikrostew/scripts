@@ -5,7 +5,7 @@
 @import { in_git_repo, not_on_git_branch, current_git_branch } from .bash_git
 @import_var { COLOR_FG_BOLD_BLUE, COLOR_FG_BOLD_RED, COLOR_RESET } from .bash_colors
 
-@uses_cmds git sed
+@uses-cmds git sed
 
 # What I've already done that worked:
 #

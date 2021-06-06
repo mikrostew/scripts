@@ -36,7 +36,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-@uses_cmds curl jq e2d
+@uses-cmds curl jq e2d
 data="$(curl -sS https://oncall.prod.linkedin.com/api/v0/users/$(whoami)/upcoming)"
 @exit-on-error "Error running curl"
 json_data="$(echo "$data" | jq -r '.[]|"\(.team) \(.role) \(.start)"')"

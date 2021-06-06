@@ -69,7 +69,7 @@ done
 shift $((OPTIND-1))
 commit_msg="${1:?Missing argument \'commit_msg\'}"
 commit_msg_extra_line="${2:-}"
-@uses_cmds squash-commits
+@uses-cmds squash-commits
 branch_name=$(current_git_branch)
 based_on=$(based_on_master_or_origin $branch_name)
 num_commits_on_branch="$(commit_diff_on_branch $branch_name $based_on)"

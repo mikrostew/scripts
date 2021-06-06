@@ -6,7 +6,7 @@
 
 @import_var { COLOR_RESET, COLOR_FG_BOLD_BLUE } from .bash_colors
 
-@uses_cmds grep wc tr spinner
+@uses-cmds grep wc tr spinner
 
 # possible comment styles
 hash_comments='#'         # Python, Bash, Ruby, Perl

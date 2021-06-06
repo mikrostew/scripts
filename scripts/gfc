@@ -89,7 +89,7 @@ shift $((OPTIND-1))
 # mandatory arg - URL of the github repository to fork
 repo_url="${1:?Missing argument \'repo_url\'}"
 
-@uses_cmds curl jq
+@uses-cmds curl jq
 
 my_username="mikrostew"
 

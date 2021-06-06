@@ -7,7 +7,7 @@
 @import { current_git_branch, based_on_master_or_origin, commit_diff_on_branch } from .bash_git
 @import echo_info from .bash_shared_functions
 
-@uses_cmds squash-commits
+@uses-cmds squash-commits
 
 branch_name=$(current_git_branch)
 based_on=$(based_on_master_or_origin $branch_name)

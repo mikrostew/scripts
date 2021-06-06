@@ -3,7 +3,7 @@
 
 @import echo_info from .bash_shared_functions
 
-@uses_cmds osascript
+@uses-cmds osascript
 
 join() {
   local IFS="/"

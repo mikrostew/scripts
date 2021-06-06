@@ -61,7 +61,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-@uses_cmds git
+@uses-cmds git
 if in_git_repo
 then
   last_commit="$(git log -1 --pretty=%B)"

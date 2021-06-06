@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-@uses_cmds gdate sed
+@uses-cmds gdate sed
 
 yesterday_date="$(gdate -d '1 day ago' +"%Y-%m-%d")"
 echo "Items from yesterday, $yesterday_date:"

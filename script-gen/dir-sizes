@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Show the sizes of the input dirs, sorted largest to smallest
 
-@uses_cmds du sort
+@uses-cmds du sort
 
 du -skx "$@" | sort --numeric-sort --reverse

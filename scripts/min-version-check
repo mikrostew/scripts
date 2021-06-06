@@ -47,7 +47,7 @@ version_specifier="${2:?Missing argument \'version_specifier\'}"
 version_cmd="${3:?Missing argument \'version_cmd\'}"
 install_cmd="${4:?Missing argument \'install_cmd\'}"
 install_path="${5:-}"
-#@uses_cmds semver
+#@uses-cmds semver
 normalize_version() {
   if [[ "$1" =~ ^[0-9]+$ ]]; then
     echo "$1.0.0"

@@ -40,7 +40,7 @@ do
 done
 shift $((OPTIND-1))
 in_dir="${1:-.}"
-@uses_cmds grep wc tr spinner
+@uses-cmds grep wc tr spinner
 hash_comments='#'         # Python, Bash, Ruby, Perl
 slash_comments='//'       # C/C++, Javascript, Java, PHP
 dquote_comments='"'       # vim script

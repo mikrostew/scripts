@@ -4,7 +4,7 @@
 
 @import_var { COLOR_FG_BOLD_BLUE, COLOR_RESET } from .bash_colors
 
-@uses_cmds curl jq e2d
+@uses-cmds curl jq e2d
 
 data="$(curl -sS https://oncall.prod.linkedin.com/api/v0/users/$(whoami)/upcoming)"
 @exit_on_error "Error running curl"

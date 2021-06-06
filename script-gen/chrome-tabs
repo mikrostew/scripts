@@ -2,6 +2,6 @@
 # Show the open tab URLs from Chrome
 # (adapted from https://stackoverflow.com/a/49678861/)
 
-@uses_cmds strings grep sort uniq
+@uses-cmds strings grep sort uniq
 
 strings "$HOME/Library/Application Support/Google/Chrome/Default/Current Session" | grep -E '^https?://' | sort | uniq

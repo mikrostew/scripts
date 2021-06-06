@@ -57,5 +57,5 @@ do
 done
 shift $((OPTIND-1))
 page_url="${1:?Missing argument \'page_url\'}"
-@uses_cmds wget
+@uses-cmds wget
 do_cmd wget --wait=1 --random-wait --convert-links --page-requisites --user-agent="" "$page_url"

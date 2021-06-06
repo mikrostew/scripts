@@ -43,7 +43,7 @@ shift $((OPTIND-1))
 to_email="${1:?Missing argument \'to_email\'}"
 subject="${2:?Missing argument \'subject\'}"
 message="${3:?Missing argument \'message\'}"
-@uses_cmds sendEmail
+@uses-cmds sendEmail
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 from_addr="$($GET_API_TOKEN outlook-email)"
 user="$($GET_API_TOKEN outlook-user)"

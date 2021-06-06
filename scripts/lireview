@@ -74,7 +74,7 @@ do
 done
 shift $((OPTIND-1))
 input_description="${1:-}"
-@uses_cmds jq git
+@uses-cmds jq git
 ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
 branch_name=$(current_git_branch)
 review_id="$(git_review_board_id $branch_name)"

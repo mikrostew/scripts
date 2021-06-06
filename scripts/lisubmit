@@ -145,7 +145,7 @@ shift $((OPTIND-1))
 commit_msg="${1:-}"
 commit_msg_extra_line="${2:-}"
 
-@uses_cmds jq gram gmm gpr squash-branch
+@uses-cmds jq gram gmm gpr squash-branch
 
 in_mint_submit_repo() {
   if [ -f "$PWD/product-spec.json" ]; then

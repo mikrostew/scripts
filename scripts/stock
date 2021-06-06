@@ -39,7 +39,7 @@ do
 done
 shift $((OPTIND-1))
 stock_symbol="${1:?Missing argument \'stock_symbol\'}"
-@uses_cmds open/Darwin xdg-open/Linux
+@uses-cmds open/Darwin xdg-open/Linux
 stock_url="https://finance.yahoo.com/quote/$stock_symbol/"
 if @system_is_linux?
 then

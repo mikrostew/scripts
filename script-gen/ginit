@@ -7,7 +7,7 @@
 @import do_git from .bash_git
 @import { do_cmd, echo_info } from .bash_shared_functions
 
-@uses_cmds vim curl jq spinner
+@uses-cmds vim curl jq spinner
 
 
 my_username="mikrostew"

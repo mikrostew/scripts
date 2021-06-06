@@ -35,5 +35,5 @@ do
   esac
 done
 shift $((OPTIND-1))
-@uses_cmds strings grep sort uniq
+@uses-cmds strings grep sort uniq
 strings "$HOME/Library/Application Support/Google/Chrome/Default/Current Session" | grep -E '^https?://' | sort | uniq

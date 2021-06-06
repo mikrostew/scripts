@@ -9,7 +9,7 @@
 
 @import_var { COLOR_FG_RED, COLOR_RESET } from .bash_colors
 
-@uses_cmds semver
+@uses-cmds semver
 
 # convert versions to X.X.X format
 normalize_version() {

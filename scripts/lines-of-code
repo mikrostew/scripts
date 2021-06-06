@@ -35,7 +35,7 @@ do
   esac
 done
 shift $((OPTIND-1))
-@uses_cmds sed grep
+@uses-cmds sed grep
 if [ "$#" -eq 0 ]
 then
   echo_err "No input files given!"

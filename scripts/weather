@@ -36,7 +36,7 @@ do
 done
 shift $((OPTIND-1))
 
-@uses_cmds curl jq bc xargs
+@uses-cmds curl jq bc xargs
 
 # get API key from the keychain (will probably have to input my password)
 api_key="$(security find-generic-password -ga open-weather-map -w)"

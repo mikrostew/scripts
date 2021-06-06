@@ -35,5 +35,5 @@ do
   esac
 done
 shift $((OPTIND-1))
-@uses_cmds npx
+@uses-cmds npx
 npx --no-install eslint "$@" 2>/dev/null || echo "v1.0.0"

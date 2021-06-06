@@ -5,7 +5,7 @@
 @arg 'subject' 'Email subject line'
 @arg 'message' 'Email message contents'
 
-@uses_cmds sendEmail
+@uses-cmds sendEmail
 
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 from_addr="$($GET_API_TOKEN outlook-email)"

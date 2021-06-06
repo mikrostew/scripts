@@ -5,7 +5,7 @@
 @import { echo_info } from .bash_shared_functions
 @import_var { COLOR_FG_GREEN, COLOR_RESET } from .bash_colors
 
-@uses_cmds sed, git
+@uses-cmds sed, git
 
 if in_git_repo
 then

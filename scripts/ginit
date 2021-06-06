@@ -68,7 +68,7 @@ done
 shift $((OPTIND-1))
 repo_name="${1:?Missing argument \'repo_name\'}"
 repo_origin="${2:-}"
-@uses_cmds vim curl jq spinner
+@uses-cmds vim curl jq spinner
 my_username="mikrostew"
 my_name="Michael Stewart"
 current_year="$(date +%Y)"

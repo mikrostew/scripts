@@ -5,7 +5,7 @@
 @arg 'subject' 'Email subject line'
 @arg 'message' 'Email message contents'
 
-@uses_cmds sendEmail
+@uses-cmds sendEmail
 
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 user="$($GET_API_TOKEN email-api-user)"

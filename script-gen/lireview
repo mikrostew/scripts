@@ -6,7 +6,7 @@
 @import { echo_info } from .bash_shared_functions
 @import { do_git, git_review_board_id, current_git_branch } from .bash_git
 
-@uses_cmds jq git
+@uses-cmds jq git
 
 # SETTINGS
 ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
