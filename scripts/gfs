@@ -1,49 +1,46 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gfs, and run 'generate-scripts.sh'
-###########################################################################
-#2b0533c3c6d3bf902a53276a216abd97
+# [git] Sync master branch to the upstream fork (Git Fork Sync)
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 current_git_branch ()
 {
-    echo "$(git rev-parse --abbrev-ref HEAD)"
+  echo "$(git rev-parse --abbrev-ref HEAD)"
 }
 do_cmd ()
 {
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
+  local cmd_args="";
+  for arg in "$@";
+  do
+    case "$arg" in
+      *\ *)
+        cmd_args="$cmd_args \"$arg\""
+        ;;
+      *)
+        cmd_args="$cmd_args $arg"
+        ;;
+    esac;
+  done;
+  echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
+  command "$@"
 }
 do_git ()
 {
-    do_cmd git "$@"
+  do_cmd git "$@"
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 in_git_repo ()
 {
-    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
+  git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
 }
 on_symbolic_ref ()
 {
-    git symbolic-ref HEAD
+  git symbolic-ref HEAD
 }
 show_help_msg() {
   echo "gfs - [git] Sync master branch to the upstream fork (Git Fork Sync)"
@@ -69,16 +66,22 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 if in_git_repo && on_symbolic_ref
 then
   branch_name=$(current_git_branch)
+
+  # if not on master, go ahead and check that out
   if [ "$branch_name" != "master" ]
   then
     do_git checkout master
   fi
+
   do_git fetch upstream
   @exit-on-error "" "echo_err \"Error: Looks like 'upstream' is not setup - use 'git remote add upstream <repo>' to set it\""
   do_git merge "upstream/master" && do_git push
+
+  # if we were not initially on master, check that branch back out
   if [ "$branch_name" != "master" ]
   then
     do_git checkout "$branch_name"

@@ -1,16 +1,14 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/nextoncall, and run 'generate-scripts.sh'
-###########################################################################
-#2e2606ec5ce8c3ab592f61b656052a0b
+# Show my upcoming oncall shifts
+# (from #oneliners)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "nextoncall - Show my upcoming oncall shifts"
@@ -36,11 +34,15 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses-cmds curl jq e2d
+
 data="$(curl -sS https://oncall.prod.linkedin.com/api/v0/users/$(whoami)/upcoming)"
 @exit-on-error "Error running curl"
+
 json_data="$(echo "$data" | jq -r '.[]|"\(.team) \(.role) \(.start)"')"
 @exit-on-error "Error running jq"
+
 while read team role ts
 do
   formatted_time="$(echo $ts | e2d)"

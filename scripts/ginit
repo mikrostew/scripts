@@ -1,42 +1,39 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/ginit, and run 'generate-scripts.sh'
-###########################################################################
-#515bd46742a700363cb6a38b21b549d8
+# [git] Initialize a repo with README, LICENSE, and maybe origin (Git Init)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 do_cmd ()
 {
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
+  local cmd_args="";
+  for arg in "$@";
+  do
+    case "$arg" in
+      *\ *)
+        cmd_args="$cmd_args \"$arg\""
+        ;;
+      *)
+        cmd_args="$cmd_args $arg"
+        ;;
+    esac;
+  done;
+  echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
+  command "$@"
 }
 do_git ()
 {
-    do_cmd git "$@"
+  do_cmd git "$@"
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "ginit - [git] Initialize a repo with README, LICENSE, and maybe origin (Git Init)"
@@ -66,39 +63,65 @@ do
   esac
 done
 shift $((OPTIND-1))
+
+# arguments
 repo_name="${1:?Missing argument \'repo_name\'}"
 repo_origin="${2:-}"
+
 @uses-cmds vim curl jq spinner
+
 my_username="mikrostew"
 my_name="Michael Stewart"
 current_year="$(date +%Y)"
+
+# TODO: move this to the keychain
 api_token="$($HOME/Dropbox/secret/get-api-token github-license-token)"
 github_license_api="https://api.github.com/licenses"
+
+# Open Source Licenses, from https://api.github.com/licenses
+
+# use process substitution to capture the output asynchronously
 exec 3< <(curl -sSLf -u "$my_username:$api_token" "$github_license_api")
 curl_pid="$!"
 spinner -m "Querying $github_license_api for license info..." $curl_pid
 licenses_info="$(cat <&3)"
 wait $curl_pid
 @exit-on-error 'API call failed' 'echo "JSON output: $licenses_info"'
+
+# put license info into arrays
 readarray -t license_names <<< "$(echo "$licenses_info" | jq -r '.[] | .name')"
 readarray -t license_urls <<< "$(echo "$licenses_info" | jq -r '.[] | .url')"
 num_licenses="${#license_names[@]}"
+
 echo_info "Got $num_licenses licenses from $github_license_api"
+
+# create the directory for the repository, and CD into it
 do_cmd mkdir -p "$repo_name"
 do_cmd cd "$repo_name"
+
+# initialize the repo for git
 do_git init
+
+# initialize the README with "# repo" at the top, and add anything else in vim
 do_cmd vim +"normal i# $repo_name" README.md
 do_git add README.md
+
+# choose a license
+
 echo ""
 echo "Choose a license:"
 echo "(When working with a specific community, see https://choosealicense.com/community/)"
 echo ""
+
 for(( i = 0; i < $num_licenses; i++ ))
 do
+  # dislplay a 1-based index, which is nicer to select
   echo -e "[$(( i + 1 ))] ${license_names[$i]}"
 done
+
 echo ""
 echo -n "Selection [Enter for none]: "
+
 read item_num
 if [ -n "$item_num" ] && (( "$item_num" <= "$num_licenses" ))
 then
@@ -106,25 +129,35 @@ then
   license_name="${license_names[$item_index]}"
   license_url="${license_urls[$item_index]}"
   echo_info "Selected $license_name"
+
+  # get text of the license
+  # use process substitution to capture the output asynchronously
   exec 3< <(curl -sSLf -u "$my_username:$api_token" "$license_url")
   curl_pid="$!"
   spinner -m "Getting text of $license_name from $license_url..." $curl_pid
   license_info="$(cat <&3)"
   wait $curl_pid
   @exit-on-error 'API call failed' 'echo "JSON output: $license_info"'
+
+  # save the license text in the LICENSE file
   echo "$license_info" | jq -r '.body' | sed -e "s/\[year\]/$current_year/" -e "s/\[fullname\]/$my_name/" > LICENSE
   do_git add LICENSE
 else
   echo_info "(no license selected)"
 fi
+
+# show what will be committed
 echo ""
 echo "What will be committed:"
 do_git diff --cached
+
 echo -n "Confirm commit [Y/n]: "
 read confirm
 if [ -z "$confirm" ] || [ "$confirm" == "Y" ] || [ "$confirm" == "y" ]
 then
   do_git commit -m "initial setup"
+
+  # push changes to origin if it was specified on the command line
   if [ -n "$repo_origin" ]
   then
     do_git remote add origin git@github.com:mikrostew/badash.git
