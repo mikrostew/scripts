@@ -1,57 +1,54 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gmm, and run 'generate-scripts.sh'
-###########################################################################
-#ab07ddd5d2b1158eb074a79a5fc87539
+# [git] Merge current branch into master (Git Merge into Master)
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 current_git_branch ()
 {
-    echo "$(git rev-parse --abbrev-ref HEAD)"
+  echo "$(git rev-parse --abbrev-ref HEAD)"
 }
 do_cmd ()
 {
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
+  local cmd_args="";
+  for arg in "$@";
+  do
+    case "$arg" in
+      *\ *)
+        cmd_args="$cmd_args \"$arg\""
+        ;;
+      *)
+        cmd_args="$cmd_args $arg"
+        ;;
+    esac;
+  done;
+  echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
+  command "$@"
 }
 do_git ()
 {
-    do_cmd git "$@"
+  do_cmd git "$@"
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 gmt ()
 {
-    do_git mergetool --tool=opendiff
+  do_git mergetool --tool=opendiff
 }
 in_git_repo ()
 {
-    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
+  git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
 }
 no_uncommitted_changes ()
 {
-    [ "$(git status --porcelain --untracked-files=no)" != "" ] && echo_err ">_<  You have uncommitted changes" && return -1 || return 0
+  [ "$(git status --porcelain --untracked-files=no)" != "" ] && echo_err ">_<  You have uncommitted changes" && return -1 || return 0
 }
 not_on_git_branch ()
 {
-    [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
+  [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
 }
 show_help_msg() {
   echo "gmm - [git] Merge current branch into master (Git Merge into Master)"
@@ -77,10 +74,12 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
   branch_name=$(current_git_branch)
   do_git checkout master && do_git merge "$branch_name"
+  # error recovery to fix merge conflicts
   if [ "$?" -ne 0 ]
   then
     echo_err "Dang it! merge failed - good luck"
