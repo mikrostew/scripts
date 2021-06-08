@@ -3,13 +3,14 @@
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "lilinks - Presents a menu to open various URLs and things for linkedin daily stuff"
@@ -35,6 +36,7 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses-cmds open/Darwin xdg-open/Linux
 
 # all the possible menu options, mapped to function names
@@ -44,10 +46,10 @@ menu_items['Coding Music']='coding_music'
 
 # to account for Linux and Mac
 open_url() {
-  if @system_is_darwin?
+  if @system-is-darwin?
   then
     open "$1"
-  elif @system_is_linux?
+  elif @system-is-linux?
   then
     xdg-open "$1"
   fi

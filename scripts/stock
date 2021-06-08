@@ -1,15 +1,12 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/stock, and run 'generate-scripts.sh'
-###########################################################################
-#d8c470b5c6a4f66d3ed55cc0236f7611
+# Open the browser with info on the input stock
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "stock - Open the browser with info on the input stock"
@@ -38,13 +35,18 @@ do
   esac
 done
 shift $((OPTIND-1))
+
+# arguments
 stock_symbol="${1:?Missing argument \'stock_symbol\'}"
+
 @uses-cmds open/Darwin xdg-open/Linux
+
 stock_url="https://finance.yahoo.com/quote/$stock_symbol/"
-if @system_is_linux?
+
+if @system-is-linux?
 then
   xdg-open "$stock_url"
-elif @system_is_darwin?
+elif @system-is-darwin?
 then
   open "$stock_url"
 fi
