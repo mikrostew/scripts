@@ -105,8 +105,7 @@ then
   xcode_path="$(xcode-select --print-path)"
   if [ "$xcode_path" != "/Applications/Xcode.app/Contents/Developer" ]
   then
-    ( sleep 10; paste-term-password "$ldap_pass" ) &
-    sudo xcode-select -s "/Applications/Xcode.app/Contents/Developer"
+    send-passwd-for-sudo "$ldap_pass" sudo xcode-select -s "/Applications/Xcode.app/Contents/Developer"
     xcode_path="$(xcode-select --print-path)"
     if [ "$xcode_path" != "/Applications/Xcode.app/Contents/Developer" ]
     then
@@ -126,7 +125,7 @@ then
   if [ "$?" != 0 ]; then errors+=('rustup update'); fi
   (( total_tasks++ ))
 
-  # TODO: make sure syncthing is running
+  # make sure syncthing is running
   echo "Syncthing"
   if pgrep syncthing >/dev/null
   then
@@ -198,11 +197,8 @@ then
 
   echo "Engtools"
 
-  # this prompts for my password
-  # so use some applescript shenanigans to paste in the password to that
-  # TODO: better way to make sure the right window is in the foreground
-  ( sleep 10; paste-term-password "$ldap_pass" ) &
-  @wait-for-command brew engtools install
+  # (hide args, so this doesn't show the password)
+  @wait-for-command --hide-args send-passwd-for-sudo "$ldap_pass" brew engtools install
   if [ "$?" != 0 ]; then errors+=('brew engtools install'); fi
   (( total_tasks++ ))
 

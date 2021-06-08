@@ -68,8 +68,7 @@ do
       if [ -n "$last_mod_dir" ] && [ "$last_mod_dir" != "/" ]
       then
         # make sure I have ownership, to delete the files
-        ( sleep 2; paste-term-password "$sudo_password" ) &
-        sudo chown -R mistewar:staff "$last_mod_dir"
+        send-passwd-for-sudo "$sudo_password" sudo chown -R mistewar:staff "$last_mod_dir"
 
         #echo "rm -rf $last_mod_dir"
         rm -rf "$last_mod_dir"
@@ -85,8 +84,7 @@ do
       if [ -n "$shiv_dir" ] && [ "$shiv_dir" != "/" ]
       then
         # make sure I have ownership, to delete the files
-        ( sleep 2; paste-term-password "$sudo_password" ) &
-        sudo chown -R mistewar:staff "$shiv_dir"
+        send-passwd-for-sudo "$sudo_password" sudo chown -R mistewar:staff "$shiv_dir"
 
         #echo "rm -rf $shiv_dir"
         rm -rf "$shiv_dir"

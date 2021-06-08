@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# use expect to send my password to sudo for automated scripts
+
+# NOTE: should setup sudo to require a password every time
+# (https://askubuntu.com/questions/636092/how-to-get-sudo-to-prompt-you-for-a-password-each-time)
+#
+#  $ sudo visudo
+#
+#  change
+#   `Defaults        env_reset`
+#  to
+#   `Defaults        env_reset,timestamp_timeout=0`
+
+# password is first argument, the rest of the args are the command to run
+password="$1"
+shift
+
+# using expect from homebrew (TODO: use which to find it?)
+# TODO: need to adjust timeout?
+# this waits to be prompted for the password, then sends it
+/usr/local/bin/expect << EOF
+set timeout 20
+spawn $@
+expect "Password"
+send "$password\r"
+expect eof
+EOF
