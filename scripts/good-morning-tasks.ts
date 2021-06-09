@@ -9,9 +9,10 @@ import which from 'which';
 enum TaskType {
   HOMEBREW = 'homebrew',
   VOLTA_PACKAGE = 'volta-package',
+  EXEC = 'exec',
 }
 
-type ConfigTask = HomebrewTask | VoltaPackageTask;
+type ConfigTask = HomebrewTask | VoltaPackageTask | ExecTask;
 
 interface HomebrewTask {
   type: TaskType.HOMEBREW;
@@ -32,6 +33,12 @@ interface VoltaPackageTask {
 
 interface VoltaPackage {
   name: string;
+}
+
+interface ExecTask {
+  type: TaskType.EXEC;
+  command: string;
+  args: string[];
 }
 
 // TODO: read config file for this
@@ -59,6 +66,7 @@ const config: ConfigTask[] = [
     ],
   },
   {
+    // TODO: this is not working right
     type: TaskType.VOLTA_PACKAGE,
     packages: [
       { name: '@11ty/eleventy' },
@@ -69,7 +77,13 @@ const config: ConfigTask[] = [
       { name: 'gulp' },
       { name: 'ts-node' },
       { name: 'typescript' },
+      { name: 'torpedo' },
     ],
+  },
+  {
+    type: TaskType.EXEC,
+    command: 'rustup',
+    args: ['update'],
   },
 ];
 
@@ -146,6 +160,13 @@ function configTaskToListrTask(task: ConfigTask): ListrTask {
             { exitOnError: false }
           );
         },
+      };
+    case TaskType.EXEC:
+      return {
+        title: `${task.command} ${task.args}`,
+        // just execa the info from the config
+        task: () => execa(task.command, task.args),
+        // TODO: how to not exitOnError?
       };
   }
 }
