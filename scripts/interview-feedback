@@ -30,7 +30,7 @@ tell application "System Events"
   keystroke "Overall"
   keystroke "b" using command down
   keystroke ":" & return
-  keystroke "- TODO" & return
+  keystroke "TODO" & return
   delay 0.2
 
   keystroke "b" using command down
