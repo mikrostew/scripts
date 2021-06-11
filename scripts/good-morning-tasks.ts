@@ -85,6 +85,11 @@ const config: ConfigTask[] = [
     command: 'rustup',
     args: ['update'],
   },
+  {
+    type: TaskType.EXEC,
+    command: 'moment-garden-download',
+    args: [],
+  },
 ];
 
 // return if the input executable is installed or not

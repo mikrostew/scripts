@@ -120,11 +120,6 @@ then
   # install or upgrade things installed via Homebrew and Volta
   good-morning-tasks.ts
 
-  # echo "Rust"
-  # @wait-for-command rustup update
-  # if [ "$?" != 0 ]; then errors+=('rustup update'); fi
-  # (( total_tasks++ ))
-
   # make sure syncthing is running
   echo "Syncthing"
   if pgrep syncthing >/dev/null
@@ -322,15 +317,13 @@ then
 fi
 
 # moments garden stuff
-
-if [[ "$machine" =~ Laptop ]]
-then
-  echo "Moment Garden"
-  # show the output, since this is a new thing
-  @wait-for-command --show-output moment-garden-download
-  if [ "$?" != 0 ]; then errors+=('moment-garden-download'); fi
-  (( total_tasks++ ))
-fi
+# if [[ "$machine" =~ Laptop ]]
+# then
+#   echo "Moment Garden"
+#   @wait-for-command moment-garden-download
+#   if [ "$?" != 0 ]; then errors+=('moment-garden-download'); fi
+#   (( total_tasks++ ))
+# fi
 
 # check free disk space
 
