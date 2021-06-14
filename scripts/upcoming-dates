@@ -20,10 +20,10 @@ function getConfig() {
     syncDir = path.join('/', 'Users', 'mikrostew', 'Sync');
   } else if (/mistewar-mn/.test(hostName)) {
     // work laptop
-    syncDir = path.join('/', 'usr', 'local', 'SyncThing', 'Sync');
+    syncDir = path.join('/', 'Users', 'mistewar', 'Sync');
   }
 
-  const dateConfig = require(path.join(syncDir, '.upcoming-dates.js'));
+  const dateConfig = require(path.join(syncDir, 'upcoming-dates.js'));
   return dateConfig;
 }
 
