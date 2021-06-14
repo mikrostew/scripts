@@ -12,8 +12,15 @@ else
   osascript -e 'tell application "Iterm" to activate'
 fi
 
+# change directory into dotfiles
+# pull and rebase to pick up recent changes
+# then run the script
 osascript <<EOF
 tell application "System Events"
+  keystroke "cd src/gh/dotfiles/" & return
+  delay 0.5
+  keystroke "gpr" & return
+  delay 5
   keystroke "good-morning" & return
 end tell
 EOF
