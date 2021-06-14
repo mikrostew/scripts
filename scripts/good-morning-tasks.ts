@@ -90,6 +90,11 @@ const config: ConfigTask[] = [
     command: 'moment-garden-download',
     args: [],
   },
+  {
+    type: TaskType.EXEC,
+    command: 'download-yt-audio-playlists',
+    args: [],
+  },
 ];
 
 // return if the input executable is installed or not

@@ -56,5 +56,5 @@ do
 
   download_dir="$BASE_DIR/$name"
   download_playlist "$name" "$list_id" "$download_dir"
-  open "$download_dir"
+  #open "$download_dir"
 done
