@@ -5,7 +5,6 @@
 const path = require('path');
 const os = require('os');
 
-
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const TODAY = new Date();
 const THIS_YEAR = TODAY.getFullYear();
@@ -18,10 +17,10 @@ function getConfig() {
   let syncDir;
   if (/MacBook-Air/.test(hostName) || /Michaels-Air/.test(hostName)) {
     // home laptop
-    syncDir = path.join('/', 'Users', 'mikrostew', 'SyncDocs');
+    syncDir = path.join('/', 'Users', 'mikrostew', 'Sync');
   } else if (/mistewar-mn/.test(hostName)) {
     // work laptop
-    syncDir = path.join('/', 'usr', 'local', 'SyncThing', 'SyncDocs');
+    syncDir = path.join('/', 'usr', 'local', 'SyncThing', 'Sync');
   }
 
   const dateConfig = require(path.join(syncDir, '.upcoming-dates.js'));
@@ -96,9 +95,12 @@ function tableData(data) {
 }
 
 function formatDate(d) {
-  return `${d.name} (${d._daysAway} days) ${d._dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} ${d.notes}`;
+  return `${d.name} (${d._daysAway} days) ${d._dateObj.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  })} ${d.notes}`;
 }
-
 
 // printout
 
