@@ -117,24 +117,9 @@ then
     echo "✅ $xcode_path"
   fi
 
-  # install or upgrade things installed via Homebrew and Volta
+  # start transitioning tasks here
   good-morning-tasks.ts
-
-  # make sure syncthing is running
-  echo "Syncthing"
-  if pgrep syncthing >/dev/null
-  then
-    echo "✅ syncthing"
-  else
-    echo "❌ syncthing"
-  fi
 fi
-
-echo "Dotfile links"
-# verify that dotfile links haven't been changed
-@wait-for-command verify-dotfile-links "$HOME/src/gh/dotfiles"
-if [ "$?" != 0 ]; then errors+=('verify-dotfile-links'); fi
-(( total_tasks++ ))
 
 if [ "$machine" == "Home Laptop" ]
 then

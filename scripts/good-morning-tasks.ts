@@ -2,6 +2,9 @@
 
 // TODO: start transitioning tasks here
 
+import path from 'path';
+import os from 'os';
+
 import execa from 'execa';
 import Listr, { ListrContext, ListrTask } from 'listr';
 import which from 'which';
@@ -94,6 +97,16 @@ const config: ConfigTask[] = [
     type: TaskType.EXEC,
     command: 'download-yt-audio-playlists',
     args: [],
+  },
+  {
+    type: TaskType.EXEC,
+    command: 'verify-dotfile-links',
+    args: [path.join(os.homedir(), 'src/gh/dotfiles')],
+  },
+  {
+    type: TaskType.EXEC,
+    command: 'pgrep',
+    args: ['syncthing'],
   },
 ];
 
