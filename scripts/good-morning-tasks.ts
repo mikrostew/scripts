@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 
-// TODO: start transitioning tasks here
+// TODO: transition the rest of the tasks here
 
 import path from 'path';
 import os from 'os';
@@ -19,6 +19,7 @@ type ConfigTask = HomebrewTask | VoltaPackageTask | ExecTask;
 
 interface HomebrewTask {
   type: TaskType.HOMEBREW;
+  machines: string[];
   packages: HomebrewPackage[];
 }
 
@@ -31,6 +32,7 @@ interface HomebrewPackage {
 
 interface VoltaPackageTask {
   type: TaskType.VOLTA_PACKAGE;
+  machines: string[];
   packages: VoltaPackage[];
 }
 
@@ -40,15 +42,30 @@ interface VoltaPackage {
 
 interface ExecTask {
   type: TaskType.EXEC;
+  machines: string[];
   command: string;
   args: string[];
 }
 
+// machine names map to the keys of this object
+// (so that adding a task is easy, because it's done often,
+//  but adding a machine is harder, and is done less often)
+interface MachineConfig {
+  [key: string]: RegExp;
+}
+
+// TODO: this should also be part of the config file
+const machineConfig: MachineConfig = {
+  homeLaptop: /(MacBook-Air|Michaels-Air)/,
+  workLaptop: /mistewar-mn/,
+  workVM: /mistewar-ld/,
+};
+
 // TODO: read config file for this
-// TODO: link machine names/IDs to the tasks they should run
 const config: ConfigTask[] = [
   {
     type: TaskType.HOMEBREW,
+    machines: ['homeLaptop', 'workLaptop'],
     packages: [
       { name: 'bats-core', executable: 'bats' },
       { name: 'expect', executable: 'expect' },
@@ -69,8 +86,9 @@ const config: ConfigTask[] = [
     ],
   },
   {
-    // TODO: this is not working right
+    // TODO: this is not working quite right
     type: TaskType.VOLTA_PACKAGE,
+    machines: ['homeLaptop', 'workLaptop', 'workVM'],
     packages: [
       { name: '@11ty/eleventy' },
       { name: 'backstopjs' },
@@ -85,29 +103,35 @@ const config: ConfigTask[] = [
   },
   {
     type: TaskType.EXEC,
+    machines: ['homeLaptop', 'workLaptop', 'workVM'],
     command: 'rustup',
     args: ['update'],
   },
   {
     type: TaskType.EXEC,
+    machines: ['homeLaptop', 'workLaptop'],
     command: 'moment-garden-download',
     args: [],
   },
   {
     type: TaskType.EXEC,
+    machines: ['homeLaptop', 'workLaptop'],
     command: 'download-yt-audio-playlists',
     args: [],
   },
   {
     type: TaskType.EXEC,
+    machines: ['homeLaptop', 'workLaptop', 'workVM'],
     command: 'verify-dotfile-links',
     args: [path.join(os.homedir(), 'src/gh/dotfiles')],
   },
   {
     type: TaskType.EXEC,
+    machines: ['homeLaptop', 'workLaptop'],
     command: 'pgrep',
     args: ['syncthing'],
   },
+  // TODO: some task that checks for VPN, and blocks following tasks
 ];
 
 // return if the input executable is installed or not
