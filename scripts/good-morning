@@ -145,7 +145,7 @@ then
   cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
   # and install any updated dependencies
-  gpr && gp && cd scripts/ && yarn install
+  gpr && gp && cd scripts/ && @wait-for-command yarn install
   if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
   (( total_tasks++ ))
 
@@ -204,7 +204,7 @@ then
   cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
   # and install any updated dependencies
-  gpr && gp && cd scripts/ && yarn install
+  gpr && gp && cd scripts/ && @wait-for-command yarn install
   if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
   (( total_tasks++ ))
 
@@ -281,7 +281,7 @@ then
   cd "$HOME/src/gh/dotfiles/"
   # pull, rebase, push to sync anything I've changed recently
   # and install any updated dependencies
-  gpr && gp && cd scripts/ && yarn install
+  gpr && gp && cd scripts/ && @wait-for-command yarn install
   if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
   (( total_tasks++ ))
 
