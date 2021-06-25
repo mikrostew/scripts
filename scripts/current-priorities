@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+
+// show upcoming dates, from the input config file
+
+const path = require('path');
+const os = require('os');
+
+// different paths for different machines
+function getConfig() {
+  const hostName = os.hostname();
+
+  let syncDir;
+  if (/MacBook-Air/.test(hostName) || /Michaels-Air/.test(hostName)) {
+    // home laptop
+    syncDir = path.join('/', 'Users', 'mikrostew', 'Sync');
+  } else if (/mistewar-mn/.test(hostName)) {
+    // work laptop
+    syncDir = path.join('/', 'Users', 'mistewar', 'Sync');
+  }
+
+  const priorityConfig = require(path.join(syncDir, 'priorities.js'));
+  return priorityConfig;
+}
+
+// printout
+
+const priorityConfig = getConfig();
+
+console.log('Priorities');
+Object.keys(priorityConfig.priorities).forEach((category) => {
+  const description = priorityConfig.priorities[category];
+  console.log(`  - (${category}) ${description}`);
+});
+
+console.log('Maintenance');
+Object.keys(priorityConfig.maintenance).forEach((category) => {
+  const description = priorityConfig.maintenance[category];
+  console.log(`  - (${category}) ${description}`);
+});

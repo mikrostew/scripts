@@ -350,6 +350,12 @@ echo ""
 upcoming-dates
 echo ""
 
+# show current priorities
+echo ""
+current-priorities
+echo ""
+
+
 # stats
 
 echo ""
