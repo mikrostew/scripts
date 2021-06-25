@@ -394,10 +394,10 @@ echo " - setup your Slack status now!"
 echo_ack ""
 echo_ack "Good Morning!"
 echo_ack ""
-if [ "$machine" == "Work Laptop" ]
-then
-  imgcat /usr/local/SyncThing/SyncImages/coffee.jpg
-elif [ "$machine" == "Home Laptop" ]
-then
-  imgcat "$HOME/SyncImages/coffee.jpg"
-fi
+# if [ "$machine" == "Work Laptop" ]
+# then
+#   imgcat /usr/local/SyncThing/SyncImages/coffee.jpg
+# elif [ "$machine" == "Home Laptop" ]
+# then
+#   imgcat "$HOME/SyncImages/coffee.jpg"
+# fi
