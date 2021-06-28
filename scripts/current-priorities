@@ -27,13 +27,15 @@ function getConfig() {
 const priorityConfig = getConfig();
 
 console.log('Priorities');
-Object.keys(priorityConfig.priorities).forEach((category) => {
-  const description = priorityConfig.priorities[category];
+priorityConfig.priorities.forEach((priority) => {
+  const category = priority.category;
+  const description = priority.description;
   console.log(`  - (${category}) ${description}`);
 });
 
 console.log('Maintenance');
-Object.keys(priorityConfig.maintenance).forEach((category) => {
-  const description = priorityConfig.maintenance[category];
+priorityConfig.maintenance.forEach((priority) => {
+  const category = priority.category;
+  const description = priority.description;
   console.log(`  - (${category}) ${description}`);
 });
