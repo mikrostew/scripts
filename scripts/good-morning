@@ -386,9 +386,13 @@ fi
 
 # reminders
 
-echo ""
-echo "Reminders"
-echo " - setup your Slack status now!"
+if [ "$machine" == "Work Laptop" ]
+then
+  # only need to setup Slack in work mornings
+  echo ""
+  echo "Reminders"
+  echo " - setup your Slack status now!"
+fi
 
 # end on a happy note
 echo_ack ""
