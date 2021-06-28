@@ -78,6 +78,10 @@ links[".config/karabiner"]="karabiner"
 # typescript
 links["tsconfig.json"]="tsconfig.json"
 
+# eslint
+links[".eslintrc.js"]=".eslintrc.js"
+
+
 # machine-specific
 host_name="$(hostname)"
 if [[ "$host_name" =~ (MacBook-Air|Michaels-Air) ]]
