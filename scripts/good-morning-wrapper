@@ -14,6 +14,7 @@ fi
 
 # change directory into dotfiles
 # pull and rebase to pick up recent changes
+# resize the terminal to 96W x 32H chars (so the Listr tasks fit without scrolling)
 # then run the script
 osascript <<EOF
 tell application "System Events"
@@ -21,6 +22,8 @@ tell application "System Events"
   delay 0.5
   keystroke "gpr" & return
   delay 5
+  keystroke "printf '\\\\033[8;32;96t'" & return
+  delay 0.5
   keystroke "good-morning" & return
 end tell
 EOF
