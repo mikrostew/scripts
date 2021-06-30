@@ -54,8 +54,7 @@ echo ""
 # some things need a password, so do that first
 if [ "$machine" == "Work Laptop" ]
 then
-  echo "(TODO: password setup)"
-  echo ""
+  echo "(this will probably prompt for password input)"
   ldap_pass="$(security find-generic-password -ga ldap_pass -w)"
   if [ -z "$ldap_pass" ]
   then
@@ -140,10 +139,6 @@ then
   gpr
   if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
   (( total_tasks++ ))
-
-  # TODO: any more repos?
-
-  # TODO: any blog pages I want to open here?
 fi
 
 if [[ "$machine" =~ Work ]]
@@ -245,7 +240,29 @@ then
     (( total_tasks++ ))
   fi
 
-  # TODO: any more repos?
+  echo "NADP"
+
+  cd "$HOME/src/li/node-acid-data-producers/"
+  # if not on the master branch, checkout master, pull, and rebase
+  # TODO: figure out the default branch name
+  branch_name="$(current_git_branch)"
+  # TODO: check for "main" as well?
+  if [ "$branch_name" != "master" ]; then
+    gc master
+    # pull and rebase from master
+    gpr
+    if [ "$?" != 0 ]; then errors+=('node-acid-data-producers - pull and rebase'); fi
+    (( total_tasks++ ))
+    # go back to the original branch
+    gc "$branch_name"
+  else
+    # otherwise, we are on master, so just pull and rebase
+    gpr
+    if [ "$?" != 0 ]; then errors+=('node-acid-data-producers - pull and rebase'); fi
+    (( total_tasks++ ))
+  fi
+
+  # add any additional work repos here...
 
   # list of blog post ideas, and posts I'm working on
   open https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit#
@@ -301,16 +318,9 @@ then
   fi
 fi
 
-# moments garden stuff
-# if [[ "$machine" =~ Laptop ]]
-# then
-#   echo "Moment Garden"
-#   @wait-for-command moment-garden-download
-#   if [ "$?" != 0 ]; then errors+=('moment-garden-download'); fi
-#   (( total_tasks++ ))
-# fi
 
 # check free disk space
+# TODO: add this check to the listr stuff
 
 echo ""
 echo "Free Disk Space"
