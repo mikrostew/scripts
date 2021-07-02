@@ -98,7 +98,6 @@ const config: ConfigTask[] = [
     ],
   },
   {
-    // TODO: this is not working quite right
     type: TaskType.VOLTA_PACKAGE,
     machines: ['homeLaptop', 'workLaptop', 'workVM'],
     packages: [
@@ -110,7 +109,6 @@ const config: ConfigTask[] = [
       { name: 'gulp' },
       { name: 'ts-node' },
       { name: 'typescript' },
-      { name: 'torpedo' },
     ],
   },
   {
@@ -193,9 +191,10 @@ function mainHomebrewTask(): ListrTask {
 // just install missing packages - don't automatically upgrade
 function voltaPackageToTask(pkg: VoltaPackage): ListrTask {
   return {
-    title: `ensure ${pkg.name} is installed`,
+    title: `ensure '${pkg.name}' is installed`,
     task: async () => {
-      if (!(await isVoltaPackageInstalled(pkg.name))) {
+      const isInstalled = await isVoltaPackageInstalled(pkg.name);
+      if (!isInstalled) {
         return execa('npm', ['i', '-g', pkg.name]);
       }
     },
@@ -204,10 +203,10 @@ function voltaPackageToTask(pkg: VoltaPackage): ListrTask {
 
 async function isVoltaPackageInstalled(name: string): Promise<boolean> {
   const { stdout } = await execa('volta', ['list', name]);
-  if (stdout === undefined) {
+  if (stdout === undefined || stdout === '' || /No tools or packages installed/.test(stdout)) {
     return false;
   }
-  return /No tools or packages installed/.test(stdout) ? false : true;
+  return true;
 }
 
 // convert a task from config to tasks that listr can use
@@ -251,12 +250,14 @@ function configTaskToListrTask(task: ConfigTask): ListrTask {
         title: `${task.command} ${task.args}`,
         // just execa the info from the config
         task: () => execa(task.command, task.args),
-        // TODO: how to not exitOnError?
       };
   }
 }
 
-const tasks: Listr = new Listr(config.map((task) => configTaskToListrTask(task)));
+const tasks: Listr = new Listr(
+  config.map((task) => configTaskToListrTask(task)),
+  { exitOnError: false }
+);
 
 tasks.run().catch((err) => {
   // TODO: when does this error?
