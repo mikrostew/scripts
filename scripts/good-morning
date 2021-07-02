@@ -62,23 +62,24 @@ then
   fi
 fi
 
-if [[ "$machine" =~ Laptop ]]
-then
-  echo "Applications"
+#if [[ "$machine" =~ Laptop ]]
+#then
+#  echo "Applications"
 
-  # open activity monitor (after making sure it's not running)
-  kill-proc-name "Activity Monitor"
-  #run-app-path "/System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor"
+#  # open activity monitor (after making sure it's not running)
+#  kill-proc-name "Activity Monitor"
+#  #run-app-path "/System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor"
 
-  # kill any programs that I don't want to be running
-  kill-proc-name "zoom.us"
-  kill-proc-name "App Store"
-  kill-proc-name "Discord"
-  kill-proc-name "Microsoft Word"
-fi
+#  # kill any programs that I don't want to be running
+#  kill-proc-name "zoom.us"
+#  kill-proc-name "App Store"
+#  kill-proc-name "Discord"
+#  kill-proc-name "Microsoft Word"
+#fi
 
 if [ "$machine" == "Work Laptop" ]
 then
+  echo "Applications"
   # kill and restart some things
   # - well, I used to restart these, but that's kinda annoying, so I'm trying just to run them if they're not already running
   # - actually, just kill these - I'll start them when I need them

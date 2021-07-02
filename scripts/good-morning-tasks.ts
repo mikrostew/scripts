@@ -10,12 +10,19 @@ import Listr, { ListrContext, ListrTask } from 'listr';
 import which from 'which';
 
 enum TaskType {
+  KILL_PROC = 'kill-proc',
   HOMEBREW = 'homebrew',
   VOLTA_PACKAGE = 'volta-package',
   EXEC = 'exec',
 }
 
-type ConfigTask = HomebrewTask | VoltaPackageTask | ExecTask;
+type ConfigTask = KillProcessTask | HomebrewTask | VoltaPackageTask | ExecTask;
+
+interface KillProcessTask {
+  type: TaskType.KILL_PROC;
+  machines: string[];
+  processes: string[];
+}
 
 interface HomebrewTask {
   type: TaskType.HOMEBREW;
@@ -63,6 +70,11 @@ const machineConfig: MachineConfig = {
 
 // TODO: read config file for this
 const config: ConfigTask[] = [
+  {
+    type: TaskType.KILL_PROC,
+    machines: ['homeLaptop', 'workLaptop'],
+    processes: ['Activity Monitor', 'zoom.us', 'App Store', 'Discord', 'Microsoft Word'],
+  },
   {
     type: TaskType.HOMEBREW,
     machines: ['homeLaptop', 'workLaptop'],
@@ -141,6 +153,21 @@ async function isExecutableInstalled(executable: string): Promise<boolean> {
     .catch(() => false);
 }
 
+// convert process name into a task to kill that process
+function killProcessToTask(processName: string): ListrTask {
+  return {
+    title: `kill process '${processName}'`,
+    task: async () => {
+      try {
+        await execa('pkill', [processName]);
+      } catch (err) {
+        // probably the process doesn't exist, that's fine
+        return true;
+      }
+    },
+  };
+}
+
 // convert homebrew packages to list of tasks for install/upgrade
 function homebrewPackageToTask(pkg: HomebrewPackage): ListrTask {
   return {
@@ -186,6 +213,17 @@ async function isVoltaPackageInstalled(name: string): Promise<boolean> {
 // convert a task from config to tasks that listr can use
 function configTaskToListrTask(task: ConfigTask): ListrTask {
   switch (task.type) {
+    case TaskType.KILL_PROC:
+      return {
+        title: 'Kill Processes',
+        task: () => {
+          // convert all the process names to tasks
+          return new Listr(
+            task.processes.map((processName) => killProcessToTask(processName)),
+            { exitOnError: false }
+          );
+        },
+      };
     case TaskType.HOMEBREW:
       return {
         title: 'Homebrew',
