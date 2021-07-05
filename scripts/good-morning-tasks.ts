@@ -81,6 +81,11 @@ const config: Config = {
       processes: ['Activity Monitor', 'zoom.us', 'App Store', 'Discord', 'Microsoft Word'],
     },
     {
+      type: TaskType.KILL_PROC,
+      machines: ['workLaptop'],
+      processes: ['Outlook', 'Microsoft Error Reporting', 'Slack', 'Microsoft Teams'],
+    },
+    {
       type: TaskType.HOMEBREW,
       machines: ['homeLaptop', 'workLaptop'],
       packages: [
