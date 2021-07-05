@@ -16,6 +16,11 @@ enum TaskType {
   EXEC = 'exec',
 }
 
+interface Config {
+  machines: MachineConfig;
+  tasks: ConfigTask[];
+}
+
 type ConfigTask = KillProcessTask | HomebrewTask | VoltaPackageTask | ExecTask;
 
 interface KillProcessTask {
@@ -61,88 +66,89 @@ interface MachineConfig {
   [key: string]: RegExp;
 }
 
-// TODO: this should also be part of the config file
-const machineConfig: MachineConfig = {
-  homeLaptop: /(MacBook-Air|Michaels-Air)/,
-  workLaptop: /mistewar-mn/,
-  workVM: /mistewar-ld/,
-};
-
 // TODO: read config file for this
-const config: ConfigTask[] = [
-  {
-    type: TaskType.KILL_PROC,
-    machines: ['homeLaptop', 'workLaptop'],
-    processes: ['Activity Monitor', 'zoom.us', 'App Store', 'Discord', 'Microsoft Word'],
+const config: Config = {
+  machines: {
+    homeLaptop: /(MacBook-Air|Michaels-Air)/,
+    workLaptop: /mistewar-mn/,
+    workVM: /mistewar-ld/,
   },
-  {
-    type: TaskType.HOMEBREW,
-    machines: ['homeLaptop', 'workLaptop'],
-    packages: [
-      { name: 'bats-core', executable: 'bats' },
-      { name: 'expect', executable: 'expect' },
-      { name: 'gh', executable: 'gh' },
-      { name: 'gimp', executable: 'gimp' },
-      { name: 'git', executable: 'git' },
-      { name: 'git-gui', executable: 'git-gui' },
-      { name: 'imagemagick', executable: 'magick' },
-      { name: 'jq', executable: 'jq' },
-      { name: 'macvim', executable: 'mvim' },
-      { name: 'moreutils', executable: 'sponge' },
-      { name: 'ruby-install', executable: 'ruby-install' },
-      { name: 'terminal-notifier', executable: 'terminal-notifier' },
-      { name: 'tmux', executable: 'tmux' },
-      { name: 'watch', executable: 'watch' },
-      { name: 'wget', executable: 'wget' },
-      { name: 'youtube-dl', executable: 'youtube-dl' },
-    ],
-  },
-  {
-    type: TaskType.VOLTA_PACKAGE,
-    machines: ['homeLaptop', 'workLaptop', 'workVM'],
-    packages: [
-      { name: '@11ty/eleventy' },
-      { name: 'backstopjs' },
-      { name: 'cowsay' },
-      { name: 'ember-cli' },
-      { name: 'eslint' },
-      { name: 'gulp' },
-      { name: 'ts-node' },
-      { name: 'typescript' },
-    ],
-  },
-  {
-    type: TaskType.EXEC,
-    machines: ['homeLaptop', 'workLaptop', 'workVM'],
-    command: 'rustup',
-    args: ['update'],
-  },
-  {
-    type: TaskType.EXEC,
-    machines: ['homeLaptop', 'workLaptop'],
-    command: 'moment-garden-download',
-    args: [],
-  },
-  {
-    type: TaskType.EXEC,
-    machines: ['homeLaptop', 'workLaptop'],
-    command: 'download-yt-audio-playlists',
-    args: [],
-  },
-  {
-    type: TaskType.EXEC,
-    machines: ['homeLaptop', 'workLaptop', 'workVM'],
-    command: 'verify-dotfile-links',
-    args: [path.join(os.homedir(), 'src/gh/dotfiles')],
-  },
-  {
-    type: TaskType.EXEC,
-    machines: ['homeLaptop', 'workLaptop'],
-    command: 'pgrep',
-    args: ['syncthing'],
-  },
-  // TODO: some task that checks for VPN, and blocks following tasks
-];
+  tasks: [
+    {
+      type: TaskType.KILL_PROC,
+      // things to kill on both laptops
+      machines: ['homeLaptop', 'workLaptop'],
+      processes: ['Activity Monitor', 'zoom.us', 'App Store', 'Discord', 'Microsoft Word'],
+    },
+    {
+      type: TaskType.HOMEBREW,
+      machines: ['homeLaptop', 'workLaptop'],
+      packages: [
+        { name: 'bats-core', executable: 'bats' },
+        { name: 'expect', executable: 'expect' },
+        { name: 'gh', executable: 'gh' },
+        { name: 'gimp', executable: 'gimp' },
+        { name: 'git', executable: 'git' },
+        { name: 'git-gui', executable: 'git-gui' },
+        { name: 'imagemagick', executable: 'magick' },
+        { name: 'jq', executable: 'jq' },
+        { name: 'macvim', executable: 'mvim' },
+        { name: 'moreutils', executable: 'sponge' },
+        { name: 'ruby-install', executable: 'ruby-install' },
+        { name: 'terminal-notifier', executable: 'terminal-notifier' },
+        { name: 'tmux', executable: 'tmux' },
+        { name: 'watch', executable: 'watch' },
+        { name: 'wget', executable: 'wget' },
+        { name: 'youtube-dl', executable: 'youtube-dl' },
+      ],
+    },
+    {
+      type: TaskType.VOLTA_PACKAGE,
+      machines: ['homeLaptop', 'workLaptop', 'workVM'],
+      packages: [
+        { name: '@11ty/eleventy' },
+        { name: 'backstopjs' },
+        { name: 'cowsay' },
+        { name: 'ember-cli' },
+        { name: 'eslint' },
+        { name: 'gulp' },
+        { name: 'ts-node' },
+        { name: 'typescript' },
+      ],
+    },
+    {
+      type: TaskType.EXEC,
+      machines: ['homeLaptop', 'workLaptop', 'workVM'],
+      command: 'rustup',
+      args: ['update'],
+    },
+    {
+      type: TaskType.EXEC,
+      machines: ['homeLaptop', 'workLaptop'],
+      command: 'moment-garden-download',
+      args: [],
+    },
+    {
+      type: TaskType.EXEC,
+      machines: ['homeLaptop', 'workLaptop'],
+      command: 'download-yt-audio-playlists',
+      args: [],
+    },
+    {
+      type: TaskType.EXEC,
+      machines: ['homeLaptop', 'workLaptop', 'workVM'],
+      command: 'verify-dotfile-links',
+      args: [path.join(os.homedir(), 'src/gh/dotfiles')],
+    },
+    {
+      type: TaskType.EXEC,
+      machines: ['homeLaptop', 'workLaptop'],
+      command: 'pgrep',
+      args: ['syncthing'],
+    },
+    // TODO: some task that checks for VPN, and blocks following tasks
+  ],
+};
 
 // return if the input executable is installed or not
 async function isExecutableInstalled(executable: string): Promise<boolean> {
@@ -209,12 +215,26 @@ async function isVoltaPackageInstalled(name: string): Promise<boolean> {
   return true;
 }
 
+// should this task run on this machine?
+function shouldRunForMachine(
+  task: ConfigTask,
+  machineConfig: MachineConfig,
+  currentMachine: string
+): boolean {
+  return task.machines.some((machineName) => machineConfig[machineName]?.test(currentMachine));
+}
+
 // convert a task from config to tasks that listr can use
-function configTaskToListrTask(task: ConfigTask): ListrTask {
+function configTaskToListrTask(
+  task: ConfigTask,
+  machineConfig: MachineConfig,
+  currentMachine: string
+): ListrTask {
   switch (task.type) {
     case TaskType.KILL_PROC:
       return {
         title: 'Kill Processes',
+        enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
         task: () => {
           // convert all the process names to tasks
           return new Listr(
@@ -226,6 +246,7 @@ function configTaskToListrTask(task: ConfigTask): ListrTask {
     case TaskType.HOMEBREW:
       return {
         title: 'Homebrew',
+        enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
         task: () => {
           // convert all the configured homebrew packages to tasks
           return new Listr(
@@ -237,6 +258,7 @@ function configTaskToListrTask(task: ConfigTask): ListrTask {
     case TaskType.VOLTA_PACKAGE:
       return {
         title: 'Volta Packages',
+        enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
         task: () => {
           // convert all the configured homebrew packages to tasks
           return new Listr(
@@ -248,14 +270,21 @@ function configTaskToListrTask(task: ConfigTask): ListrTask {
     case TaskType.EXEC:
       return {
         title: `${task.command} ${task.args}`,
+        enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
         // just execa the info from the config
         task: () => execa(task.command, task.args),
       };
   }
 }
 
+// this machines name
+const machineName = os.hostname();
+console.log(`Running for machine '${machineName}'`);
+
+// TODO: validate config (all machine names match, etc.)
+
 const tasks: Listr = new Listr(
-  config.map((task) => configTaskToListrTask(task)),
+  config.tasks.map((task) => configTaskToListrTask(task, config.machines, machineName)),
   { exitOnError: false }
 );
 
