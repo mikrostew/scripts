@@ -12,18 +12,15 @@ else
   osascript -e 'tell application "Iterm" to activate'
 fi
 
+# resize the terminal to 96W x 40H chars (so the Listr tasks fit without scrolling)
 # change directory into dotfiles
-# pull and rebase to pick up recent changes
-# resize the terminal to 96W x 32H chars (so the Listr tasks fit without scrolling)
-# then run the script
+# pull and rebase to pick up recent changes, then run the script
 osascript <<EOF
 tell application "System Events"
+  keystroke "printf '\\\\033[8;40;96t'" & return
+  delay 0.5
   keystroke "cd src/gh/dotfiles/" & return
   delay 0.5
-  keystroke "gpr" & return
-  delay 5
-  keystroke "printf '\\\\033[8;32;96t'" & return
-  delay 0.5
-  keystroke "good-morning" & return
+  keystroke "gpr; good-morning" & return
 end tell
 EOF
