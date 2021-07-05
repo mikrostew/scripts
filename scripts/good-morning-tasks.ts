@@ -14,6 +14,7 @@ enum TaskType {
   HOMEBREW = 'homebrew',
   VOLTA_PACKAGE = 'volta-package',
   EXEC = 'exec',
+  EXEC_AND_SAVE = 'exec-and-save',
 }
 
 interface Config {
@@ -21,7 +22,7 @@ interface Config {
   tasks: ConfigTask[];
 }
 
-type ConfigTask = KillProcessTask | HomebrewTask | VoltaPackageTask | ExecTask;
+type ConfigTask = KillProcessTask | HomebrewTask | VoltaPackageTask | ExecTask | ExecAndSaveTask;
 
 interface KillProcessTask {
   type: TaskType.KILL_PROC;
@@ -59,6 +60,15 @@ interface ExecTask {
   args: string[];
 }
 
+// exec a command and save the output in the configured variable in the context
+interface ExecAndSaveTask {
+  type: TaskType.EXEC_AND_SAVE;
+  machines: string[];
+  varName: string;
+  command: string;
+  args: string[];
+}
+
 // machine names map to the keys of this object
 // (so that adding a task is easy, because it's done often,
 //  but adding a machine is harder, and is done less often)
@@ -74,6 +84,15 @@ const config: Config = {
     workVM: /mistewar-ld/,
   },
   tasks: [
+    // for the work laptop, need to get the password first
+    // TODO: enable this once I have other tasks that need it
+    // {
+    //   type: TaskType.EXEC_AND_SAVE,
+    //   machines: ['workLaptop'],
+    //   varName: 'ldap_pass',
+    //   command: 'security',
+    //   args: ['find-generic-password', '-ga', 'ldap_pass', '-w'],
+    // },
     {
       type: TaskType.KILL_PROC,
       // things to kill on both laptops
@@ -279,6 +298,16 @@ function configTaskToListrTask(
         // just execa the info from the config
         task: () => execa(task.command, task.args),
       };
+    case TaskType.EXEC_AND_SAVE:
+      return {
+        title: `Save '${task.command} ${task.args}' to ${task.varName}`,
+        enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
+        // execa the command and save the output
+        task: async (ctx) => {
+          const { stdout } = await execa(task.command, task.args);
+          ctx[task.varName] = stdout;
+        },
+      };
   }
 }
 
@@ -286,7 +315,7 @@ function configTaskToListrTask(
 const machineName = os.hostname();
 console.log(`Running for machine '${machineName}'`);
 
-// TODO: validate config (all machine names match, etc.)
+// TODO: read and validate config (all machine names match, etc.)
 
 const tasks: Listr = new Listr(
   config.tasks.map((task) => configTaskToListrTask(task, config.machines, machineName)),
