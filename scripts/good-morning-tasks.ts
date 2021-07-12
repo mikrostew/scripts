@@ -114,6 +114,7 @@ const config: Config = {
         { name: 'gimp', executable: 'gimp' },
         { name: 'git', executable: 'git' },
         { name: 'git-gui', executable: 'git-gui' },
+        { name: 'tidy-html5', executable: 'tidy' },
         { name: 'imagemagick', executable: 'magick' },
         { name: 'jq', executable: 'jq' },
         { name: 'macvim', executable: 'mvim' },
