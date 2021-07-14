@@ -55,6 +55,7 @@ interface VoltaPackage {
 }
 
 interface ExecTask {
+  name: string;
   type: TaskType.EXEC;
   machines: string[];
   command: string;
@@ -145,30 +146,35 @@ const config: Config = {
       ],
     },
     {
+      name: 'Update Rust',
       type: TaskType.EXEC,
       machines: ['homeLaptop', 'workLaptop', 'workVM'],
       command: 'rustup',
       args: ['update'],
     },
     {
+      name: 'Download moment garden pics & videos',
       type: TaskType.EXEC,
       machines: ['homeLaptop', 'workLaptop'],
       command: 'moment-garden-download',
       args: [],
     },
     {
+      name: 'Download audio playlists from YT',
       type: TaskType.EXEC,
       machines: ['homeLaptop', 'workLaptop'],
       command: 'download-yt-audio-playlists',
       args: [],
     },
     {
+      name: 'Verify dotfile links are good',
       type: TaskType.EXEC,
       machines: ['homeLaptop', 'workLaptop', 'workVM'],
       command: 'verify-dotfile-links',
       args: [path.join(os.homedir(), 'src/gh/dotfiles')],
     },
     {
+      name: 'Make sure syncthing is running',
       type: TaskType.EXEC,
       machines: ['homeLaptop', 'workLaptop'],
       command: 'pgrep',
@@ -297,7 +303,7 @@ function configTaskToListrTask(
       };
     case TaskType.EXEC:
       return {
-        title: `${task.command} ${task.args}`,
+        title: task.name,
         enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
         // just execa the info from the config
         task: () => execa(task.command, task.args),
