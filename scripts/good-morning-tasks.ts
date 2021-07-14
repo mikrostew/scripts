@@ -25,6 +25,7 @@ interface Config {
 type ConfigTask = KillProcessTask | HomebrewTask | VoltaPackageTask | ExecTask | ExecAndSaveTask;
 
 interface KillProcessTask {
+  name: string;
   type: TaskType.KILL_PROC;
   machines: string[];
   processes: string[];
@@ -94,12 +95,14 @@ const config: Config = {
     //   args: ['find-generic-password', '-ga', 'ldap_pass', '-w'],
     // },
     {
+      name: 'Kill processes (all laptops)',
       type: TaskType.KILL_PROC,
       // things to kill on both laptops
       machines: ['homeLaptop', 'workLaptop'],
       processes: ['Activity Monitor', 'zoom.us', 'App Store', 'Discord', 'Microsoft Word'],
     },
     {
+      name: 'Kill processes (work laptop)',
       type: TaskType.KILL_PROC,
       machines: ['workLaptop'],
       processes: ['Outlook', 'Microsoft Error Reporting', 'Slack', 'Microsoft Teams'],
@@ -258,7 +261,7 @@ function configTaskToListrTask(
   switch (task.type) {
     case TaskType.KILL_PROC:
       return {
-        title: 'Kill Processes',
+        title: task.name,
         enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
         task: () => {
           // convert all the process names to tasks
