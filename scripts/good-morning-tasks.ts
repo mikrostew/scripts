@@ -2,12 +2,13 @@
 
 // TODO: transition the rest of the tasks here
 
+import { promises as fsPromises } from 'fs';
 import path from 'path';
 import os from 'os';
 
 import chalk from 'chalk';
 import execa from 'execa';
-import Listr, { ListrContext, ListrTask } from 'listr';
+import Listr, { ListrContext, ListrTask, ListrTaskResult } from 'listr';
 import which from 'which';
 
 enum TaskType {
@@ -17,9 +18,14 @@ enum TaskType {
   EXEC = 'exec',
   EXEC_AND_SAVE = 'exec-and-save',
   GROUP = 'group',
+  FUNCTION = 'function',
 }
 
 interface Config {
+  // any environment vars to set for this
+  environment?: {
+    [key: string]: string;
+  };
   // matching machine names
   machines: MachineMatchConfig;
   // the actual tasks to run, based on machine config
@@ -35,7 +41,8 @@ type ConfigTask =
   | VoltaPackageTask
   | ExecTask
   | ExecAndSaveTask
-  | TaskGroup;
+  | TaskGroup
+  | FunctionTask;
 
 interface KillProcessTask {
   name: string;
@@ -92,6 +99,14 @@ interface TaskGroup {
   tasks: ConfigTask[];
 }
 
+// run a JS function
+interface FunctionTask {
+  name: string;
+  type: TaskType.FUNCTION;
+  machines: MachineSpec;
+  function: () => void | ListrTaskResult<any>;
+}
+
 // machine names map to the keys of this object
 // (so that adding a task is easy, because it's done often,
 //  but adding a machine is harder, and is done less often)
@@ -101,6 +116,12 @@ interface MachineMatchConfig {
 
 // TODO: read config file for this
 const config: Config = {
+  environment: {
+    // TODO: provide hostname somehow in the config file
+    BASE_SYNC_DIR: /(MacBook-Air|Michaels-Air)/.test(os.hostname())
+      ? process.env['HOME']!
+      : '/usr/local/SyncThing',
+  },
   machines: {
     homeLaptop: /(MacBook-Air|Michaels-Air)/,
     workLaptop: /mistewar-mn/,
@@ -116,6 +137,7 @@ const config: Config = {
     //   command: 'security',
     //   args: ['find-generic-password', '-ga', 'ldap_pass', '-w'],
     // },
+
     {
       name: 'Kill processes (all laptops)',
       type: TaskType.KILL_PROC,
@@ -202,10 +224,33 @@ const config: Config = {
       args: ['syncthing'],
     },
     {
-      name: 'Check music files',
+      name: 'Check workout music files',
       type: TaskType.GROUP,
       machines: ['homeLaptop', 'workLaptop'],
-      tasks: [],
+      tasks: [
+        {
+          name: 'check for "official video" in file names',
+          type: TaskType.FUNCTION,
+          machines: 'inherit',
+          function: async () => {
+            const workoutMusicDir = path.join(
+              process.env['BASE_SYNC_DIR']!,
+              'SyncPhone/Music/Workout Music'
+            );
+            const musicDirContents = await fsPromises.readdir(workoutMusicDir, {
+              withFileTypes: true,
+            });
+            const matchingFiles = musicDirContents
+              .filter((f) => !f.isDirectory())
+              .map((f) => f.name)
+              .filter((fname) => /official video/i.test(fname));
+            if (matchingFiles.length !== 0) {
+              throw new Error(`${matchingFiles.length} files contain "Official Video"`);
+            }
+          },
+        },
+        // TODO: check for duplicate files with different extensions
+      ],
     },
     // TODO: some task that checks for VPN, and blocks following tasks
   ],
@@ -360,6 +405,12 @@ function configTaskToListrTask(
           );
         },
       };
+    case TaskType.FUNCTION:
+      return {
+        title: task.name,
+        enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
+        task: task.function,
+      };
   }
 }
 
@@ -369,12 +420,26 @@ console.log(`Running for machine '${chalk.green(machineName)}'`);
 
 // TODO: read and validate config (all machine names match, etc.)
 
+// set any configured env vars
+if (config.environment) {
+  for (const [key, value] of Object.entries(config.environment)) {
+    process.env[key] = value;
+  }
+}
+
 const tasks: Listr = new Listr(
   config.tasks.map((task) => configTaskToListrTask(task, config.machines, machineName)),
   { exitOnError: false }
 );
 
-tasks.run().catch((err) => {
-  // TODO: when does this error?
-  console.error(err);
-});
+tasks
+  .run()
+  .then(() => {
+    console.log();
+    console.log('no errors!');
+  })
+  .catch((err) => {
+    // this error has a list of the errors from any failed tasks
+    console.error();
+    console.error(chalk.red(`${err.errors.length} task(s) had an error!`));
+  });
