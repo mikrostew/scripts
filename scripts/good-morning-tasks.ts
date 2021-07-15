@@ -5,6 +5,7 @@
 import path from 'path';
 import os from 'os';
 
+import chalk from 'chalk';
 import execa from 'execa';
 import Listr, { ListrContext, ListrTask } from 'listr';
 import which from 'which';
@@ -19,9 +20,14 @@ enum TaskType {
 }
 
 interface Config {
-  machines: MachineConfig;
+  // matching machine names
+  machines: MachineMatchConfig;
+  // the actual tasks to run, based on machine config
   tasks: ConfigTask[];
 }
+
+// specify a list of machine names, or inherit from parent task
+type MachineSpec = string[] | 'inherit';
 
 type ConfigTask =
   | KillProcessTask
@@ -34,13 +40,13 @@ type ConfigTask =
 interface KillProcessTask {
   name: string;
   type: TaskType.KILL_PROC;
-  machines: string[];
+  machines: MachineSpec;
   processes: string[];
 }
 
 interface HomebrewTask {
   type: TaskType.HOMEBREW;
-  machines: string[];
+  machines: MachineSpec;
   packages: HomebrewPackage[];
 }
 
@@ -53,7 +59,7 @@ interface HomebrewPackage {
 
 interface VoltaPackageTask {
   type: TaskType.VOLTA_PACKAGE;
-  machines: string[];
+  machines: MachineSpec;
   packages: VoltaPackage[];
 }
 
@@ -64,7 +70,7 @@ interface VoltaPackage {
 interface ExecTask {
   name: string;
   type: TaskType.EXEC;
-  machines: string[];
+  machines: MachineSpec;
   command: string;
   args: string[];
 }
@@ -72,7 +78,7 @@ interface ExecTask {
 // exec a command and save the output in the configured variable in the context
 interface ExecAndSaveTask {
   type: TaskType.EXEC_AND_SAVE;
-  machines: string[];
+  machines: MachineSpec;
   varName: string;
   command: string;
   args: string[];
@@ -82,14 +88,14 @@ interface ExecAndSaveTask {
 interface TaskGroup {
   name: string;
   type: TaskType.GROUP;
-  machines: string[];
+  machines: MachineSpec;
   tasks: ConfigTask[];
 }
 
 // machine names map to the keys of this object
 // (so that adding a task is easy, because it's done often,
 //  but adding a machine is harder, and is done less often)
-interface MachineConfig {
+interface MachineMatchConfig {
   [key: string]: RegExp;
 }
 
@@ -273,16 +279,19 @@ async function isVoltaPackageInstalled(name: string): Promise<boolean> {
 // should this task run on this machine?
 function shouldRunForMachine(
   task: ConfigTask,
-  machineConfig: MachineConfig,
+  machineConfig: MachineMatchConfig,
   currentMachine: string
 ): boolean {
-  return task.machines.some((machineName) => machineConfig[machineName]?.test(currentMachine));
+  return (
+    task.machines === 'inherit' ||
+    task.machines.some((machineName) => machineConfig[machineName]?.test(currentMachine))
+  );
 }
 
 // convert a task from config to tasks that listr can use
 function configTaskToListrTask(
   task: ConfigTask,
-  machineConfig: MachineConfig,
+  machineConfig: MachineMatchConfig,
   currentMachine: string
 ): ListrTask {
   switch (task.type) {
@@ -354,9 +363,9 @@ function configTaskToListrTask(
   }
 }
 
-// this machines name
+// this machine's name
 const machineName = os.hostname();
-console.log(`Running for machine '${machineName}'`);
+console.log(`Running for machine '${chalk.green(machineName)}'`);
 
 // TODO: read and validate config (all machine names match, etc.)
 
