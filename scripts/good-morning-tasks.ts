@@ -15,6 +15,7 @@ enum TaskType {
   VOLTA_PACKAGE = 'volta-package',
   EXEC = 'exec',
   EXEC_AND_SAVE = 'exec-and-save',
+  GROUP = 'group',
 }
 
 interface Config {
@@ -22,7 +23,13 @@ interface Config {
   tasks: ConfigTask[];
 }
 
-type ConfigTask = KillProcessTask | HomebrewTask | VoltaPackageTask | ExecTask | ExecAndSaveTask;
+type ConfigTask =
+  | KillProcessTask
+  | HomebrewTask
+  | VoltaPackageTask
+  | ExecTask
+  | ExecAndSaveTask
+  | TaskGroup;
 
 interface KillProcessTask {
   name: string;
@@ -69,6 +76,14 @@ interface ExecAndSaveTask {
   varName: string;
   command: string;
   args: string[];
+}
+
+// group tasks together
+interface TaskGroup {
+  name: string;
+  type: TaskType.GROUP;
+  machines: string[];
+  tasks: ConfigTask[];
 }
 
 // machine names map to the keys of this object
@@ -179,6 +194,12 @@ const config: Config = {
       machines: ['homeLaptop', 'workLaptop'],
       command: 'pgrep',
       args: ['syncthing'],
+    },
+    {
+      name: 'Check music files',
+      type: TaskType.GROUP,
+      machines: ['homeLaptop', 'workLaptop'],
+      tasks: [],
     },
     // TODO: some task that checks for VPN, and blocks following tasks
   ],
@@ -316,6 +337,18 @@ function configTaskToListrTask(
         task: async (ctx) => {
           const { stdout } = await execa(task.command, task.args);
           ctx[task.varName] = stdout;
+        },
+      };
+    case TaskType.GROUP:
+      return {
+        title: task.name,
+        enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
+        task: () => {
+          return new Listr(
+            // convert all the tasks contained in this group
+            task.tasks.map((t) => configTaskToListrTask(t, machineConfig, currentMachine)),
+            { exitOnError: false }
+          );
         },
       };
   }
