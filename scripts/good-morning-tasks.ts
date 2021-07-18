@@ -252,6 +252,28 @@ const config: Config = {
         // TODO: check for duplicate files with different extensions
       ],
     },
+    // TODO: check that rpi is connected using syncthing API
+    {
+      name: 'Free space check',
+      type: TaskType.FUNCTION,
+      machines: ['homeLaptop', 'workLaptop'],
+      function: async () => {
+        const { stdout } = await execa('df', ['-h']);
+        const mainVolumeLine = stdout.match(/.*\/System\/Volumes\/Data\n/);
+        if (mainVolumeLine === null) {
+          throw new Error(`Could not parse free space from ${stdout}`);
+        }
+        const splitLine = mainVolumeLine[0]?.split(' ').filter((s) => s !== '');
+        if (splitLine === undefined) {
+          throw new Error(`Could not parse free space from line ${mainVolumeLine}`);
+        }
+        const percentFreeSpace = parseInt(splitLine[4] || '', 10);
+
+        if (percentFreeSpace > 80) {
+          throw new Error(`${percentFreeSpace} free space left (over 80%)`);
+        }
+      },
+    },
     // TODO: some task that checks for VPN, and blocks following tasks
   ],
 };

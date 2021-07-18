@@ -308,25 +308,25 @@ fi
 # check free disk space
 # TODO: add this check to the listr stuff
 
-echo ""
-echo "Free Disk Space"
+# echo ""
+# echo "Free Disk Space"
 
-(( total_tasks++ ))
-if [[ "$machine" =~ Laptop ]]
-then
-  percentage="$(df -h | grep /System/Volumes/Data$ | awk '{ print $5 }')"
-else
-  # this works on the VM...
-  percentage="$(df -h | grep ' /$' | awk '{ print $5 }')"
-fi
-percent="$( [[ "$percentage" =~ ^([0-9]+)% ]] && echo "${BASH_REMATCH[1]}" )"
-if [ -z "$percent" ] || [ "$percent" -le 80 ]
-then
-  echo "✅ $percentage"
-else
-  echo "❌ $percentage"
-  errors+=('free disk space')
-fi
+# (( total_tasks++ ))
+# if [[ "$machine" =~ Laptop ]]
+# then
+#   percentage="$(df -h | grep /System/Volumes/Data$ | awk '{ print $5 }')"
+# else
+#   # this works on the VM...
+#   percentage="$(df -h | grep ' /$' | awk '{ print $5 }')"
+# fi
+# percent="$( [[ "$percentage" =~ ^([0-9]+)% ]] && echo "${BASH_REMATCH[1]}" )"
+# if [ -z "$percent" ] || [ "$percent" -le 80 ]
+# then
+#   echo "✅ $percentage"
+# else
+#   echo "❌ $percentage"
+#   errors+=('free disk space')
+# fi
 
 
 # TODO: people I should reach out to every couple days, or week, or month, etc.
