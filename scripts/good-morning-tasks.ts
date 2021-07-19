@@ -229,7 +229,7 @@ const config: Config = {
       machines: ['homeLaptop', 'workLaptop'],
       tasks: [
         {
-          name: 'check for "official video" in file names',
+          name: 'check for "official * video" in file names',
           type: TaskType.FUNCTION,
           machines: 'inherit',
           function: async () => {
@@ -243,9 +243,9 @@ const config: Config = {
             const matchingFiles = musicDirContents
               .filter((f) => !f.isDirectory())
               .map((f) => f.name)
-              .filter((fname) => /official video/i.test(fname));
+              .filter((fname) => /official.*video/i.test(fname));
             if (matchingFiles.length !== 0) {
-              throw new Error(`${matchingFiles.length} files contain "Official Video"`);
+              throw new Error(`${matchingFiles.length} files contain "Official * Video"`);
             }
           },
         },
