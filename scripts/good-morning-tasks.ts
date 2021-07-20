@@ -244,12 +244,24 @@ const config: Config = {
               .filter((f) => !f.isDirectory())
               .map((f) => f.name)
               .filter((fname) => /official.*video/i.test(fname));
+
+            // TODO: check for (rename)
+            // TODO: check for "remix"
+            // TODO: check for "lyric"
+            // TODO: check for "official audio"
+            // TODO: check for "visualizer"
+            // TODO: check for "HQ"
+            // TODO: check for "Of" and "A" (except at beginning)
+            // TODO: check for words in all CAPS
+
             if (matchingFiles.length !== 0) {
+              // TODO: open the directory in Finder?
               throw new Error(`${matchingFiles.length} files contain "Official * Video"`);
             }
           },
         },
         // TODO: check for duplicate files with different extensions
+        // TODO: if all checks pass, write the list to workout music playlist repo
       ],
     },
     // TODO: check that rpi is connected using syncthing API
