@@ -272,11 +272,12 @@ const config: Config = {
                 errorMsg: (numFiles: number) => `${numFiles} hq`,
               },
               {
-                match: (fname: string) => / (Of|A)/.test(fname),
+                match: (fname: string) =>
+                  fname.split('-').some((part) => / (Of|A) /.test(part.trim())),
                 errorMsg: (numFiles: number) => `${numFiles} Of/A`,
               },
               {
-                match: (fname: string) => fname.split(' ').some((word) => /^A-Z$/.test(word)),
+                match: (fname: string) => fname.split(' ').some((word) => /^[A-Z]{2,}$/.test(word)),
                 errorMsg: (numFiles: number) => `${numFiles} all caps`,
               },
               {
