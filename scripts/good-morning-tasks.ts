@@ -114,10 +114,10 @@ interface MachineMatchConfig {
   [key: string]: RegExp;
 }
 
-// TODO: read config file for this
+// TODO: read config file for this? it's starting to get complicated to have in a file tho...
 const config: Config = {
   environment: {
-    // TODO: provide hostname somehow in the config file
+    // TODO: provide hostname somehow (if this will be from a config file)
     BASE_SYNC_DIR: /(MacBook-Air|Michaels-Air)/.test(os.hostname())
       ? process.env['HOME']!
       : '/usr/local/SyncThing',
@@ -223,13 +223,17 @@ const config: Config = {
       command: 'pgrep',
       args: ['syncthing'],
     },
+
+    // TODO: check for sync conflict files - `find . | grep sync-conflict`
+    // TODO: also check singalong files
+
     {
       name: 'Check workout music files',
       type: TaskType.GROUP,
       machines: ['homeLaptop', 'workLaptop'],
       tasks: [
         {
-          name: 'check for "official * video" in file names',
+          name: 'file name checks',
           type: TaskType.FUNCTION,
           machines: 'inherit',
           function: async () => {
@@ -240,23 +244,58 @@ const config: Config = {
             const musicDirContents = await fsPromises.readdir(workoutMusicDir, {
               withFileTypes: true,
             });
-            const matchingFiles = musicDirContents
-              .filter((f) => !f.isDirectory())
-              .map((f) => f.name)
-              .filter((fname) => /official.*video/i.test(fname));
+            const fileNames = musicDirContents.filter((f) => !f.isDirectory()).map((f) => f.name);
 
-            // TODO: check for (rename)
-            // TODO: check for "remix"
-            // TODO: check for "lyric"
-            // TODO: check for "official audio"
-            // TODO: check for "visualizer"
-            // TODO: check for "HQ"
-            // TODO: check for "Of" and "A" (except at beginning)
-            // TODO: check for words in all CAPS
+            const errors = [
+              {
+                match: (fname: string) => /official.*(video|audio)/i.test(fname),
+                errorMsg: (numFiles: number) => `${numFiles} official/audio/video`,
+              },
+              {
+                match: (fname: string) => /rename/i.test(fname),
+                errorMsg: (numFiles: number) => `${numFiles} (rename)`,
+              },
+              {
+                match: (fname: string) => /remix/i.test(fname),
+                errorMsg: (numFiles: number) => `${numFiles} remix`,
+              },
+              {
+                match: (fname: string) => /lyric/i.test(fname),
+                errorMsg: (numFiles: number) => `${numFiles} lyric`,
+              },
+              {
+                match: (fname: string) => /visualizer/i.test(fname),
+                errorMsg: (numFiles: number) => `${numFiles} visualizer`,
+              },
+              {
+                match: (fname: string) => /hq/i.test(fname),
+                errorMsg: (numFiles: number) => `${numFiles} hq`,
+              },
+              {
+                match: (fname: string) => / (Of|A)/.test(fname),
+                errorMsg: (numFiles: number) => `${numFiles} Of/A`,
+              },
+              {
+                match: (fname: string) => fname.split(' ').some((word) => /^A-Z$/.test(word)),
+                errorMsg: (numFiles: number) => `${numFiles} all caps`,
+              },
+              {
+                match: (fname: string) => !/-/.test(fname),
+                errorMsg: (numFiles: number) => `${numFiles} no dashes`,
+              },
+            ]
+              .map((check) => {
+                const numMatchingFiles = fileNames.filter(check.match).length;
+                if (numMatchingFiles > 0) {
+                  return check.errorMsg(numMatchingFiles);
+                }
+              })
+              .filter((error) => error !== undefined);
 
-            if (matchingFiles.length !== 0) {
-              // TODO: open the directory in Finder?
-              throw new Error(`${matchingFiles.length} files contain "Official * Video"`);
+            if (errors.length > 0) {
+              // open the directory in Finder to fix these
+              await execa('open', [workoutMusicDir]);
+              throw new Error(errors.join(', '));
             }
           },
         },
