@@ -33,6 +33,7 @@ priorityConfig.priorities.forEach((priority) => {
   console.log(`  - (${category}) ${description}`);
 });
 
+console.log('');
 console.log('Maintenance');
 priorityConfig.maintenance.forEach((priority) => {
   const category = priority.category;

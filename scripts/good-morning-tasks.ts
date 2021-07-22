@@ -104,7 +104,7 @@ interface FunctionTask {
   name: string;
   type: TaskType.FUNCTION;
   machines: MachineSpec;
-  function: () => void | ListrTaskResult<any>;
+  function: (ctx?: ListrContext) => void | ListrTaskResult<any>;
 }
 
 // machine names map to the keys of this object
@@ -225,8 +225,34 @@ const config: Config = {
     },
 
     // TODO: check for sync conflict files - `find . | grep sync-conflict`
-    // TODO: also check singalong files
 
+    {
+      name: 'Check singalong music files',
+      type: TaskType.GROUP,
+      machines: ['homeLaptop', 'workLaptop'],
+      tasks: [
+        {
+          name: 'file name checks',
+          type: TaskType.FUNCTION,
+          machines: 'inherit',
+          function: (ctx) =>
+            fileNameChecks(
+              ctx,
+              path.join(process.env['BASE_SYNC_DIR']!, 'SyncPhone/Music/Singalong'),
+              'singalong-music-errors'
+            ),
+        },
+        // TODO: check for duplicate files with different extensions
+        // TODO: if all checks pass, write the list to music playlist repo (src/gh/playlists)
+        // {
+        //   name: 'Export singalong music playlist',
+        //   type: TaskType.FUNCTION,
+        //   machines: ['homeLaptop', 'workLaptop'],
+        //   // TODO
+        //   function: () => {},
+        // },
+      ],
+    },
     {
       name: 'Check workout music files',
       type: TaskType.GROUP,
@@ -236,75 +262,28 @@ const config: Config = {
           name: 'file name checks',
           type: TaskType.FUNCTION,
           machines: 'inherit',
-          function: async () => {
-            const workoutMusicDir = path.join(
-              process.env['BASE_SYNC_DIR']!,
-              'SyncPhone/Music/Workout Music'
-            );
-            const musicDirContents = await fsPromises.readdir(workoutMusicDir, {
-              withFileTypes: true,
-            });
-            const fileNames = musicDirContents.filter((f) => !f.isDirectory()).map((f) => f.name);
-
-            const errors = [
-              {
-                match: (fname: string) => /official.*(video|audio)/i.test(fname),
-                errorMsg: (numFiles: number) => `${numFiles} official/audio/video`,
-              },
-              {
-                match: (fname: string) => /rename/i.test(fname),
-                errorMsg: (numFiles: number) => `${numFiles} (rename)`,
-              },
-              {
-                match: (fname: string) => /remix/i.test(fname),
-                errorMsg: (numFiles: number) => `${numFiles} remix`,
-              },
-              {
-                match: (fname: string) => /lyric/i.test(fname),
-                errorMsg: (numFiles: number) => `${numFiles} lyric`,
-              },
-              {
-                match: (fname: string) => /visualizer/i.test(fname),
-                errorMsg: (numFiles: number) => `${numFiles} visualizer`,
-              },
-              {
-                match: (fname: string) => /hq/i.test(fname),
-                errorMsg: (numFiles: number) => `${numFiles} hq`,
-              },
-              {
-                match: (fname: string) =>
-                  fname.split('-').some((part) => / (Of|A) /.test(part.trim())),
-                errorMsg: (numFiles: number) => `${numFiles} Of/A`,
-              },
-              {
-                match: (fname: string) => fname.split(' ').some((word) => /^[A-Z]{2,}$/.test(word)),
-                errorMsg: (numFiles: number) => `${numFiles} all caps`,
-              },
-              {
-                match: (fname: string) => !/-/.test(fname),
-                errorMsg: (numFiles: number) => `${numFiles} no dashes`,
-              },
-            ]
-              .map((check) => {
-                const numMatchingFiles = fileNames.filter(check.match).length;
-                if (numMatchingFiles > 0) {
-                  return check.errorMsg(numMatchingFiles);
-                }
-              })
-              .filter((error) => error !== undefined);
-
-            if (errors.length > 0) {
-              // open the directory in Finder to fix these
-              await execa('open', [workoutMusicDir]);
-              throw new Error(errors.join(', '));
-            }
-          },
+          function: (ctx) =>
+            fileNameChecks(
+              ctx,
+              path.join(process.env['BASE_SYNC_DIR']!, 'SyncPhone/Music/Workout Music'),
+              'workout-music-errors'
+            ),
         },
         // TODO: check for duplicate files with different extensions
-        // TODO: if all checks pass, write the list to workout music playlist repo
+        // TODO: if all checks pass, write the list to music playlist repo (src/gh/playlists)
+        // {
+        //   name: 'Export workout music playlist',
+        //   type: TaskType.FUNCTION,
+        //   machines: ['homeLaptop', 'workLaptop'],
+        //   // TODO
+        //   function: () => {},
+        // },
       ],
     },
+
     // TODO: check that rpi is connected using syncthing API
+    // TODO: check that syncthing is not paused, using the API
+
     {
       name: 'Free space check',
       type: TaskType.FUNCTION,
@@ -326,6 +305,7 @@ const config: Config = {
         }
       },
     },
+
     // TODO: some task that checks for VPN, and blocks following tasks
   ],
 };
@@ -405,6 +385,79 @@ function shouldRunForMachine(
     task.machines === 'inherit' ||
     task.machines.some((machineName) => machineConfig[machineName]?.test(currentMachine))
   );
+}
+
+// check the files in the input directory, setting the contextPropName in the context to true on error
+async function fileNameChecks(
+  ctx: ListrContext,
+  dirPath: string,
+  contextPropName: string
+): Promise<void> {
+  const dirContents = await fsPromises.readdir(dirPath, {
+    withFileTypes: true,
+  });
+  const fileNames = dirContents
+    .filter((f) => !f.isDirectory())
+    .map((f) => f.name)
+    .filter((name) => name !== '.DS_Store');
+
+  const errors = [
+    {
+      match: (fname: string) => /official.*(video|audio)/i.test(fname),
+      errorMsg: (numFiles: number) => `${numFiles} official/audio/video`,
+    },
+    {
+      match: (fname: string) => /rename/i.test(fname),
+      errorMsg: (numFiles: number) => `${numFiles} (rename)`,
+    },
+    {
+      match: (fname: string) => /remix/i.test(fname),
+      errorMsg: (numFiles: number) => `${numFiles} remix`,
+    },
+    {
+      match: (fname: string) => /lyric/i.test(fname),
+      errorMsg: (numFiles: number) => `${numFiles} lyric`,
+    },
+    {
+      match: (fname: string) => /visuali[sz]er/i.test(fname),
+      errorMsg: (numFiles: number) => `${numFiles} visualizer`,
+    },
+    {
+      match: (fname: string) => /hq/i.test(fname),
+      errorMsg: (numFiles: number) => `${numFiles} hq`,
+    },
+    // https://www.grammarly.com/blog/capitalization-in-the-titles/
+    // (prepositions, articles, and conjunctions are not capitalized)
+    //   find . | sort | grep ' \(Of\|A\|And\|To\|The\|For\|Or\|In\|On\) '
+    {
+      match: (fname: string) =>
+        fname.split('-').some((part) => / (Of|A|And|To|The|For|Or|In|On) /.test(part.trim())),
+      errorMsg: (numFiles: number) => `${numFiles} Of/A/And/To/The/For/Or/In/On`,
+    },
+    {
+      match: (fname: string) => fname.split(' ').some((word) => /^[A-Z]{2,}$/.test(word)),
+      errorMsg: (numFiles: number) => `${numFiles} all caps`,
+    },
+    //   find . | sort | grep -v "-"
+    {
+      match: (fname: string) => !/-/.test(fname),
+      errorMsg: (numFiles: number) => `${numFiles} no dashes`,
+    },
+  ]
+    .map((check) => {
+      const numMatchingFiles = fileNames.filter(check.match).length;
+      if (numMatchingFiles > 0) {
+        return check.errorMsg(numMatchingFiles);
+      }
+    })
+    .filter((error) => error !== undefined);
+
+  if (errors.length > 0) {
+    ctx[contextPropName] = true;
+    // open the directory in Finder to fix these
+    await execa('open', [dirPath]);
+    throw new Error(errors.join(', '));
+  }
 }
 
 // convert a task from config to tasks that listr can use
