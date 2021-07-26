@@ -1,5 +1,5 @@
 #!/usr/bin/env badash
-# [git] Sync master branch to the upstream fork (Git Fork Sync)
+# [git] Sync main/master branch to the upstream fork (Git Fork Sync)
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -40,8 +40,9 @@ in_git_repo ()
 }
 on_symbolic_ref ()
 {
-  git symbolic-ref HEAD
+  git symbolic-ref HEAD >/dev/null
 }
+
 show_help_msg() {
   echo "gfs - [git] Sync master branch to the upstream fork (Git Fork Sync)"
   echo 'Usage: gfs [options]'
@@ -69,21 +70,46 @@ shift $((OPTIND-1))
 
 if in_git_repo && on_symbolic_ref
 then
-  branch_name=$(current_git_branch)
+  branch_name="$(current_git_branch)"
 
-  # if not on master, go ahead and check that out
-  if [ "$branch_name" != "master" ]
+  # first try to update upstream, and fail early since I often mess this up
+  @wait-for-command git fetch upstream
+  @exit-on-error "" "echo_err \"Error: Looks like 'upstream' is not setup - use 'git remote add upstream <repo>' to set it\""
+
+  # also update this
+  @wait-for-command git fetch origin
+
+  echo "Figuring out default branch names..."
+  # figure out default branch names
+  # (from https://stackoverflow.com/a/61357104)
+  origin_default="$(git remote show origin | awk '/HEAD branch/ {print $NF}')"
+  echo "origin: $origin_default"
+  upstream_default="$(git remote show upstream | awk '/HEAD branch/ {print $NF}')"
+  echo "upstream: $upstream_default"
+
+  # if not on default branch locally, go ahead and check that out
+  if [ "$branch_name" != "$origin_default" ]
   then
-    do_git checkout master
+    @wait-for-command git checkout "$origin_default"
   fi
 
-  do_git fetch upstream
-  @exit-on-error "" "echo_err \"Error: Looks like 'upstream' is not setup - use 'git remote add upstream <repo>' to set it\""
-  do_git merge "upstream/master" && do_git push
+  # merge in any changes from upstream
+  @wait-for-command git merge "upstream/$upstream_default"
 
-  # if we were not initially on master, check that branch back out
-  if [ "$branch_name" != "master" ]
+  # if branch name has changed, check that out locally
+  # (master -> main is common now)
+  if [ "$upstream_default" != "$origin_default" ]
   then
-    do_git checkout "$branch_name"
+    @wait-for-command git checkout "$upstream_default"
+    echo_err "You need to update the default branch $origin_default --> $upstream_default on your fork"
+  fi
+
+  # push changes to sync my fork with upstream
+  @wait-for-command git push
+
+  # if we were not initially on the default, check that branch back out
+  if [ "$branch_name" != "$origin_default" ]
+  then
+    @wait-for-command git checkout "$branch_name"
   fi
 fi
