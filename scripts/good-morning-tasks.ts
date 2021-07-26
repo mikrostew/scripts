@@ -402,26 +402,32 @@ async function fileNameChecks(
     .filter((name) => name !== '.DS_Store');
 
   const errors = [
+    //   find . | sort | grep -i 'official.*\(video\|audio\)'
     {
       match: (fname: string) => /official.*(video|audio)/i.test(fname),
       errorMsg: (numFiles: number) => `${numFiles} official/audio/video`,
     },
+    //   find . | sort | grep -i 'rename'
     {
       match: (fname: string) => /rename/i.test(fname),
       errorMsg: (numFiles: number) => `${numFiles} (rename)`,
     },
+    //   find . | sort | grep -i 'remix'
     {
       match: (fname: string) => /remix/i.test(fname),
       errorMsg: (numFiles: number) => `${numFiles} remix`,
     },
+    //   find . | sort | grep -i 'lyric'
     {
       match: (fname: string) => /lyric/i.test(fname),
       errorMsg: (numFiles: number) => `${numFiles} lyric`,
     },
+    //   find . | sort | grep -i 'visuali[sz]er'
     {
       match: (fname: string) => /visuali[sz]er/i.test(fname),
       errorMsg: (numFiles: number) => `${numFiles} visualizer`,
     },
+    //   find . | sort | grep -i 'hq'
     {
       match: (fname: string) => /hq/i.test(fname),
       errorMsg: (numFiles: number) => `${numFiles} hq`,
@@ -442,6 +448,11 @@ async function fileNameChecks(
     {
       match: (fname: string) => !/-/.test(fname),
       errorMsg: (numFiles: number) => `${numFiles} no dashes`,
+    },
+    //   find . | sort | grep -i 'best quality'
+    {
+      match: (fname: string) => /best quality/i.test(fname),
+      errorMsg: (numFiles: number) => `${numFiles} best quality`,
     },
   ]
     .map((check) => {
