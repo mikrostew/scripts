@@ -307,6 +307,7 @@ const config: Config = {
     },
 
     // TODO: some task that checks for VPN, and blocks following tasks
+    // (probably a function, that pings something only accessible via the VPN, complete once it's accessible)
   ],
 };
 
