@@ -1,5 +1,5 @@
 #!/usr/bin/env badash
-# [git] Rebase current branch against master (Git Rebase Against Master)
+# [git] Rebase current branch against main/master (Git Rebase Against Main/Master)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -60,26 +60,42 @@ not_on_git_branch ()
     [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
 }
 
-
-if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
+if in_git_repo && no_uncommitted_changes
 then
   branch_name=$(current_git_branch)
   need_to_remove_orig_files='no'
-  gc master && gpr
-  @exit-on-error "Failed to pull and rebase master" 'gc "$branch_name"'
-  gc "$branch_name" && do_git rebase master
-  while [ "$?" -ne 0 ]; do
-    @wait-for-keypress 'Press any key to continue... '
-    need_to_remove_orig_files='yes'
-    # TODO: if I fix conflicts so there have been no changes, need to do `git rebase --skip` here
-    # (have to detect that from the output of `git rebase --continue`)
-    gmt && do_git rebase --continue
-    # TODO: how to detect that I should abort?
-  done
 
-  # delete any *.orig files leftover from merge conflicts
-  if [ "$need_to_remove_orig_files" == 'yes' ]; then
-    echo_info "Cleaning up .orig files from merge conflicts..."
-    grmorig
+  # is the default branch main or master?
+  # see https://stackoverflow.com/q/5167957
+  if git show-ref --verify --quiet refs/heads/main
+  then
+    default_branch="main"
+  elif git show-ref --verify --quiet refs/heads/master
+  then
+    default_branch="master"
+  else
+    echo "Error: default branch is not 'main' or 'master'"
+    exit 1
+  fi
+
+  if not_on_git_branch "$default_branch"
+  then
+    gc "$default_branch" && gpr
+    @exit-on-error "Failed to pull and rebase $default_branch" 'gc "$branch_name"'
+    gc "$branch_name" && do_git rebase "$default_branch"
+    while [ "$?" -ne 0 ]; do
+      @wait-for-keypress 'Press any key to continue... '
+      need_to_remove_orig_files='yes'
+      # TODO: if I fix conflicts so there have been no changes, need to do `git rebase --skip` here
+      # (have to detect that from the output of `git rebase --continue`)
+      gmt && do_git rebase --continue
+      # TODO: how to detect that I should abort?
+    done
+
+    # delete any *.orig files leftover from merge conflicts
+    if [ "$need_to_remove_orig_files" == 'yes' ]; then
+      echo_info "Cleaning up .orig files from merge conflicts..."
+      grmorig
+    fi
   fi
 fi
