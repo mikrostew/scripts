@@ -576,6 +576,8 @@ function configTaskToListrTask(
   }
 }
 
+// TODO: input ldap_pass as an argument to this script
+
 // this machine's name
 const machineName = os.hostname();
 console.log(`Running for machine '${chalk.green(machineName)}'`);

@@ -119,6 +119,8 @@ fi
 
 if [ "$machine" == "Work Laptop" ]
 then
+  # TODO: move all this stuff to the listr tasks
+
   # check that I am connected to VPN, and pause & wait for keypress
   if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
   then
