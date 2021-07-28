@@ -11,6 +11,11 @@ import execa from 'execa';
 import Listr, { ListrContext, ListrTask, ListrTaskResult } from 'listr';
 import which from 'which';
 
+// sleep for the input number of milliseconds
+function sleep(millis: number) {
+  return new Promise((resolve) => setTimeout(resolve, millis));
+}
+
 enum TaskType {
   KILL_PROC = 'kill-proc',
   HOMEBREW = 'homebrew',
@@ -306,8 +311,26 @@ const config: Config = {
       },
     },
 
-    // TODO: some task that checks for VPN, and blocks following tasks
-    // (probably a function, that pings something only accessible via the VPN, complete once it's accessible)
+    // check for VPN connection, and block following tasks until connected
+    {
+      name: 'Block until connected to VPN...',
+      type: TaskType.FUNCTION,
+      machines: ['workLaptop'],
+      function: async () => {
+        for (;;) {
+          try {
+            // ping once
+            // (returns non-zero on failure, so execa throws)
+            await execa('ping', ['-c1', 'tools.corp.linkedin.com']);
+            // if successful, we're good
+            break;
+          } catch {
+            // ping failed, wait 5 seconds and try again
+            await sleep(5 * 1000);
+          }
+        }
+      },
+    },
   ],
 };
 
