@@ -1,7 +1,5 @@
 #!/usr/bin/env ts-node
 
-// TODO: transition the rest of the tasks here
-
 import { promises as fsPromises } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -133,7 +131,7 @@ const config: Config = {
     workVM: /mistewar-ld/,
   },
   tasks: [
-    // for the work laptop, need to get the password first
+    // for the work laptop, need to get the password first (if it is not passed in as an argument)
     // TODO: enable this once I have other tasks that need it
     // {
     //   type: TaskType.EXEC_AND_SAVE,
@@ -228,8 +226,14 @@ const config: Config = {
       command: 'pgrep',
       args: ['syncthing'],
     },
-
-    // TODO: check for sync conflict files - `find . | grep sync-conflict`
+    {
+      name: 'Check for sync conflict files',
+      type: TaskType.GROUP,
+      machines: ['homeLaptop', 'workLaptop'],
+      tasks: ['SyncAudio', 'SyncCamera', 'SyncDocs', 'SyncImages', 'SyncPhone', 'SyncVideo'].map(
+        (dir) => syncConflictCheck(dir)
+      ),
+    },
 
     {
       name: 'Check singalong music files',
@@ -493,6 +497,22 @@ async function fileNameChecks(
     await execa('open', [dirPath]);
     throw new Error(errors.join(', '));
   }
+}
+
+// generate task to check for sync-conflict files in the input sync dir
+function syncConflictCheck(syncDirName: string): FunctionTask {
+  return {
+    name: `check ${syncDirName} files`,
+    type: TaskType.FUNCTION,
+    machines: 'inherit',
+    function: async () => {
+      const syncDirPath = path.join(process.env['BASE_SYNC_DIR']!, syncDirName);
+      const { stdout } = await execa('find', [syncDirPath, '-iname', '*sync-conflict*']);
+      if (stdout.length > 0) {
+        throw new Error(`Found ${stdout.split('\n').length} sync-conflict files`);
+      }
+    },
+  };
 }
 
 // convert a task from config to tasks that listr can use
