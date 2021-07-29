@@ -1,22 +1,27 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/squash-branch, and run 'generate-scripts.sh'
-###########################################################################
-#fb1855f3be1c8803e3b984a54b024bfd
+# [git] Squash commits in current branch into a single commit
+
+# @arg 'commit_msg' 'Commit message'
+# @arg_optional 'commit_msg_extra_line' 'Extra line for more info, overrides, etc.'
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-based_on_master_or_origin ()
+
+based_on_local_or_origin ()
 {
-    local tracking_branch="$(git rev-parse --abbrev-ref --symbolic-full-name $1@{u} 2>/dev/null)";
-    if [ "$tracking_branch" == "origin/master" ]; then
-        echo "origin/master";
-    else
-        echo "master";
-    fi
+  local branch_name="$1"
+  local default_branch="$2"
+
+  local tracking_branch="$(git rev-parse --abbrev-ref --symbolic-full-name $branch_name@{u} 2>/dev/null)";
+
+  if [ "$tracking_branch" == "origin/$default_branch" ]; then
+      echo "origin/$default_branch";
+  else
+      echo "$default_branch";
+  fi
 }
+
 commit_diff_on_branch ()
 {
     local git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)";
@@ -67,12 +72,32 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 commit_msg="${1:?Missing argument \'commit_msg\'}"
 commit_msg_extra_line="${2:-}"
+
 @uses-cmds squash-commits
+
 branch_name=$(current_git_branch)
-based_on=$(based_on_master_or_origin $branch_name)
+
+# is the default branch main or master?
+# see https://stackoverflow.com/q/5167957
+if git show-ref --verify --quiet refs/heads/main
+then
+  default_branch="main"
+elif git show-ref --verify --quiet refs/heads/master
+then
+  default_branch="master"
+else
+  echo "Error: default branch is not 'main' or 'master'"
+  exit 1
+fi
+
+based_on="$(based_on_local_or_origin $branch_name $default_branch)"
+
+# this may not be what I want in all situations - fix this when it becomes a problem
 num_commits_on_branch="$(commit_diff_on_branch $branch_name $based_on)"
+
 echo_info "$num_commits_on_branch change(s) between '$branch_name' and '$based_on'"
 echo -n "Confirm squashing $num_commits_on_branch commits [Y/n]: "
 read confirm
