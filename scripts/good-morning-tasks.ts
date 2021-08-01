@@ -117,6 +117,14 @@ interface MachineMatchConfig {
   [key: string]: RegExp;
 }
 
+// for checking file names
+interface FileCheck {
+  // TODO: simplify this to just be string | RegExp, and I can construct the function based on type
+  match: (fileName: string) => boolean;
+  // TODO: this could be a string with placeholder instead, like "{} bad characters" (kinda like Rust)
+  errorMsg: (numFiles: number) => string;
+}
+
 // TODO: read config file for this? it's starting to get complicated to have in a file tho...
 const config: Config = {
   environment: {
@@ -240,6 +248,8 @@ const config: Config = {
       type: TaskType.GROUP,
       machines: ['homeLaptop', 'workLaptop'],
       tasks: [
+        renameRenameFiles('inherit', 'SyncPhone/Music/Singalong'),
+        // TODO: extract this object like I did with the one above ^^
         {
           name: 'file name checks',
           type: TaskType.FUNCTION,
@@ -267,6 +277,8 @@ const config: Config = {
       type: TaskType.GROUP,
       machines: ['homeLaptop', 'workLaptop'],
       tasks: [
+        renameRenameFiles('inherit', 'SyncPhone/Music/Workout Music'),
+        // TODO: extract this object like I did with the one above ^^
         {
           name: 'file name checks',
           type: TaskType.FUNCTION,
@@ -415,6 +427,32 @@ function shouldRunForMachine(
   );
 }
 
+// rename files containing '(rename)'
+function renameRenameFiles(machineSpec: MachineSpec, syncDir: string): ConfigTask {
+  return {
+    name: 'remove (rename) from file names',
+    type: TaskType.FUNCTION,
+    machines: machineSpec,
+    function: async () => {
+      const dirPath = path.join(process.env['BASE_SYNC_DIR']!, syncDir);
+      const fileNames = (
+        await fsPromises.readdir(dirPath, {
+          withFileTypes: true,
+        })
+      )
+        .filter((f) => !f.isDirectory())
+        .map((dirent) => dirent.name);
+      for (const fileName of fileNames) {
+        if (/rename/i.test(fileName)) {
+          // remove the ' (rename)' from the file, which I guess will throw if this doesn't work?
+          const newName = fileName.replace(' (rename)', '');
+          await fsPromises.rename(path.join(dirPath, fileName), path.join(dirPath, newName));
+        }
+      }
+    },
+  };
+}
+
 // check the files in the input directory, setting the contextPropName in the context to true on error
 async function fileNameChecks(
   ctx: ListrContext,
@@ -429,7 +467,7 @@ async function fileNameChecks(
     .map((f) => f.name)
     .filter((name) => name !== '.DS_Store');
 
-  const errors = [
+  const fileChecks: FileCheck[] = [
     //   find . | sort | grep -i 'official.*\(video\|audio\)'
     {
       match: (fname: string) => /official.*(video|audio)/i.test(fname),
@@ -462,19 +500,21 @@ async function fileNameChecks(
     },
     // https://www.grammarly.com/blog/capitalization-in-the-titles/
     // (prepositions, articles, and conjunctions are not capitalized)
-    //   find . | sort | grep ' \(Of\|A\|And\|To\|The\|For\|Or\|In\|On\) '
+    //   find . | sort | grep ' \(Of\|A\|And\|To\|The\|For\|Or\|In\|On\|Out\|Up\) '
     {
       match: (fname: string) =>
-        fname.split('-').some((part) => / (Of|A|And|To|The|For|Or|In|On) /.test(part.trim())),
-      errorMsg: (numFiles: number) => `${numFiles} Of/A/And/To/The/For/Or/In/On`,
+        fname
+          .split('-')
+          .some((part) => / (Of|A|And|To|The|For|Or|In|On|Out|Up) /.test(part.trim())),
+      errorMsg: (numFiles: number) => `${numFiles} Of/A/And/To/The/For/Or/In/On/Out/Up`,
     },
     {
       match: (fname: string) => fname.split(' ').some((word) => /^[A-Z]{2,}$/.test(word)),
       errorMsg: (numFiles: number) => `${numFiles} all caps`,
     },
-    //   find . | sort | grep -v "-"
+    //   find . | sort | grep -v " - "
     {
-      match: (fname: string) => !/-/.test(fname),
+      match: (fname: string) => !/ - /.test(fname),
       errorMsg: (numFiles: number) => `${numFiles} no dashes`,
     },
     //   find . | sort | grep -i 'best quality'
@@ -482,8 +522,15 @@ async function fileNameChecks(
       match: (fname: string) => /best quality/i.test(fname),
       errorMsg: (numFiles: number) => `${numFiles} best quality`,
     },
-  ]
-    .map((check) => {
+    //   find . | sort | grep '  '
+    {
+      match: (fname: string) => /  /.test(fname),
+      errorMsg: (numFiles: number) => `${numFiles} extra spaces`,
+    },
+  ];
+
+  const errors = fileChecks
+    .map((check: FileCheck) => {
       const numMatchingFiles = fileNames.filter(check.match).length;
       if (numMatchingFiles > 0) {
         return check.errorMsg(numMatchingFiles);
