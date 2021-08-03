@@ -117,9 +117,11 @@ interface RepoUpdateTask {
   name: string;
   type: TaskType.REPO_UPDATE;
   machines: MachineSpec;
-  // TODO: this should be a list of params/options, not a function
-  function: (ctx?: ListrContext) => void | ListrTaskResult<any>;
+  directory: string;
+  options: RepoOptions[];
 }
+
+type RepoOptions = 'pull&rebase' | 'push' | 'yarn';
 
 // machine names map to the keys of this object
 // (so that adding a task is easy, because it's done often,
@@ -361,44 +363,48 @@ const config: Config = {
       },
     },
 
-    // TODO: homebrew stuff for work laptop
+    // TODO: homebrew and engtools stuff for work machines
 
     // update repositories
     {
       name: 'Update repositories',
       type: TaskType.GROUP,
-      machines: ['homeLaptop', 'workLaptop'],
+      machines: ['homeLaptop', 'workLaptop', 'workVM'],
       tasks: [
         {
           name: 'dotfiles',
           type: TaskType.REPO_UPDATE,
-          machines: ['homeLaptop', 'workLaptop'],
-          // TODO: these will not be functions, should be list of options
-          function: async () => {},
+          machines: ['homeLaptop', 'workLaptop', 'workVM'],
+          directory: path.join(os.homedir(), 'src/gh/dotfiles'),
+          options: ['pull&rebase', 'push', 'yarn'],
         },
         {
           name: 'badash',
           type: TaskType.REPO_UPDATE,
-          machines: ['homeLaptop', 'workLaptop'],
-          function: async () => {},
+          machines: ['homeLaptop', 'workLaptop', 'workVM'],
+          directory: '/usr/local/lib/badash/',
+          options: ['pull&rebase'],
         },
         {
           name: 'voyager-web',
           type: TaskType.REPO_UPDATE,
-          machines: ['workLaptop'],
-          function: async () => {},
+          machines: ['workLaptop', 'workVM'],
+          directory: path.join(os.homedir(), 'src/li/voyager-web'),
+          options: ['pull&rebase'],
         },
         {
           name: 'work blog',
           type: TaskType.REPO_UPDATE,
           machines: ['workLaptop'],
-          function: async () => {},
+          directory: path.join(os.homedir(), 'src/li/blog'),
+          options: ['pull&rebase'],
         },
         {
-          name: 'NADP',
+          name: 'node-acid-data-producers',
           type: TaskType.REPO_UPDATE,
           machines: ['workLaptop'],
-          function: async () => {},
+          directory: path.join(os.homedir(), 'src/li/node-acid-data-producers'),
+          options: ['pull&rebase'],
         },
       ],
     },
@@ -468,6 +474,128 @@ async function isVoltaPackageInstalled(name: string): Promise<boolean> {
     return false;
   }
   return true;
+}
+
+async function repoTask(directory: string, options: RepoOptions[]): Promise<void> {
+  // what is the default branch for the repo?
+  const defaultBranch = await getRepoDefaultBranch(directory);
+
+  // save current branch
+  const originalBranch = await currentGitBranch(directory);
+  try {
+    // run these tasks on the default branch
+    if (originalBranch !== defaultBranch) {
+      await gitCheckout(directory, defaultBranch);
+    }
+
+    // do things based on the options
+    // (using contains should be fine here, these options are <5 things)
+    if (options.includes('pull&rebase')) {
+      await gitPullRebase(directory, defaultBranch);
+    }
+    if (options.includes('push')) {
+      await gitPush(directory);
+    }
+    if (options.includes('yarn')) {
+      await yarnInstall(directory);
+    }
+  } finally {
+    // try to get back to the original branch
+    if (originalBranch !== defaultBranch) {
+      await gitCheckout(directory, originalBranch);
+    }
+  }
+}
+
+// is the default branch main or master?
+async function getRepoDefaultBranch(directory: string): Promise<string> {
+  // check if repo uses main or master
+  try {
+    await execa('git', ['show-ref', '--verify', '--quiet', 'refs/heads/main'], { cwd: directory });
+    return 'main';
+  } catch {
+    // not main
+  }
+  try {
+    await execa('git', ['show-ref', '--verify', '--quiet', 'refs/heads/master'], {
+      cwd: directory,
+    });
+    return 'master';
+  } catch {
+    // not master either
+  }
+  throw new Error("default branch is not 'main' or 'master'");
+}
+
+async function currentGitBranch(directory: string): Promise<string> {
+  try {
+    const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+      cwd: directory,
+    });
+    return stdout.trim();
+  } catch (err) {
+    // short message is not helpful (just shows command failed), but stderr has useful info
+    const msg = err.stderr
+      .split('\n')
+      .map((s: string) => s.trim())
+      .join(' ');
+    throw new Error(`Error getting current branch: ${msg}`);
+  }
+}
+
+async function gitCheckout(directory: string, branch: string): Promise<void> {
+  try {
+    const { stdout } = await execa('git', ['checkout', branch], {
+      cwd: directory,
+    });
+  } catch (err) {
+    // short message is not helpful (just shows command failed), but stderr has useful info
+    const msg = err.stderr
+      .split('\n')
+      .map((s: string) => s.trim())
+      .join(' ');
+    throw new Error(`Error checking out branch ${branch}: ${msg}`);
+  }
+}
+
+async function gitPullRebase(directory: string, branch: string): Promise<void> {
+  try {
+    await execa('git', ['fetch', '--all', '--prune'], { cwd: directory });
+    await execa('git', ['rebase', `origin/${branch}`], { cwd: directory });
+  } catch (err) {
+    // short message is not helpful (just shows command failed), but stderr has useful info
+    const msg = err.stderr
+      .split('\n')
+      .map((s: string) => s.trim())
+      .join(' ');
+    throw new Error(`Error pulling and rebasing branch ${branch}: ${msg}`);
+  }
+}
+
+async function gitPush(directory: string): Promise<void> {
+  try {
+    await execa('git', ['push'], { cwd: directory });
+  } catch (err) {
+    // short message is not helpful (just shows command failed), but stderr has useful info
+    const msg = err.stderr
+      .split('\n')
+      .map((s: string) => s.trim())
+      .join(' ');
+    throw new Error(`Error pushing: ${msg}`);
+  }
+}
+
+async function yarnInstall(directory: string): Promise<void> {
+  try {
+    await execa('yarn', ['install'], { cwd: directory });
+  } catch (err) {
+    // short message is not helpful (just shows command failed), but stderr has useful info
+    const msg = err.stderr
+      .split('\n')
+      .map((s: string) => s.trim())
+      .join(' ');
+    throw new Error(`Error running 'yarn install': ${msg}`);
+  }
 }
 
 // should this task run on this machine?
@@ -704,8 +832,7 @@ function configTaskToListrTask(
       return {
         title: task.name,
         enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
-        // TODO: this should actually be different, params instead of a function
-        task: task.function,
+        task: () => repoTask(task.directory, task.options),
       };
   }
 }

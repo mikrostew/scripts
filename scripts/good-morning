@@ -86,26 +86,26 @@ then
   good-morning-tasks.ts
 fi
 
-if [ "$machine" == "Home Laptop" ]
-then
-  # OSS repos
-
-  echo "Dotfiles"
-  # TODO: check that directory exists
-  cd "$HOME/src/gh/dotfiles/"
-  # pull, rebase, push to sync anything I've changed recently
-  # and install any updated dependencies
-  gpr && gp && cd scripts/ && @wait-for-command yarn install
-  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
-  (( total_tasks++ ))
-
-  echo "Badash"
-  cd "/usr/local/lib/badash/"
-  # just pull and rebase, to stay current with master
-  gpr
-  if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
-  (( total_tasks++ ))
-fi
+# if [ "$machine" == "Home Laptop" ]
+# then
+#   # OSS repos
+#
+#   echo "Dotfiles"
+#   # TODO: check that directory exists
+#   cd "$HOME/src/gh/dotfiles/"
+#   # pull, rebase, push to sync anything I've changed recently
+#   # and install any updated dependencies
+#   gpr && gp && cd scripts/ && @wait-for-command yarn install
+#   if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
+#   (( total_tasks++ ))
+#
+#   echo "Badash"
+#   cd "/usr/local/lib/badash/"
+#   # just pull and rebase, to stay current with master
+#   gpr
+#   if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
+#   (( total_tasks++ ))
+# fi
 
 if [[ "$machine" =~ Work ]]
 then
@@ -148,87 +148,87 @@ then
   # OSS repos
   # (because git is routed over the VPN, ugh)
 
-  echo "Dotfiles"
-  cd "$HOME/src/gh/dotfiles/"
-  # pull, rebase, push to sync anything I've changed recently
-  # and install any updated dependencies
-  gpr && gp && cd scripts/ && @wait-for-command yarn install
-  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
-  (( total_tasks++ ))
+  # echo "Dotfiles"
+  # cd "$HOME/src/gh/dotfiles/"
+  # # pull, rebase, push to sync anything I've changed recently
+  # # and install any updated dependencies
+  # gpr && gp && cd scripts/ && @wait-for-command yarn install
+  # if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
+  # (( total_tasks++ ))
 
-  echo "Badash"
-  cd "/usr/local/lib/badash/"
-  # just pull and rebase, to stay current with master
-  gpr
-  if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
-  (( total_tasks++ ))
+  # echo "Badash"
+  # cd "/usr/local/lib/badash/"
+  # # just pull and rebase, to stay current with master
+  # gpr
+  # if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
+  # (( total_tasks++ ))
 
-  # LI repos
+  # # LI repos
 
-  echo "Voyager Web"
-  cd "$HOME/src/li/voyager-web_trunk/"
-  # if not on the master branch, checkout master, pull, and rebase
-  # TODO: figure out the default branch name
-  branch_name="$(current_git_branch)"
-  # TODO: check for "main" as well?
-  if [ "$branch_name" != "master" ]; then
-    gc master
-    # pull and rebase from master
-    gpr
-    if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
-    (( total_tasks++ ))
-    # go back to the original branch
-    gc "$branch_name"
-  else
-    # otherwise, we are on master, so just pull and rebase
-    gpr
-    if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
-    (( total_tasks++ ))
-  fi
+  # echo "Voyager Web"
+  # cd "$HOME/src/li/voyager-web_trunk/"
+  # # if not on the master branch, checkout master, pull, and rebase
+  # # TODO: figure out the default branch name
+  # branch_name="$(current_git_branch)"
+  # # TODO: check for "main" as well?
+  # if [ "$branch_name" != "master" ]; then
+  #   gc master
+  #   # pull and rebase from master
+  #   gpr
+  #   if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
+  #   (( total_tasks++ ))
+  #   # go back to the original branch
+  #   gc "$branch_name"
+  # else
+  #   # otherwise, we are on master, so just pull and rebase
+  #   gpr
+  #   if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
+  #   (( total_tasks++ ))
+  # fi
 
-  echo "Blog"
+  # echo "Blog"
 
-  cd "$HOME/src/li/blog/"
-  # if not on the master branch, checkout master, pull, and rebase
-  # TODO: figure out the default branch name
-  branch_name="$(current_git_branch)"
-  # TODO: check for "main" as well?
-  if [ "$branch_name" != "master" ]; then
-    gc master
-    # pull and rebase from master
-    gpr
-    if [ "$?" != 0 ]; then errors+=('blog - pull and rebase'); fi
-    (( total_tasks++ ))
-    # go back to the original branch
-    gc "$branch_name"
-  else
-    # otherwise, we are on master, so just pull and rebase
-    gpr
-    if [ "$?" != 0 ]; then errors+=('blog - pull and rebase'); fi
-    (( total_tasks++ ))
-  fi
+  # cd "$HOME/src/li/blog/"
+  # # if not on the master branch, checkout master, pull, and rebase
+  # # TODO: figure out the default branch name
+  # branch_name="$(current_git_branch)"
+  # # TODO: check for "main" as well?
+  # if [ "$branch_name" != "master" ]; then
+  #   gc master
+  #   # pull and rebase from master
+  #   gpr
+  #   if [ "$?" != 0 ]; then errors+=('blog - pull and rebase'); fi
+  #   (( total_tasks++ ))
+  #   # go back to the original branch
+  #   gc "$branch_name"
+  # else
+  #   # otherwise, we are on master, so just pull and rebase
+  #   gpr
+  #   if [ "$?" != 0 ]; then errors+=('blog - pull and rebase'); fi
+  #   (( total_tasks++ ))
+  # fi
 
-  echo "NADP"
+  # echo "NADP"
 
-  cd "$HOME/src/li/node-acid-data-producers/"
-  # if not on the master branch, checkout master, pull, and rebase
-  # TODO: figure out the default branch name
-  branch_name="$(current_git_branch)"
-  # TODO: check for "main" as well?
-  if [ "$branch_name" != "master" ]; then
-    gc master
-    # pull and rebase from master
-    gpr
-    if [ "$?" != 0 ]; then errors+=('node-acid-data-producers - pull and rebase'); fi
-    (( total_tasks++ ))
-    # go back to the original branch
-    gc "$branch_name"
-  else
-    # otherwise, we are on master, so just pull and rebase
-    gpr
-    if [ "$?" != 0 ]; then errors+=('node-acid-data-producers - pull and rebase'); fi
-    (( total_tasks++ ))
-  fi
+  # cd "$HOME/src/li/node-acid-data-producers/"
+  # # if not on the master branch, checkout master, pull, and rebase
+  # # TODO: figure out the default branch name
+  # branch_name="$(current_git_branch)"
+  # # TODO: check for "main" as well?
+  # if [ "$branch_name" != "master" ]; then
+  #   gc master
+  #   # pull and rebase from master
+  #   gpr
+  #   if [ "$?" != 0 ]; then errors+=('node-acid-data-producers - pull and rebase'); fi
+  #   (( total_tasks++ ))
+  #   # go back to the original branch
+  #   gc "$branch_name"
+  # else
+  #   # otherwise, we are on master, so just pull and rebase
+  #   gpr
+  #   if [ "$?" != 0 ]; then errors+=('node-acid-data-producers - pull and rebase'); fi
+  #   (( total_tasks++ ))
+  # fi
 
   # add any additional work repos here...
 
@@ -247,43 +247,43 @@ then
 
   # OSS repos
 
-  echo "Dotfiles"
-  cd "$HOME/src/gh/dotfiles/"
-  # pull, rebase, push to sync anything I've changed recently
-  # and install any updated dependencies
-  gpr && gp && cd scripts/ && @wait-for-command yarn install
-  if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
-  (( total_tasks++ ))
+  # echo "Dotfiles"
+  # cd "$HOME/src/gh/dotfiles/"
+  # # pull, rebase, push to sync anything I've changed recently
+  # # and install any updated dependencies
+  # gpr && gp && cd scripts/ && @wait-for-command yarn install
+  # if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
+  # (( total_tasks++ ))
 
-  echo "Badash"
-  cd "/usr/local/lib/badash/"
-  # just pull and rebase, to stay current with master
-  gpr
-  if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
-  (( total_tasks++ ))
+  # echo "Badash"
+  # cd "/usr/local/lib/badash/"
+  # # just pull and rebase, to stay current with master
+  # gpr
+  # if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
+  # (( total_tasks++ ))
 
-  # LI repos
+  # # LI repos
 
-  echo "Voyager Web"
-  cd "$HOME/src/li/voyager-web_trunk/"
-  # if not on the master branch, checkout master, pull, and rebase
-  # TODO: figure out the default branch name
-  branch_name="$(current_git_branch)"
-  # TODO: check for "main" as well?
-  if [ "$branch_name" != "master" ]; then
-    gc master
-    # pull and rebase from master
-    gpr
-    if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
-    (( total_tasks++ ))
-    # go back to the original branch
-    gc "$branch_name"
-  else
-    # otherwise, we are on master, so just pull and rebase
-    gpr
-    if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
-    (( total_tasks++ ))
-  fi
+  # echo "Voyager Web"
+  # cd "$HOME/src/li/voyager-web_trunk/"
+  # # if not on the master branch, checkout master, pull, and rebase
+  # # TODO: figure out the default branch name
+  # branch_name="$(current_git_branch)"
+  # # TODO: check for "main" as well?
+  # if [ "$branch_name" != "master" ]; then
+  #   gc master
+  #   # pull and rebase from master
+  #   gpr
+  #   if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
+  #   (( total_tasks++ ))
+  #   # go back to the original branch
+  #   gc "$branch_name"
+  # else
+  #   # otherwise, we are on master, so just pull and rebase
+  #   gpr
+  #   if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
+  #   (( total_tasks++ ))
+  # fi
 fi
 
 
