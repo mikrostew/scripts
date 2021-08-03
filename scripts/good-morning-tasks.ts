@@ -22,6 +22,7 @@ enum TaskType {
   EXEC_AND_SAVE = 'exec-and-save',
   GROUP = 'group',
   FUNCTION = 'function',
+  REPO_UPDATE = 'repo-update',
 }
 
 interface Config {
@@ -45,7 +46,8 @@ type ConfigTask =
   | ExecTask
   | ExecAndSaveTask
   | TaskGroup
-  | FunctionTask;
+  | FunctionTask
+  | RepoUpdateTask;
 
 interface KillProcessTask {
   name: string;
@@ -107,6 +109,15 @@ interface FunctionTask {
   name: string;
   type: TaskType.FUNCTION;
   machines: MachineSpec;
+  function: (ctx?: ListrContext) => void | ListrTaskResult<any>;
+}
+
+// update a repository
+interface RepoUpdateTask {
+  name: string;
+  type: TaskType.REPO_UPDATE;
+  machines: MachineSpec;
+  // TODO: this should be a list of params/options, not a function
   function: (ctx?: ListrContext) => void | ListrTaskResult<any>;
 }
 
@@ -305,6 +316,8 @@ const config: Config = {
     // TODO: check that rpi is connected using syncthing API
     // TODO: check that syncthing is not paused, using the API
 
+    // TODO: cleanup shivs
+
     {
       name: 'Free space check',
       type: TaskType.FUNCTION,
@@ -346,6 +359,48 @@ const config: Config = {
           }
         }
       },
+    },
+
+    // TODO: homebrew stuff for work laptop
+
+    // update repositories
+    {
+      name: 'Update repositories',
+      type: TaskType.GROUP,
+      machines: ['homeLaptop', 'workLaptop'],
+      tasks: [
+        {
+          name: 'dotfiles',
+          type: TaskType.REPO_UPDATE,
+          machines: ['homeLaptop', 'workLaptop'],
+          // TODO: these will not be functions, should be list of options
+          function: async () => {},
+        },
+        {
+          name: 'badash',
+          type: TaskType.REPO_UPDATE,
+          machines: ['homeLaptop', 'workLaptop'],
+          function: async () => {},
+        },
+        {
+          name: 'voyager-web',
+          type: TaskType.REPO_UPDATE,
+          machines: ['workLaptop'],
+          function: async () => {},
+        },
+        {
+          name: 'work blog',
+          type: TaskType.REPO_UPDATE,
+          machines: ['workLaptop'],
+          function: async () => {},
+        },
+        {
+          name: 'NADP',
+          type: TaskType.REPO_UPDATE,
+          machines: ['workLaptop'],
+          function: async () => {},
+        },
+      ],
     },
   ],
 };
@@ -537,6 +592,7 @@ async function fileNameChecks(
     .map((check: FileCheck) => {
       const numMatchingFiles = fileNames.filter(check.match).length;
       if (numMatchingFiles > 0) {
+        // TODO: open a terminal and run one of the find/grep combos above to show the files
         return check.errorMsg(numMatchingFiles);
       }
     })
@@ -642,6 +698,13 @@ function configTaskToListrTask(
       return {
         title: task.name,
         enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
+        task: task.function,
+      };
+    case TaskType.REPO_UPDATE:
+      return {
+        title: task.name,
+        enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
+        // TODO: this should actually be different, params instead of a function
         task: task.function,
       };
   }
