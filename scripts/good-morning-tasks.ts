@@ -500,12 +500,16 @@ async function fileNameChecks(
     },
     // https://www.grammarly.com/blog/capitalization-in-the-titles/
     // (prepositions, articles, and conjunctions are not capitalized)
-    //   find . | sort | grep ' \(Of\|A\|And\|To\|The\|For\|Or\|In\|On\|Out\|Up\) '
+    //   find . | sort | grep -v 'The A' | grep '[^-] \(Of\|A\|And\|To\|The\|For\|Or\|In\|On\|Out\|Up\) '
     {
       match: (fname: string) =>
         fname
           .split('-')
-          .some((part) => / (Of|A|And|To|The|For|Or|In|On|Out|Up) /.test(part.trim())),
+          .some(
+            (part) =>
+              / (Of|A|And|To|The|For|Or|In|On|Out|Up) /.test(part.trim()) &&
+              !/The A/.test(part.trim())
+          ),
       errorMsg: (numFiles: number) => `${numFiles} Of/A/And/To/The/For/Or/In/On/Out/Up`,
     },
     {
