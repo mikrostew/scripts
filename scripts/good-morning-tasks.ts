@@ -134,8 +134,8 @@ interface MachineMatchConfig {
 interface FileCheck {
   // TODO: simplify this to just be string | RegExp, and I can construct the function based on type
   match: (fileName: string) => boolean;
-  // TODO: this could be a string with placeholder instead, like "{} bad characters" (kinda like Rust)
-  errorMsg: (numFiles: number) => string;
+  // string with '{}' placeholder, like "{} bad characters" (like what Rust does)
+  errorMsg: `${any}{}${any}`;
 }
 
 // TODO: read config file for this? it's starting to get complicated to have in a file tho...
@@ -654,32 +654,32 @@ async function fileNameChecks(
     //   find . | sort | grep -i 'official.*\(video\|audio\)'
     {
       match: (fname: string) => /official.*(video|audio)/i.test(fname),
-      errorMsg: (numFiles: number) => `${numFiles} official/audio/video`,
+      errorMsg: '{} official/audio/video',
     },
     //   find . | sort | grep -i 'rename'
     {
       match: (fname: string) => /rename/i.test(fname),
-      errorMsg: (numFiles: number) => `${numFiles} (rename)`,
+      errorMsg: '{} (rename)',
     },
     //   find . | sort | grep -i 'remix'
     {
       match: (fname: string) => /remix/i.test(fname),
-      errorMsg: (numFiles: number) => `${numFiles} remix`,
+      errorMsg: '{} remix',
     },
     //   find . | sort | grep -i 'lyric'
     {
       match: (fname: string) => /lyric/i.test(fname),
-      errorMsg: (numFiles: number) => `${numFiles} lyric`,
+      errorMsg: '{} lyric',
     },
     //   find . | sort | grep -i 'visuali[sz]er'
     {
       match: (fname: string) => /visuali[sz]er/i.test(fname),
-      errorMsg: (numFiles: number) => `${numFiles} visualizer`,
+      errorMsg: '{} visualizer',
     },
     //   find . | sort | grep -i 'hq'
     {
       match: (fname: string) => /hq/i.test(fname),
-      errorMsg: (numFiles: number) => `${numFiles} hq`,
+      errorMsg: '{} hq',
     },
     // https://www.grammarly.com/blog/capitalization-in-the-titles/
     // (prepositions, articles, and conjunctions are not capitalized)
@@ -693,26 +693,26 @@ async function fileNameChecks(
               / (Of|A|And|To|The|For|Or|In|On|Out|Up) /.test(part.trim()) &&
               !/The A/.test(part.trim())
           ),
-      errorMsg: (numFiles: number) => `${numFiles} Of/A/And/To/The/For/Or/In/On/Out/Up`,
+      errorMsg: '{} Of/A/And/To/The/For/Or/In/On/Out/Up',
     },
     {
       match: (fname: string) => fname.split(' ').some((word) => /^[A-Z]{2,}$/.test(word)),
-      errorMsg: (numFiles: number) => `${numFiles} all caps`,
+      errorMsg: '{} all caps',
     },
     //   find . | sort | grep -v " - "
     {
       match: (fname: string) => !/ - /.test(fname),
-      errorMsg: (numFiles: number) => `${numFiles} no dashes`,
+      errorMsg: '{} no dashes',
     },
     //   find . | sort | grep -i 'best quality'
     {
       match: (fname: string) => /best quality/i.test(fname),
-      errorMsg: (numFiles: number) => `${numFiles} best quality`,
+      errorMsg: '{} best quality',
     },
     //   find . | sort | grep '  '
     {
       match: (fname: string) => /  /.test(fname),
-      errorMsg: (numFiles: number) => `${numFiles} extra spaces`,
+      errorMsg: '{} extra spaces',
     },
   ];
 
@@ -721,7 +721,7 @@ async function fileNameChecks(
       const numMatchingFiles = fileNames.filter(check.match).length;
       if (numMatchingFiles > 0) {
         // TODO: open a terminal and run one of the find/grep combos above to show the files
-        return check.errorMsg(numMatchingFiles);
+        return check.errorMsg.replace('{}', `${numMatchingFiles}`);
       }
     })
     .filter((error) => error !== undefined);
