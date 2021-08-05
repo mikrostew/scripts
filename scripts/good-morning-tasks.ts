@@ -1,5 +1,8 @@
 #!/usr/bin/env ts-node
 
+// TODO: split this file up, since it's starting to get large and unwieldy
+// (maybe in its own repo?)
+
 import { promises as fsPromises } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -132,10 +135,11 @@ interface MachineMatchConfig {
 
 // for checking file names
 interface FileCheck {
-  // TODO: simplify this to just be string | RegExp, and I can construct the function based on type
-  match: (fileName: string) => boolean;
+  // I could maybe simplify this to just be string | RegExp, but that' not expressive enough
+  match: ((fileName: string) => boolean) | RegExp | string;
   // string with '{}' placeholder, like "{} bad characters" (like what Rust does)
   errorMsg: `${any}{}${any}`;
+  // TODO: some way to list the failed files on the command line, maybe a command string?
 }
 
 // TODO: read config file for this? it's starting to get complicated to have in a file tho...
@@ -653,32 +657,32 @@ async function fileNameChecks(
   const fileChecks: FileCheck[] = [
     //   find . | sort | grep -i 'official.*\(video\|audio\)'
     {
-      match: (fname: string) => /official.*(video|audio)/i.test(fname),
-      errorMsg: '{} official/audio/video',
+      match: /official.*(video|audio)/i,
+      errorMsg: '{} official audio/video',
     },
     //   find . | sort | grep -i 'rename'
     {
-      match: (fname: string) => /rename/i.test(fname),
+      match: /rename/i,
       errorMsg: '{} (rename)',
     },
     //   find . | sort | grep -i 'remix'
     {
-      match: (fname: string) => /remix/i.test(fname),
+      match: /remix/i,
       errorMsg: '{} remix',
     },
     //   find . | sort | grep -i 'lyric'
     {
-      match: (fname: string) => /lyric/i.test(fname),
+      match: /lyric/i,
       errorMsg: '{} lyric',
     },
     //   find . | sort | grep -i 'visuali[sz]er'
     {
-      match: (fname: string) => /visuali[sz]er/i.test(fname),
+      match: /visuali[sz]er/i,
       errorMsg: '{} visualizer',
     },
     //   find . | sort | grep -i 'hq'
     {
-      match: (fname: string) => /hq/i.test(fname),
+      match: /hq/i,
       errorMsg: '{} hq',
     },
     // https://www.grammarly.com/blog/capitalization-in-the-titles/
@@ -701,24 +705,40 @@ async function fileNameChecks(
     },
     //   find . | sort | grep -v " - "
     {
+      // could negate this regex with negative look-ahead, like /^(?!.* - )/, but I will definitely forget that syntax
+      // (see https://stackoverflow.com/a/1538524 for instance)
       match: (fname: string) => !/ - /.test(fname),
       errorMsg: '{} no dashes',
     },
     //   find . | sort | grep -i 'best quality'
     {
-      match: (fname: string) => /best quality/i.test(fname),
+      match: /best quality/i,
       errorMsg: '{} best quality',
     },
     //   find . | sort | grep '  '
     {
-      match: (fname: string) => /  /.test(fname),
+      match: '  ',
       errorMsg: '{} extra spaces',
     },
   ];
 
   const errors = fileChecks
     .map((check: FileCheck) => {
-      const numMatchingFiles = fileNames.filter(check.match).length;
+      let numMatchingFiles;
+      // what will we use to match?
+      const howToMatch = check.match;
+      if (typeof howToMatch === 'function') {
+        numMatchingFiles = fileNames.filter(howToMatch).length;
+      } else if (typeof howToMatch === 'string') {
+        numMatchingFiles = fileNames.filter(
+          (fname: string) => fname.indexOf(howToMatch) >= 0
+        ).length;
+      } else if (howToMatch instanceof RegExp) {
+        numMatchingFiles = fileNames.filter((fname: string) => howToMatch.test(fname)).length;
+      } else {
+        throw new Error(`unknown type of file check: ${JSON.stringify(check)}`);
+      }
+
       if (numMatchingFiles > 0) {
         // TODO: open a terminal and run one of the find/grep combos above to show the files
         return check.errorMsg.replace('{}', `${numMatchingFiles}`);
