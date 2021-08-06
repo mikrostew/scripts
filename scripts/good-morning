@@ -83,7 +83,7 @@ then
   fi
 
   # start transitioning tasks here
-  good-morning-tasks.ts
+  good-morning-tasks.ts "$ldap_pass"
 fi
 
 # if [ "$machine" == "Home Laptop" ]

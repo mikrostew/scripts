@@ -93,6 +93,7 @@ interface ExecTask {
 // exec a command and save the output in the configured variable in the context
 interface ExecAndSaveTask {
   type: TaskType.EXEC_AND_SAVE;
+  name: string;
   machines: MachineSpec;
   varName: string;
   command: string;
@@ -142,10 +143,9 @@ interface FileCheck {
   // TODO: some way to list the failed files on the command line, maybe a command string?
 }
 
-// TODO: read config file for this? it's starting to get complicated to have in a file tho...
+// TODO: move this config to a separate file
 const config: Config = {
   environment: {
-    // TODO: provide hostname somehow (if this will be from a config file)
     BASE_SYNC_DIR: /(MacBook-Air|Michaels-Air)/.test(os.hostname())
       ? process.env['HOME']!
       : '/usr/local/SyncThing',
@@ -157,14 +157,25 @@ const config: Config = {
   },
   tasks: [
     // for the work laptop, need to get the password first (if it is not passed in as an argument)
-    // TODO: enable this once I have other tasks that need it
-    // {
-    //   type: TaskType.EXEC_AND_SAVE,
-    //   machines: ['workLaptop'],
-    //   varName: 'ldap_pass',
-    //   command: 'security',
-    //   args: ['find-generic-password', '-ga', 'ldap_pass', '-w'],
-    // },
+    {
+      type: TaskType.FUNCTION,
+      name: 'Save LDAP password',
+      machines: ['workLaptop'],
+      function: async (ctx) => {
+        // try to get it from the input arg, otherwise prompt
+        if (process.env['LDAP_PASS'] !== undefined && process.env['LDAP_PASS'] !== '') {
+          ctx['ldap_pass'] = process.env['LDAP_PASS'];
+        } else {
+          const { stdout } = await execa('security', [
+            'find-generic-password',
+            '-ga',
+            'ldap_pass',
+            '-w',
+          ]);
+          ctx['ldap_pass'] = stdout.trim();
+        }
+      },
+    },
 
     {
       name: 'Kill processes (all laptops)',
@@ -822,7 +833,7 @@ function configTaskToListrTask(
       };
     case TaskType.EXEC_AND_SAVE:
       return {
-        title: `Save '${task.command} ${task.args}' to ${task.varName}`,
+        title: task.name,
         enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
         // execa the command and save the output
         task: async (ctx) => {
@@ -857,7 +868,10 @@ function configTaskToListrTask(
   }
 }
 
-// TODO: input ldap_pass as an argument to this script
+// input ldap_pass as an optional argument to this script
+const args = process.argv.slice(2);
+const ldapPass = args[0];
+process.env['LDAP_PASS'] = ldapPass;
 
 // this machine's name
 const machineName = os.hostname();
