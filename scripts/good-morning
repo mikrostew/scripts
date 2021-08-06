@@ -1,17 +1,6 @@
 #!/usr/bin/env badash
 # Automatically do things that I use to do manually every morning
 
-# TODO: instead of hardcoding a bunch of if's here, use a config
-# could `source` a config file with just vars...
-# https://askubuntu.com/questions/743493/best-way-to-read-a-config-file-in-bash
-# or use something like `jq` for a JSON config
-# https://unix.stackexchange.com/questions/175648/use-config-file-for-my-shell-script
-# (or there is `yq` for YAML, so I get comments ¯\_(ツ)_/¯)
-# https://github.com/mikefarah/yq  (brew install yq)
-#
-# OR, just use a different language that can handle YAML/JSON/whatever much better...
-# that ^^^
-
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -86,27 +75,6 @@ then
   good-morning-tasks.ts "$ldap_pass"
 fi
 
-# if [ "$machine" == "Home Laptop" ]
-# then
-#   # OSS repos
-#
-#   echo "Dotfiles"
-#   # TODO: check that directory exists
-#   cd "$HOME/src/gh/dotfiles/"
-#   # pull, rebase, push to sync anything I've changed recently
-#   # and install any updated dependencies
-#   gpr && gp && cd scripts/ && @wait-for-command yarn install
-#   if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
-#   (( total_tasks++ ))
-#
-#   echo "Badash"
-#   cd "/usr/local/lib/badash/"
-#   # just pull and rebase, to stay current with master
-#   gpr
-#   if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
-#   (( total_tasks++ ))
-# fi
-
 if [[ "$machine" =~ Work ]]
 then
   echo "Cleanup shivs"
@@ -119,8 +87,6 @@ fi
 
 if [ "$machine" == "Work Laptop" ]
 then
-  # TODO: move all this stuff to the listr tasks
-
   # check that I am connected to VPN, and pause & wait for keypress
   if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
   then
@@ -145,93 +111,6 @@ then
   if [ "$?" != 0 ]; then errors+=('brew engtools install'); fi
   (( total_tasks++ ))
 
-  # OSS repos
-  # (because git is routed over the VPN, ugh)
-
-  # echo "Dotfiles"
-  # cd "$HOME/src/gh/dotfiles/"
-  # # pull, rebase, push to sync anything I've changed recently
-  # # and install any updated dependencies
-  # gpr && gp && cd scripts/ && @wait-for-command yarn install
-  # if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
-  # (( total_tasks++ ))
-
-  # echo "Badash"
-  # cd "/usr/local/lib/badash/"
-  # # just pull and rebase, to stay current with master
-  # gpr
-  # if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
-  # (( total_tasks++ ))
-
-  # # LI repos
-
-  # echo "Voyager Web"
-  # cd "$HOME/src/li/voyager-web_trunk/"
-  # # if not on the master branch, checkout master, pull, and rebase
-  # # TODO: figure out the default branch name
-  # branch_name="$(current_git_branch)"
-  # # TODO: check for "main" as well?
-  # if [ "$branch_name" != "master" ]; then
-  #   gc master
-  #   # pull and rebase from master
-  #   gpr
-  #   if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
-  #   (( total_tasks++ ))
-  #   # go back to the original branch
-  #   gc "$branch_name"
-  # else
-  #   # otherwise, we are on master, so just pull and rebase
-  #   gpr
-  #   if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
-  #   (( total_tasks++ ))
-  # fi
-
-  # echo "Blog"
-
-  # cd "$HOME/src/li/blog/"
-  # # if not on the master branch, checkout master, pull, and rebase
-  # # TODO: figure out the default branch name
-  # branch_name="$(current_git_branch)"
-  # # TODO: check for "main" as well?
-  # if [ "$branch_name" != "master" ]; then
-  #   gc master
-  #   # pull and rebase from master
-  #   gpr
-  #   if [ "$?" != 0 ]; then errors+=('blog - pull and rebase'); fi
-  #   (( total_tasks++ ))
-  #   # go back to the original branch
-  #   gc "$branch_name"
-  # else
-  #   # otherwise, we are on master, so just pull and rebase
-  #   gpr
-  #   if [ "$?" != 0 ]; then errors+=('blog - pull and rebase'); fi
-  #   (( total_tasks++ ))
-  # fi
-
-  # echo "NADP"
-
-  # cd "$HOME/src/li/node-acid-data-producers/"
-  # # if not on the master branch, checkout master, pull, and rebase
-  # # TODO: figure out the default branch name
-  # branch_name="$(current_git_branch)"
-  # # TODO: check for "main" as well?
-  # if [ "$branch_name" != "master" ]; then
-  #   gc master
-  #   # pull and rebase from master
-  #   gpr
-  #   if [ "$?" != 0 ]; then errors+=('node-acid-data-producers - pull and rebase'); fi
-  #   (( total_tasks++ ))
-  #   # go back to the original branch
-  #   gc "$branch_name"
-  # else
-  #   # otherwise, we are on master, so just pull and rebase
-  #   gpr
-  #   if [ "$?" != 0 ]; then errors+=('node-acid-data-producers - pull and rebase'); fi
-  #   (( total_tasks++ ))
-  # fi
-
-  # add any additional work repos here...
-
   # list of blog post ideas, and posts I'm working on
   open https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit#
 fi
@@ -244,46 +123,6 @@ then
   sudo yum install usr-local-linkedin-dist
   if [ "$?" != 0 ]; then errors+=('yum install usr-local-linkedin-dist'); fi
   (( total_tasks++ ))
-
-  # OSS repos
-
-  # echo "Dotfiles"
-  # cd "$HOME/src/gh/dotfiles/"
-  # # pull, rebase, push to sync anything I've changed recently
-  # # and install any updated dependencies
-  # gpr && gp && cd scripts/ && @wait-for-command yarn install
-  # if [ "$?" != 0 ]; then errors+=('dotfiles - pull, rebase, push, install deps'); fi
-  # (( total_tasks++ ))
-
-  # echo "Badash"
-  # cd "/usr/local/lib/badash/"
-  # # just pull and rebase, to stay current with master
-  # gpr
-  # if [ "$?" != 0 ]; then errors+=('badash - pull and rebase'); fi
-  # (( total_tasks++ ))
-
-  # # LI repos
-
-  # echo "Voyager Web"
-  # cd "$HOME/src/li/voyager-web_trunk/"
-  # # if not on the master branch, checkout master, pull, and rebase
-  # # TODO: figure out the default branch name
-  # branch_name="$(current_git_branch)"
-  # # TODO: check for "main" as well?
-  # if [ "$branch_name" != "master" ]; then
-  #   gc master
-  #   # pull and rebase from master
-  #   gpr
-  #   if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
-  #   (( total_tasks++ ))
-  #   # go back to the original branch
-  #   gc "$branch_name"
-  # else
-  #   # otherwise, we are on master, so just pull and rebase
-  #   gpr
-  #   if [ "$?" != 0 ]; then errors+=('voyager-web - pull and rebase'); fi
-  #   (( total_tasks++ ))
-  # fi
 fi
 
 
@@ -352,10 +191,3 @@ fi
 echo_ack ""
 echo_ack "Good Morning!"
 echo_ack ""
-# if [ "$machine" == "Work Laptop" ]
-# then
-#   imgcat /usr/local/SyncThing/SyncImages/coffee.jpg
-# elif [ "$machine" == "Home Laptop" ]
-# then
-#   imgcat "$HOME/SyncImages/coffee.jpg"
-# fi
