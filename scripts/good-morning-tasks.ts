@@ -178,18 +178,26 @@ const config: Config = {
     },
 
     {
-      name: 'Kill processes (all laptops)',
-      type: TaskType.KILL_PROC,
-      // things to kill on both laptops
-      machines: ['homeLaptop', 'workLaptop'],
-      processes: ['Activity Monitor', 'zoom.us', 'App Store', 'Discord', 'Microsoft Word'],
+      name: 'Kill Processes',
+      type: TaskType.GROUP,
+      machines: ['homeLaptop', 'workLaptop', 'workVM'],
+      tasks: [
+        {
+          name: 'all laptops',
+          type: TaskType.KILL_PROC,
+          // things to kill on both laptops
+          machines: ['homeLaptop', 'workLaptop'],
+          processes: ['Activity Monitor', 'zoom.us', 'App Store', 'Discord', 'Microsoft Word'],
+        },
+        {
+          name: 'work laptop',
+          type: TaskType.KILL_PROC,
+          machines: ['workLaptop'],
+          processes: ['Outlook', 'Microsoft Error Reporting', 'Slack', 'Microsoft Teams'],
+        },
+      ],
     },
-    {
-      name: 'Kill processes (work laptop)',
-      type: TaskType.KILL_PROC,
-      machines: ['workLaptop'],
-      processes: ['Outlook', 'Microsoft Error Reporting', 'Slack', 'Microsoft Teams'],
-    },
+
     {
       type: TaskType.HOMEBREW,
       machines: ['homeLaptop', 'workLaptop'],
@@ -213,6 +221,7 @@ const config: Config = {
         { name: 'youtube-dl', executable: 'youtube-dl' },
       ],
     },
+
     {
       type: TaskType.VOLTA_PACKAGE,
       machines: ['homeLaptop', 'workLaptop', 'workVM'],
@@ -227,134 +236,161 @@ const config: Config = {
         { name: 'typescript' },
       ],
     },
+
     {
-      name: 'Update Rust',
+      name: 'Rust',
       type: TaskType.EXEC,
       machines: ['homeLaptop', 'workLaptop', 'workVM'],
       command: 'rustup',
       args: ['update'],
     },
+
     {
-      name: 'Download moment garden pics & videos',
-      type: TaskType.EXEC,
+      name: 'Downloads',
+      type: TaskType.GROUP,
       machines: ['homeLaptop', 'workLaptop'],
-      command: 'moment-garden-download',
-      args: [],
+      tasks: [
+        {
+          name: 'Moment garden pics & videos',
+          type: TaskType.EXEC,
+          machines: 'inherit',
+          command: 'moment-garden-download',
+          args: [],
+        },
+        {
+          name: 'Audio playlists from YT',
+          type: TaskType.EXEC,
+          machines: 'inherit',
+          command: 'download-yt-audio-playlists',
+          args: [],
+        },
+        // TODO: YT Series
+      ],
     },
+
     {
-      name: 'Download audio playlists from YT',
-      type: TaskType.EXEC,
-      machines: ['homeLaptop', 'workLaptop'],
-      command: 'download-yt-audio-playlists',
-      args: [],
-    },
-    {
-      name: 'Verify dotfile links are good',
-      type: TaskType.EXEC,
+      name: 'Misc Checks',
+      type: TaskType.GROUP,
       machines: ['homeLaptop', 'workLaptop', 'workVM'],
-      command: 'verify-dotfile-links',
-      args: [path.join(os.homedir(), 'src/gh/dotfiles')],
-    },
-    {
-      name: 'Make sure syncthing is running',
-      type: TaskType.EXEC,
-      machines: ['homeLaptop', 'workLaptop'],
-      command: 'pgrep',
-      args: ['syncthing'],
-    },
-    {
-      name: 'Check for sync conflict files',
-      type: TaskType.GROUP,
-      machines: ['homeLaptop', 'workLaptop'],
-      tasks: ['SyncAudio', 'SyncCamera', 'SyncDocs', 'SyncImages', 'SyncPhone', 'SyncVideo'].map(
-        (dir) => syncConflictCheck(dir)
-      ),
-    },
+      tasks: [
+        {
+          name: 'Verify dotfile links are good',
+          type: TaskType.EXEC,
+          machines: ['homeLaptop', 'workLaptop', 'workVM'],
+          command: 'verify-dotfile-links',
+          args: [path.join(os.homedir(), 'src/gh/dotfiles')],
+        },
+        {
+          name: 'Make sure syncthing is running',
+          type: TaskType.EXEC,
+          machines: ['homeLaptop', 'workLaptop'],
+          command: 'pgrep',
+          args: ['syncthing'],
+        },
+        // TODO: check that syncthing is not paused, using the API
+        // TODO: check that rpi is connected using syncthing API
+        {
+          name: 'Check for sync conflict files',
+          type: TaskType.GROUP,
+          machines: ['homeLaptop', 'workLaptop'],
+          tasks: [
+            'SyncAudio',
+            'SyncCamera',
+            'SyncDocs',
+            'SyncImages',
+            'SyncPhone',
+            'SyncVideo',
+          ].map((dir) => syncConflictCheck(dir)),
+        },
+        // TODO: cleanup shivs
+        {
+          name: 'Free space check',
+          type: TaskType.FUNCTION,
+          machines: ['homeLaptop', 'workLaptop'],
+          function: async () => {
+            const { stdout } = await execa('df', ['-h']);
+            const mainVolumeLine = stdout.match(/.*\/System\/Volumes\/Data\n/);
+            if (mainVolumeLine === null) {
+              throw new Error(`Could not parse free space from ${stdout}`);
+            }
+            const splitLine = mainVolumeLine[0]?.split(' ').filter((s) => s !== '');
+            if (splitLine === undefined) {
+              throw new Error(`Could not parse free space from line ${mainVolumeLine}`);
+            }
+            const percentFreeSpace = parseInt(splitLine[4] || '', 10);
 
-    {
-      name: 'Check singalong music files',
-      type: TaskType.GROUP,
-      machines: ['homeLaptop', 'workLaptop'],
-      tasks: [
-        renameRenameFiles('inherit', 'SyncPhone/Music/Singalong'),
-        // TODO: extract this object like I did with the one above ^^
-        {
-          name: 'file name checks',
-          type: TaskType.FUNCTION,
-          machines: 'inherit',
-          function: (ctx) =>
-            fileNameChecks(
-              ctx,
-              path.join(process.env['BASE_SYNC_DIR']!, 'SyncPhone/Music/Singalong'),
-              'singalong-music-errors'
-            ),
+            if (percentFreeSpace > 80) {
+              throw new Error(`${percentFreeSpace} free space left (over 80%)`);
+            }
+          },
         },
-        // TODO: check for duplicate files with different extensions
-        // TODO: if all checks pass, write the list to music playlist repo (src/gh/playlists)
-        // {
-        //   name: 'Export singalong music playlist',
-        //   type: TaskType.FUNCTION,
-        //   machines: ['homeLaptop', 'workLaptop'],
-        //   // TODO
-        //   function: () => {},
-        // },
-      ],
-    },
-    {
-      name: 'Check workout music files',
-      type: TaskType.GROUP,
-      machines: ['homeLaptop', 'workLaptop'],
-      tasks: [
-        renameRenameFiles('inherit', 'SyncPhone/Music/Workout Music'),
-        // TODO: extract this object like I did with the one above ^^
-        {
-          name: 'file name checks',
-          type: TaskType.FUNCTION,
-          machines: 'inherit',
-          function: (ctx) =>
-            fileNameChecks(
-              ctx,
-              path.join(process.env['BASE_SYNC_DIR']!, 'SyncPhone/Music/Workout Music'),
-              'workout-music-errors'
-            ),
-        },
-        // TODO: check for duplicate files with different extensions
-        // TODO: if all checks pass, write the list to music playlist repo (src/gh/playlists)
-        // {
-        //   name: 'Export workout music playlist',
-        //   type: TaskType.FUNCTION,
-        //   machines: ['homeLaptop', 'workLaptop'],
-        //   // TODO
-        //   function: () => {},
-        // },
       ],
     },
 
-    // TODO: check that rpi is connected using syncthing API
-    // TODO: check that syncthing is not paused, using the API
-
-    // TODO: cleanup shivs
-
     {
-      name: 'Free space check',
-      type: TaskType.FUNCTION,
+      name: 'Music Files',
+      type: TaskType.GROUP,
       machines: ['homeLaptop', 'workLaptop'],
-      function: async () => {
-        const { stdout } = await execa('df', ['-h']);
-        const mainVolumeLine = stdout.match(/.*\/System\/Volumes\/Data\n/);
-        if (mainVolumeLine === null) {
-          throw new Error(`Could not parse free space from ${stdout}`);
-        }
-        const splitLine = mainVolumeLine[0]?.split(' ').filter((s) => s !== '');
-        if (splitLine === undefined) {
-          throw new Error(`Could not parse free space from line ${mainVolumeLine}`);
-        }
-        const percentFreeSpace = parseInt(splitLine[4] || '', 10);
-
-        if (percentFreeSpace > 80) {
-          throw new Error(`${percentFreeSpace} free space left (over 80%)`);
-        }
-      },
+      tasks: [
+        {
+          name: 'Singalong',
+          type: TaskType.GROUP,
+          machines: 'inherit',
+          tasks: [
+            renameRenameFiles('inherit', 'SyncPhone/Music/Singalong'),
+            // TODO: extract this object like I did with the one above ^^
+            {
+              name: 'file name checks',
+              type: TaskType.FUNCTION,
+              machines: 'inherit',
+              function: (ctx) =>
+                fileNameChecks(
+                  ctx,
+                  path.join(process.env['BASE_SYNC_DIR']!, 'SyncPhone/Music/Singalong'),
+                  'singalong-music-errors'
+                ),
+            },
+            // TODO: check for duplicate files with different extensions
+            // TODO: if all checks pass, write the list to music playlist repo (src/gh/playlists)
+            // {
+            //   name: 'Export singalong music playlist',
+            //   type: TaskType.FUNCTION,
+            //   machines: ['homeLaptop', 'workLaptop'],
+            //   // TODO
+            //   function: () => {},
+            // },
+          ],
+        },
+        {
+          name: 'Workout',
+          type: TaskType.GROUP,
+          machines: 'inherit',
+          tasks: [
+            renameRenameFiles('inherit', 'SyncPhone/Music/Workout Music'),
+            // TODO: extract this object like I did with the one above ^^
+            {
+              name: 'file name checks',
+              type: TaskType.FUNCTION,
+              machines: 'inherit',
+              function: (ctx) =>
+                fileNameChecks(
+                  ctx,
+                  path.join(process.env['BASE_SYNC_DIR']!, 'SyncPhone/Music/Workout Music'),
+                  'workout-music-errors'
+                ),
+            },
+            // TODO: check for duplicate files with different extensions
+            // TODO: if all checks pass, write the list to music playlist repo (src/gh/playlists)
+            // {
+            //   name: 'Export workout music playlist',
+            //   type: TaskType.FUNCTION,
+            //   machines: ['homeLaptop', 'workLaptop'],
+            //   // TODO
+            //   function: () => {},
+            // },
+          ],
+        },
+      ],
     },
 
     // check for VPN connection, and block following tasks until connected
@@ -380,7 +416,6 @@ const config: Config = {
 
     // TODO: homebrew and engtools stuff for work machines
 
-    // update repositories
     {
       name: 'Update repositories',
       type: TaskType.GROUP,
