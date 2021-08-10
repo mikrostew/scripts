@@ -706,14 +706,14 @@ async function fileNameChecks(
           .some(
             (part) =>
               / (Of|A|And|To|The|For|Or|In|On|Out|Up) /.test(part.trim()) &&
-              !/The A/.test(part.trim()) &&
-              !/II/.test(part.trim())
+              !/The A/.test(part.trim())
           ),
       errorMsg: '{} Of/A/And/To/The/For/Or/In/On/Out/Up',
     },
     //   find . | sort | grep [A-Z][A-Z][A-Z]*
     {
-      match: (fname: string) => fname.split(' ').some((word) => /^[A-Z]{2,}$/.test(word)),
+      match: (fname: string) =>
+        fname.split(' ').some((word) => /^[A-Z]{2,}$/.test(word) && !/II/.test(word)),
       errorMsg: '{} all caps',
     },
     //   find . | sort | grep -v " - "
