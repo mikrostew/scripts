@@ -75,15 +75,15 @@ then
   good-morning-tasks.ts "$ldap_pass"
 fi
 
-if [[ "$machine" =~ Work ]]
-then
-  echo "Cleanup shivs"
-  # clean up old stuff in $HOME/.shiv/
-  # (hide the args, so this doesn't show the password)
-  @wait-for-command --hide-args cleanup-shivs "$ldap_pass"
-  if [ "$?" != 0 ]; then errors+=('cleanup shivs'); fi
-  (( total_tasks++ ))
-fi
+# if [[ "$machine" =~ Work ]]
+# then
+#   echo "Cleanup shivs"
+#   # clean up old stuff in $HOME/.shiv/
+#   # (hide the args, so this doesn't show the password)
+#   @wait-for-command --hide-args cleanup-shivs "$ldap_pass"
+#   if [ "$?" != 0 ]; then errors+=('cleanup shivs'); fi
+#   (( total_tasks++ ))
+# fi
 
 if [ "$machine" == "Work Laptop" ]
 then

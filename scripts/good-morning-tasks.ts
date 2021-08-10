@@ -303,7 +303,13 @@ const config: Config = {
             'SyncVideo',
           ].map((dir) => syncConflictCheck(dir)),
         },
-        // TODO: cleanup shivs
+        {
+          name: 'Cleanup shivs',
+          type: TaskType.EXEC,
+          machines: ['workLaptop', 'workVM'],
+          command: 'cleanup-shivs',
+          args: [process.env['LDAP_PASS']!],
+        },
         {
           name: 'Free space check',
           type: TaskType.FUNCTION,
