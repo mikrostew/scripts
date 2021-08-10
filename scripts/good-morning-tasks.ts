@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 
 // TODO: split this file up, since it's starting to get large and unwieldy
-// (maybe in its own repo?)
+// (probably in its own repo)
 
 import { promises as fsPromises } from 'fs';
 import path from 'path';
@@ -140,10 +140,11 @@ interface FileCheck {
   match: ((fileName: string) => boolean) | RegExp | string;
   // string with '{}' placeholder, like "{} bad characters" (like what Rust does)
   errorMsg: `${any}{}${any}`;
-  // TODO: some way to list the failed files on the command line, maybe a command string?
+  // how to list the failed files on the command line, usually a command string
+  commandRepro: string;
 }
 
-// TODO: move this config to a separate file
+// TODO: move this config to a separate file (and add CLI option for file path)
 const config: Config = {
   environment: {
     BASE_SYNC_DIR: /(MacBook-Air|Michaels-Air)/.test(os.hostname())
@@ -701,39 +702,38 @@ async function fileNameChecks(
     .filter((name) => name !== '.DS_Store');
 
   const fileChecks: FileCheck[] = [
-    //   find . | sort | grep -i 'official.*\(video\|audio\)'
     {
       match: /official.*(video|audio)/i,
       errorMsg: '{} official audio/video',
+      commandRepro: "find . | sort | grep -i 'official.*(video|audio)'",
     },
-    //   find . | sort | grep -i 'rename'
     {
       match: /rename/i,
       errorMsg: '{} (rename)',
+      commandRepro: "find . | sort | grep -i 'rename'",
     },
-    //   find . | sort | grep -i 'remix'
     {
       match: /remix/i,
       errorMsg: '{} remix',
+      commandRepro: "find . | sort | grep -i 'remix'",
     },
-    //   find . | sort | grep -i 'lyric'
     {
       match: /lyric/i,
       errorMsg: '{} lyric',
+      commandRepro: "find . | sort | grep -i 'lyric'",
     },
-    //   find . | sort | grep -i 'visuali[sz]er'
     {
       match: /visuali[sz]er/i,
       errorMsg: '{} visualizer',
+      commandRepro: "find . | sort | grep -i 'visuali[sz]er'",
     },
-    //   find . | sort | grep -i 'hq'
     {
       match: /hq/i,
       errorMsg: '{} hq',
+      commandRepro: "find . | sort | grep -i 'hq'",
     },
     // https://www.grammarly.com/blog/capitalization-in-the-titles/
     // (prepositions, articles, and conjunctions are not capitalized)
-    //   find . | sort | grep -v 'The A' | grep -v II | grep '[^-] \(Of\|A\|And\|To\|The\|For\|Or\|In\|On\|Out\|Up\) '
     {
       match: (fname: string) =>
         fname
@@ -744,52 +744,58 @@ async function fileNameChecks(
               !/The A/.test(part.trim())
           ),
       errorMsg: '{} Of/A/And/To/The/For/Or/In/On/Out/Up',
+      commandRepro:
+        "find . | sort | grep -v 'The A' | grep -v II | grep '[^-] (Of|A|And|To|The|For|Or|In|On|Out|Up) '",
     },
-    //   find . | sort | grep [A-Z][A-Z][A-Z]*
     {
       match: (fname: string) =>
         fname.split(' ').some((word) => /^[A-Z]{2,}$/.test(word) && !/II/.test(word)),
       errorMsg: '{} all caps',
+      commandRepro: 'find . | sort | grep [A-Z][A-Z][A-Z]*',
     },
-    //   find . | sort | grep -v " - "
     {
       // could negate this regex with negative look-ahead, like /^(?!.* - )/, but I will definitely forget that syntax
       // (see https://stackoverflow.com/a/1538524 for instance)
       match: (fname: string) => !/ - /.test(fname),
       errorMsg: '{} no dashes',
+      commandRepro: "find . | sort | grep -v ' - '",
     },
-    //   find . | sort | grep -i 'best quality'
     {
       match: /best quality/i,
       errorMsg: '{} best quality',
+      commandRepro: "find . | sort | grep -i 'best quality'",
     },
-    //   find . | sort | grep '  '
     {
       match: '  ',
       errorMsg: '{} extra spaces',
+      commandRepro: "find . | sort | grep '  '",
     },
   ];
 
   const errors = fileChecks
     .map((check: FileCheck) => {
-      let numMatchingFiles;
+      let matchingFiles;
       // what will we use to match?
       const howToMatch = check.match;
       if (typeof howToMatch === 'function') {
-        numMatchingFiles = fileNames.filter(howToMatch).length;
+        matchingFiles = fileNames.filter(howToMatch);
       } else if (typeof howToMatch === 'string') {
-        numMatchingFiles = fileNames.filter(
-          (fname: string) => fname.indexOf(howToMatch) >= 0
-        ).length;
+        matchingFiles = fileNames.filter((fname: string) => fname.indexOf(howToMatch) >= 0);
       } else if (howToMatch instanceof RegExp) {
-        numMatchingFiles = fileNames.filter((fname: string) => howToMatch.test(fname)).length;
+        matchingFiles = fileNames.filter((fname: string) => howToMatch.test(fname));
       } else {
         throw new Error(`unknown type of file check: ${JSON.stringify(check)}`);
       }
 
-      if (numMatchingFiles > 0) {
-        // TODO: open a terminal and run one of the find/grep combos above to show the files
-        return check.errorMsg.replace('{}', `${numMatchingFiles}`);
+      if (matchingFiles.length > 0) {
+        // add matching files to context
+        const errorProp = `${contextPropName}-files`;
+        if (ctx[errorProp]) {
+          ctx[errorProp] = matchingFiles;
+        } else {
+          ctx[errorProp].push(...matchingFiles);
+        }
+        return check.errorMsg.replace('{}', `${matchingFiles.length}`);
       }
     })
     .filter((error) => error !== undefined);
