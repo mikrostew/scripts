@@ -796,7 +796,7 @@ async function fileNameChecks(
       if (matchingFiles.length > 0) {
         // add matching files to context
         const errorProp = `${contextPropName}-files`;
-        if (ctx[errorProp]) {
+        if (ctx[errorProp] === undefined) {
           ctx[errorProp] = matchingFiles;
         } else {
           ctx[errorProp].push(...matchingFiles);
