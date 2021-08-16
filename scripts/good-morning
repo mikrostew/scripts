@@ -105,15 +105,15 @@ then
   open https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit#
 fi
 
-if [ "$machine" == "Work VM" ]
-then
-  echo "Engtools"
+# if [ "$machine" == "Work VM" ]
+# then
+#   echo "Engtools"
 
-  # this prompts for my password
-  sudo yum install usr-local-linkedin-dist
-  if [ "$?" != 0 ]; then errors+=('yum install usr-local-linkedin-dist'); fi
-  (( total_tasks++ ))
-fi
+#   # this prompts for my password
+#   sudo yum install usr-local-linkedin-dist
+#   if [ "$?" != 0 ]; then errors+=('yum install usr-local-linkedin-dist'); fi
+#   (( total_tasks++ ))
+# fi
 
 
 # TODO: people I should reach out to every couple days, or week, or month, etc.
