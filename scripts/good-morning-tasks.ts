@@ -405,16 +405,27 @@ const config: Config = {
       type: TaskType.FUNCTION,
       machines: ['workLaptop'],
       function: async () => {
+        // timeout after 2 minutes, (2 minutes * 60 sec/min) / (5 sec/attempt) = 24 attempts
+        const timeoutMinutes = 2;
+        const timeoutDelaySeconds = 5;
+        const totalAttempts = (timeoutMinutes * 60) / timeoutDelaySeconds;
+
+        let numAttempts = 0;
         for (;;) {
           try {
-            // ping once
+            // ping once, with a 1 second timeout
             // (returns non-zero on failure, so execa throws)
-            await execa('ping', ['-c1', 'tools.corp.linkedin.com']);
+            await execa('ping', ['-c1', '-t1', 'tools.corp.linkedin.com']);
             // if successful, we're good
             break;
           } catch {
-            // ping failed, wait 5 seconds and try again
-            await sleep(5 * 1000);
+            if (numAttempts >= totalAttempts) {
+              throw new Error(`Timed out after ${timeoutMinutes} minutes`);
+            }
+            // ping failed, wait and try again
+            // (if ping times out, this will be 1 second longer - could do setInterval but whatever)
+            await sleep(timeoutDelaySeconds * 1000);
+            numAttempts++;
           }
         }
       },
