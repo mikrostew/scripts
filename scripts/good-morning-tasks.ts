@@ -762,6 +762,10 @@ async function fileNameChecks(
       errorMsg: '{} lyric',
     },
     {
+      match: /\(audio\)/i,
+      errorMsg: '{} (audio)',
+    },
+    {
       match: /visuali[sz]er/i,
       errorMsg: '{} visualizer',
     },
