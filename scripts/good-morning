@@ -75,41 +75,31 @@ then
   good-morning-tasks.ts "$ldap_pass"
 fi
 
-# if [[ "$machine" =~ Work ]]
-# then
-#   echo "Cleanup shivs"
-#   # clean up old stuff in $HOME/.shiv/
-#   # (hide the args, so this doesn't show the password)
-#   @wait-for-command --hide-args cleanup-shivs "$ldap_pass"
-#   if [ "$?" != 0 ]; then errors+=('cleanup shivs'); fi
-#   (( total_tasks++ ))
-# fi
-
 if [ "$machine" == "Work Laptop" ]
 then
-  # check that I am connected to VPN, and pause & wait for keypress
-  if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
-  then
-    echo_ack "(Connected to VPN)"
-  else
-    echo_err "(Not connected to VPN)"
-    # make sure iTerm is shown, so I see this
-    osascript -e 'tell application "Iterm" to activate'
-    echo "Please connect to VPN, then press any key to continue..."
-    read -n1 -s
-  fi
+  # # check that I am connected to VPN, and pause & wait for keypress
+  # if ping -c1 tools.corp.linkedin.com >/dev/null 2>&1
+  # then
+  #   echo_ack "(Connected to VPN)"
+  # else
+  #   echo_err "(Not connected to VPN)"
+  #   # make sure iTerm is shown, so I see this
+  #   osascript -e 'tell application "Iterm" to activate'
+  #   echo "Please connect to VPN, then press any key to continue..."
+  #   read -n1 -s
+  # fi
 
-  # update this homebrew as well
-  @wait-for-command brew engtools update
-  if [ "$?" != 0 ]; then errors+=('brew engtools update'); fi
-  (( total_tasks++ ))
+  # # update this homebrew as well
+  # @wait-for-command brew engtools update
+  # if [ "$?" != 0 ]; then errors+=('brew engtools update'); fi
+  # (( total_tasks++ ))
 
-  echo "Engtools"
+  # echo "Engtools"
 
-  # (hide args, so this doesn't show the password)
-  @wait-for-command --hide-args send-passwd-for-sudo "$ldap_pass" brew engtools install
-  if [ "$?" != 0 ]; then errors+=('brew engtools install'); fi
-  (( total_tasks++ ))
+  # # (hide args, so this doesn't show the password)
+  # @wait-for-command --hide-args send-passwd-for-sudo "$ldap_pass" brew engtools install
+  # if [ "$?" != 0 ]; then errors+=('brew engtools install'); fi
+  # (( total_tasks++ ))
 
   # list of blog post ideas, and posts I'm working on
   open https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit#

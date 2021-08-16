@@ -431,7 +431,34 @@ const config: Config = {
       },
     },
 
-    // TODO: homebrew and engtools stuff for work machines
+    {
+      name: 'Engtools',
+      type: TaskType.GROUP,
+      machines: ['workLaptop', 'workVM'],
+      tasks: [
+        {
+          name: 'engtools update for laptop',
+          type: TaskType.EXEC,
+          machines: ['workLaptop'],
+          command: 'brew',
+          args: ['engtools', 'update'],
+        },
+        {
+          name: 'engtools install for laptop',
+          type: TaskType.EXEC,
+          machines: ['workLaptop'],
+          command: 'send-passwd-for-sudo',
+          args: [process.env['LDAP_PASS']!, 'brew', 'engtools', 'install'],
+        },
+        {
+          name: 'engtools for VM',
+          type: TaskType.EXEC,
+          machines: ['workVM'],
+          command: 'send-passwd-for-sudo',
+          args: [process.env['LDAP_PASS']!, 'sudo', 'yum', 'install', 'usr-local-linkedin-dist'],
+        },
+      ],
+    },
 
     {
       name: 'Update repositories',
