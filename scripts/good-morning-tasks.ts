@@ -161,10 +161,10 @@ const config: Config = {
       type: TaskType.FUNCTION,
       name: 'Save LDAP password',
       machines: ['workLaptop'],
-      function: async (ctx) => {
+      function: async () => {
         // try to get it from the input arg, otherwise prompt
-        if (process.env['LDAP_PASS'] !== undefined && process.env['LDAP_PASS'] !== '') {
-          ctx['ldap_pass'] = process.env['LDAP_PASS'];
+        if (typeof process.env['LDAP_PASS'] !== 'undefined') {
+          // it's already there, so we're good
         } else {
           const { stdout } = await execa('security', [
             'find-generic-password',
@@ -172,7 +172,7 @@ const config: Config = {
             'ldap_pass',
             '-w',
           ]);
-          ctx['ldap_pass'] = stdout.trim();
+          process.env['LDAP_PASS'] = stdout.trim();
         }
       },
     },
@@ -912,10 +912,11 @@ function configTaskToListrTask(
   }
 }
 
-// input ldap_pass as an optional argument to this script
 const args = process.argv.slice(2);
-const ldapPass = args[0];
-process.env['LDAP_PASS'] = ldapPass;
+// input ldap_pass as an optional argument to this script
+if (args[0] !== undefined) {
+  process.env['LDAP_PASS'] = args[0];
+}
 
 // this machine's name
 const machineName = os.hostname();
