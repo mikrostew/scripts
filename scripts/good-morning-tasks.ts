@@ -3,9 +3,10 @@
 // TODO: split this file up, since it's starting to get large and unwieldy
 // (probably in its own repo)
 
+import fs from 'fs';
 import { promises as fsPromises } from 'fs';
-import path from 'path';
 import os from 'os';
+import path from 'path';
 
 import chalk from 'chalk';
 import execa from 'execa';
@@ -140,8 +141,6 @@ interface FileCheck {
   match: ((fileName: string) => boolean) | RegExp | string;
   // string with '{}' placeholder, like "{} bad characters" (like what Rust does)
   errorMsg: `${any}{}${any}`;
-  // how to list the failed files on the command line, usually a command string
-  commandRepro: string;
 }
 
 // TODO: move this config to a separate file (and add CLI option for file path)
@@ -711,32 +710,26 @@ async function fileNameChecks(
     {
       match: /official.*(video|audio)/i,
       errorMsg: '{} official audio/video',
-      commandRepro: "find . | sort | grep -i 'official.*(video|audio)'",
     },
     {
       match: /rename/i,
       errorMsg: '{} (rename)',
-      commandRepro: "find . | sort | grep -i 'rename'",
     },
     {
       match: /remix/i,
       errorMsg: '{} remix',
-      commandRepro: "find . | sort | grep -i 'remix'",
     },
     {
       match: /lyric/i,
       errorMsg: '{} lyric',
-      commandRepro: "find . | sort | grep -i 'lyric'",
     },
     {
       match: /visuali[sz]er/i,
       errorMsg: '{} visualizer',
-      commandRepro: "find . | sort | grep -i 'visuali[sz]er'",
     },
     {
       match: /hq/i,
       errorMsg: '{} hq',
-      commandRepro: "find . | sort | grep -i 'hq'",
     },
     // https://www.grammarly.com/blog/capitalization-in-the-titles/
     // (prepositions, articles, and conjunctions are not capitalized)
@@ -750,34 +743,29 @@ async function fileNameChecks(
               !/The A/.test(part.trim())
           ),
       errorMsg: '{} Of/A/And/To/The/For/Or/In/On/Out/Up',
-      commandRepro:
-        "find . | sort | grep -v 'The A' | grep -v II | grep '[^-] (Of|A|And|To|The|For|Or|In|On|Out|Up) '",
     },
     {
       match: (fname: string) =>
         fname.split(' ').some((word) => /^[A-Z]{2,}$/.test(word) && !/II/.test(word)),
       errorMsg: '{} all caps',
-      commandRepro: 'find . | sort | grep [A-Z][A-Z][A-Z]*',
     },
     {
       // could negate this regex with negative look-ahead, like /^(?!.* - )/, but I will definitely forget that syntax
       // (see https://stackoverflow.com/a/1538524 for instance)
       match: (fname: string) => !/ - /.test(fname),
       errorMsg: '{} no dashes',
-      commandRepro: "find . | sort | grep -v ' - '",
     },
     {
       match: /best quality/i,
       errorMsg: '{} best quality',
-      commandRepro: "find . | sort | grep -i 'best quality'",
     },
     {
       match: '  ',
       errorMsg: '{} extra spaces',
-      commandRepro: "find . | sort | grep '  '",
     },
   ];
 
+  const failedFiles: string[] = [];
   const errors = fileChecks
     .map((check: FileCheck) => {
       let matchingFiles;
@@ -794,13 +782,8 @@ async function fileNameChecks(
       }
 
       if (matchingFiles.length > 0) {
-        // add matching files to context
-        const errorProp = `${contextPropName}-files`;
-        if (ctx[errorProp] === undefined) {
-          ctx[errorProp] = matchingFiles;
-        } else {
-          ctx[errorProp].push(...matchingFiles);
-        }
+        // add matching files to array
+        failedFiles.push(...matchingFiles);
         return check.errorMsg.replace('{}', `${matchingFiles.length}`);
       }
     })
@@ -810,7 +793,8 @@ async function fileNameChecks(
     ctx[contextPropName] = true;
     // open the directory in Finder to fix these
     await execa('open', [dirPath]);
-    throw new Error(errors.join(', '));
+    // show error summary, along with file names
+    throw new Error(`${errors.join(', ')}\n${failedFiles.join('\n')}`);
   }
 }
 
@@ -948,6 +932,13 @@ tasks
   })
   .catch((err) => {
     // this error has a list of the errors from any failed tasks
-    console.error();
-    console.error(chalk.red(`${err.errors.length} task(s) had an error!`));
+    console.log();
+    console.log(chalk.red(`${err.errors.length} task(s) had an error!`));
+    console.log();
+    // reprint the errors
+    for (let i = 0; i < err.errors.length; i++) {
+      console.log(`Error #${i + 1}`);
+      console.log(err.errors[i]);
+      console.log();
+    }
   });
