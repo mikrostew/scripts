@@ -805,6 +805,11 @@ async function fileNameChecks(
       match: '  ',
       errorMsg: '{} extra spaces',
     },
+    {
+      match: (fname: string) =>
+        fname.split('-').some((part) => /^[']/.test(part.trim()) || /[']$/.test(part.trim())),
+      errorMsg: '{} start/end with quote mark',
+    },
   ];
 
   const failedFiles: string[] = [];
