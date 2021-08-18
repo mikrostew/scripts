@@ -531,6 +531,23 @@ const config: Config = {
         },
       ],
     },
+
+    {
+      name: 'Open pages',
+      type: TaskType.GROUP,
+      machines: ['workLaptop', 'homeLaptop'],
+      tasks: [
+        {
+          name: 'blog',
+          type: TaskType.EXEC,
+          machines: ['workLaptop'],
+          command: 'open',
+          args: [
+            'https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit#',
+          ],
+        },
+      ],
+    },
   ],
 };
 

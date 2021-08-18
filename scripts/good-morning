@@ -75,11 +75,11 @@ echo ""
 # start transitioning tasks here
 good-morning-tasks.ts
 
-if [ "$machine" == "Work Laptop" ]
-then
-  # list of blog post ideas, and posts I'm working on
-  open https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit#
-fi
+# if [ "$machine" == "Work Laptop" ]
+# then
+#   # list of blog post ideas, and posts I'm working on
+#   open https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit#
+# fi
 
 # TODO: people I should reach out to every couple days, or week, or month, etc.
 # (ex. cflor)
