@@ -17,10 +17,6 @@ fi
 # pull and rebase to pick up recent changes, then run the script
 osascript <<EOF
 tell application "System Events"
-  keystroke "printf '\\\\033[8;44;108t'" & return
-  delay 0.5
-  keystroke "cd src/gh/dotfiles/" & return
-  delay 0.5
-  keystroke "gpr; good-morning" & return
+  keystroke "printf '\\\\033[8;44;108t'; cd src/gh/dotfiles/; gpr; good-morning" & return
 end tell
 EOF
