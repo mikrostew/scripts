@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 
 // TODO: split this file up, since it's starting to get large and unwieldy
-// (probably in its own repo)
+// (in its own repo)
 
 import fs from 'fs';
 import { promises as fsPromises } from 'fs';
@@ -12,6 +12,9 @@ import chalk from 'chalk';
 import execa from 'execa';
 import Listr, { ListrContext, ListrTask, ListrTaskResult } from 'listr';
 import which from 'which';
+
+// TODO: add things to this, to display after the tasks are run
+const FINAL_OUTPUT: string[] = [];
 
 // sleep for the input number of milliseconds
 function sleep(millis: number) {
@@ -548,6 +551,40 @@ const config: Config = {
         },
       ],
     },
+
+    {
+      name: 'Add after-task outputs',
+      type: TaskType.GROUP,
+      machines: ['workLaptop', 'homeLaptop', 'workVM'],
+      tasks: [
+        {
+          name: 'Upcoming Dates',
+          type: TaskType.FUNCTION,
+          machines: 'inherit',
+          function: async () => {
+            const { stdout } = await execa('upcoming-dates');
+            FINAL_OUTPUT.push('', stdout, '');
+          },
+        },
+        {
+          name: 'Current Priorities',
+          type: TaskType.FUNCTION,
+          machines: 'inherit',
+          function: async () => {
+            const { stdout } = await execa('current-priorities');
+            FINAL_OUTPUT.push('', stdout, '');
+          },
+        },
+        {
+          name: 'Work Reminders',
+          type: TaskType.FUNCTION,
+          machines: ['workLaptop'],
+          function: () => {
+            FINAL_OUTPUT.push('', 'Reminders', ' - setup your Slack status now!');
+          },
+        },
+      ],
+    },
   ],
 };
 
@@ -1018,6 +1055,7 @@ const tasks: Listr = new Listr(
   { exitOnError: false }
 );
 
+// TODO: input the initial context with env vars setup
 tasks
   .run()
   .then(() => {
@@ -1035,4 +1073,9 @@ tasks
       console.log(err.errors[i]);
       console.log();
     }
+  })
+  .then(() => {
+    // things after the tasks
+    console.log(FINAL_OUTPUT.join('\n'));
+    console.log(chalk.green('\nGood Morning!\n'));
   });

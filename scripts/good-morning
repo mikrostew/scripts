@@ -1,44 +1,44 @@
 #!/usr/bin/env badash
 # Automatically do things that I used to do manually every morning
 
-COLOR_FG_BOLD_BLUE='\033[1;34m'
-COLOR_FG_BOLD_GREEN='\033[1;32m'
-COLOR_FG_GREEN='\033[0;32m'
-COLOR_FG_RED='\033[0;31m'
-COLOR_RESET='\033[0m'
+# COLOR_FG_BOLD_BLUE='\033[1;34m'
+# COLOR_FG_BOLD_GREEN='\033[1;32m'
+# COLOR_FG_GREEN='\033[0;32m'
+# COLOR_FG_RED='\033[0;31m'
+# COLOR_RESET='\033[0m'
 
 # collect stats, and display at the end
-total_tasks=0
-errors=()
+# total_tasks=0
+# errors=()
 
-current_git_branch () {
-  git rev-parse --abbrev-ref HEAD
-}
-echo_ack () {
-  echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
-}
-echo_err () {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
-}
+# current_git_branch () {
+#   git rev-parse --abbrev-ref HEAD
+# }
+# echo_ack () {
+#   echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
+# }
+# echo_err () {
+#   echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+# }
 
-# different things for different machines
-HOST_NAME="$(hostname)"
-if [[ "$HOST_NAME" =~ MacBook-Air ]] || [[ "$HOST_NAME" =~ Michaels-Air ]]
-then
-  machine="Home Laptop"
-elif [[ "$HOST_NAME" =~ mistewar-mn ]]
-then
-  machine="Work Laptop"
-elif [[ "$HOST_NAME" =~ mistewar-ld ]]
-then
-  machine="Work VM"
-else
-  echo_err "Machine '$HOST_NAME' has not been configured for this script"
-  exit 1
-fi
-echo ""
-echo -e "Running for '${COLOR_FG_BOLD_BLUE}$machine${COLOR_RESET}' ($HOST_NAME)"
-echo ""
+# # different things for different machines
+# HOST_NAME="$(hostname)"
+# if [[ "$HOST_NAME" =~ MacBook-Air ]] || [[ "$HOST_NAME" =~ Michaels-Air ]]
+# then
+#   machine="Home Laptop"
+# elif [[ "$HOST_NAME" =~ mistewar-mn ]]
+# then
+#   machine="Work Laptop"
+# elif [[ "$HOST_NAME" =~ mistewar-ld ]]
+# then
+#   machine="Work VM"
+# else
+#   echo_err "Machine '$HOST_NAME' has not been configured for this script"
+#   exit 1
+# fi
+# echo ""
+# echo -e "Running for '${COLOR_FG_BOLD_BLUE}$machine${COLOR_RESET}' ($HOST_NAME)"
+# echo ""
 
 # some things need a password, so do that first
 # if [ "$machine" == "Work Laptop" ]
@@ -84,56 +84,55 @@ good-morning-tasks.ts
 # TODO: people I should reach out to every couple days, or week, or month, etc.
 # (ex. cflor)
 
-# show upcoming dates
-echo ""
-upcoming-dates
-echo ""
+# # show upcoming dates
+# echo ""
+# upcoming-dates
+# echo ""
 
-# show current priorities
-echo ""
-current-priorities
-echo ""
-
+# # show current priorities
+# echo ""
+# current-priorities
+# echo ""
 
 # stats
 
-echo ""
+# echo ""
 
-# display any errors encountered
-if [ "${#errors[@]}" -gt 0 ]
-then
-  echo_err ""
-  echo_err "${total_tasks} tasks, with ${#errors[@]} error(s):"
-  for error in "${errors[@]}"
-  do
-    echo_err "$error"
-  done
-else
-  echo "(${total_tasks} tasks, no errors)"
-fi
+# # display any errors encountered
+# if [ "${#errors[@]}" -gt 0 ]
+# then
+#   echo_err ""
+#   echo_err "${total_tasks} tasks, with ${#errors[@]} error(s):"
+#   for error in "${errors[@]}"
+#   do
+#     echo_err "$error"
+#   done
+# else
+#   echo "(${total_tasks} tasks, no errors)"
+# fi
 
 # clean up any stray stuff on stdin (from pasting in passwords, etc.)
-cleaned_up_lines=0
-while read -t 1 -n 1024 discard
-do
-  (( cleaned_up_lines++ ))
-done
-if [ "$cleaned_up_lines" -gt 0 ]
-then
-  echo_err "(cleaned up $cleaned_up_lines stray input lines)"
-fi
+# cleaned_up_lines=0
+# while read -t 1 -n 1024 discard
+# do
+#   (( cleaned_up_lines++ ))
+# done
+# if [ "$cleaned_up_lines" -gt 0 ]
+# then
+#   echo_err "(cleaned up $cleaned_up_lines stray input lines)"
+# fi
 
 # reminders
 
-if [ "$machine" == "Work Laptop" ]
-then
-  # only need to setup Slack in work mornings
-  echo ""
-  echo "Reminders"
-  echo " - setup your Slack status now!"
-fi
+# if [ "$machine" == "Work Laptop" ]
+# then
+#   # only need to setup Slack in work mornings
+#   echo ""
+#   echo "Reminders"
+#   echo " - setup your Slack status now!"
+# fi
 
 # end on a happy note
-echo_ack ""
-echo_ack "Good Morning!"
-echo_ack ""
+# echo_ack ""
+# echo_ack "Good Morning!"
+# echo_ack ""
