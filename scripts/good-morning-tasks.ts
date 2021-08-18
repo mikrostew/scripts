@@ -199,6 +199,35 @@ const config: Config = {
     },
 
     {
+      name: 'Check XCode path',
+      type: TaskType.FUNCTION,
+      machines: ['homeLaptop', 'workLaptop'],
+      function: async () => {
+        const { stdout, stderr } = await execa('xcode-select', ['--print-path']);
+        if (!stdout) {
+          throw new Error(`Could not get current XCode path\nstderr='${stderr}'`);
+        }
+        if (stdout.trim() !== '/Applications/Xcode.app/Contents/Developer') {
+          await execa('send-passwd-for-sudo', [
+            process.env['LDAP_PASS']!,
+            'sudo',
+            'xcode-select',
+            '-s',
+            '/Applications/Xcode.app/Contents/Developer',
+          ]);
+          // recheck this
+          const { stdout, stderr } = await execa('xcode-select', ['--print-path']);
+          if (!stdout) {
+            throw new Error(`Could not get updated XCode path, stderr=${stderr}`);
+          }
+          if (stdout.trim() !== '/Applications/Xcode.app/Contents/Developer') {
+            throw new Error(`Could not change XCode path\nstdout='${stdout}'\nstderr='${stderr}'`);
+          }
+        }
+      },
+    },
+
+    {
       type: TaskType.HOMEBREW,
       machines: ['homeLaptop', 'workLaptop'],
       packages: [
