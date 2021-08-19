@@ -13,7 +13,7 @@ import execa from 'execa';
 import Listr, { ListrContext, ListrTask, ListrTaskResult } from 'listr';
 import which from 'which';
 
-// TODO: add things to this, to display after the tasks are run
+// add things to this, to display after the tasks are run
 const FINAL_OUTPUT: string[] = [];
 
 // sleep for the input number of milliseconds
@@ -64,6 +64,7 @@ interface KillProcessTask {
 }
 
 interface HomebrewTask {
+  name: string;
   type: TaskType.HOMEBREW;
   machines: MachineSpec;
   packages: HomebrewPackage[];
@@ -231,26 +232,40 @@ const config: Config = {
     },
 
     {
-      type: TaskType.HOMEBREW,
+      name: 'Homebrew',
+      type: TaskType.GROUP,
       machines: ['homeLaptop', 'workLaptop'],
-      packages: [
-        { name: 'bats-core', executable: 'bats' },
-        { name: 'expect', executable: 'expect' },
-        { name: 'gh', executable: 'gh' },
-        { name: 'gimp', executable: 'gimp' },
-        { name: 'git', executable: 'git' },
-        { name: 'git-gui', executable: 'git-gui' },
-        { name: 'tidy-html5', executable: 'tidy' },
-        { name: 'imagemagick', executable: 'magick' },
-        { name: 'jq', executable: 'jq' },
-        { name: 'macvim', executable: 'mvim' },
-        { name: 'moreutils', executable: 'sponge' },
-        { name: 'ruby-install', executable: 'ruby-install' },
-        { name: 'terminal-notifier', executable: 'terminal-notifier' },
-        { name: 'tmux', executable: 'tmux' },
-        { name: 'watch', executable: 'watch' },
-        { name: 'wget', executable: 'wget' },
-        { name: 'youtube-dl', executable: 'youtube-dl' },
+      tasks: [
+        {
+          name: 'common',
+          type: TaskType.HOMEBREW,
+          machines: ['homeLaptop', 'workLaptop'],
+          packages: [
+            { name: 'bats-core', executable: 'bats' },
+            { name: 'expect', executable: 'expect' },
+            { name: 'gh', executable: 'gh' },
+            { name: 'gimp', executable: 'gimp' },
+            { name: 'git', executable: 'git' },
+            { name: 'git-gui', executable: 'git-gui' },
+            { name: 'tidy-html5', executable: 'tidy' },
+            { name: 'imagemagick', executable: 'magick' },
+            { name: 'jq', executable: 'jq' },
+            { name: 'macvim', executable: 'mvim' },
+            { name: 'moreutils', executable: 'sponge' },
+            { name: 'ruby-install', executable: 'ruby-install' },
+            { name: 'terminal-notifier', executable: 'terminal-notifier' },
+            { name: 'tmux', executable: 'tmux' },
+            { name: 'watch', executable: 'watch' },
+            { name: 'wget', executable: 'wget' },
+            { name: 'youtube-dl', executable: 'youtube-dl' },
+          ],
+        },
+        {
+          name: 'work laptop',
+          type: TaskType.HOMEBREW,
+          machines: ['workLaptop'],
+          packages: [{ name: 'mysql', executable: 'mysql' }],
+        },
       ],
     },
 
@@ -965,7 +980,7 @@ function configTaskToListrTask(
       };
     case TaskType.HOMEBREW:
       return {
-        title: 'Homebrew',
+        title: task.name,
         enabled: () => shouldRunForMachine(task, machineConfig, currentMachine),
         task: () => {
           // convert all the configured homebrew packages to tasks

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// TODO: convert this to use TS
+
 function printUsage() {
   console.log('Usage:');
   console.log('  moment-garden-download [options]');
