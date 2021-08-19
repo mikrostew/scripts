@@ -191,7 +191,14 @@ const config: Config = {
           type: TaskType.KILL_PROC,
           // things to kill on both laptops
           machines: ['homeLaptop', 'workLaptop'],
-          processes: ['Activity Monitor', 'zoom.us', 'App Store', 'Discord', 'Microsoft Word'],
+          processes: [
+            'Activity Monitor',
+            'zoom.us',
+            'App Store',
+            'Discord',
+            'Microsoft Word',
+            'obs',
+          ],
         },
         {
           name: 'work laptop',
