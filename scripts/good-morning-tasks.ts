@@ -584,7 +584,7 @@ const config: Config = {
           type: TaskType.FUNCTION,
           machines: 'inherit',
           function: async () => {
-            const { stdout } = await execa('upcoming-dates');
+            const { stdout } = await execa('upcoming-dates.ts');
             FINAL_OUTPUT.push('', stdout, '');
           },
         },
