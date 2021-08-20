@@ -318,7 +318,13 @@ const config: Config = {
           command: 'download-yt-audio-playlists',
           args: [],
         },
-        // TODO: YT Series
+        {
+          name: 'Video playlists from YT',
+          type: TaskType.EXEC,
+          machines: 'inherit',
+          command: 'download-yt-video-playlists',
+          args: [],
+        },
       ],
     },
 
