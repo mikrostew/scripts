@@ -13,138 +13,32 @@ import execa from 'execa';
 import Listr, { ListrContext, ListrTask, ListrTaskResult } from 'listr';
 import which from 'which';
 
+import {
+  TaskType,
+  Config,
+  MachineSpec,
+  ConfigTask,
+  KillProcessTask,
+  HomebrewTask,
+  HomebrewPackage,
+  VoltaPackageTask,
+  VoltaPackage,
+  ExecTask,
+  ExecAndSaveTask,
+  TaskGroup,
+  FunctionTask,
+  RepoUpdateTask,
+  RepoOptions,
+  MachineMatchConfig,
+  FileCheck,
+} from 'good-morning';
+
 // add things to this, to display after the tasks are run
 const FINAL_OUTPUT: string[] = [];
 
 // sleep for the input number of milliseconds
 function sleep(millis: number) {
   return new Promise((resolve) => setTimeout(resolve, millis));
-}
-
-enum TaskType {
-  KILL_PROC = 'kill-proc',
-  HOMEBREW = 'homebrew',
-  VOLTA_PACKAGE = 'volta-package',
-  EXEC = 'exec',
-  EXEC_AND_SAVE = 'exec-and-save',
-  GROUP = 'group',
-  FUNCTION = 'function',
-  REPO_UPDATE = 'repo-update',
-}
-
-interface Config {
-  // any environment vars to set for this
-  environment?: {
-    [key: string]: string;
-  };
-  // matching machine names
-  machines: MachineMatchConfig;
-  // the actual tasks to run, based on machine config
-  tasks: ConfigTask[];
-}
-
-// specify a list of machine names, or inherit from parent task
-type MachineSpec = string[] | 'inherit';
-
-type ConfigTask =
-  | KillProcessTask
-  | HomebrewTask
-  | VoltaPackageTask
-  | ExecTask
-  | ExecAndSaveTask
-  | TaskGroup
-  | FunctionTask
-  | RepoUpdateTask;
-
-interface KillProcessTask {
-  name: string;
-  type: TaskType.KILL_PROC;
-  machines: MachineSpec;
-  processes: string[];
-}
-
-interface HomebrewTask {
-  name: string;
-  type: TaskType.HOMEBREW;
-  machines: MachineSpec;
-  packages: HomebrewPackage[];
-}
-
-interface HomebrewPackage {
-  // name of the package
-  name: string;
-  // name of an executable installed by the package
-  executable: string;
-}
-
-interface VoltaPackageTask {
-  type: TaskType.VOLTA_PACKAGE;
-  machines: MachineSpec;
-  packages: VoltaPackage[];
-}
-
-interface VoltaPackage {
-  name: string;
-}
-
-interface ExecTask {
-  name: string;
-  type: TaskType.EXEC;
-  machines: MachineSpec;
-  command: string;
-  args: string[];
-}
-
-// exec a command and save the output in the configured variable in the context
-interface ExecAndSaveTask {
-  type: TaskType.EXEC_AND_SAVE;
-  name: string;
-  machines: MachineSpec;
-  varName: string;
-  command: string;
-  args: string[];
-}
-
-// group tasks together
-interface TaskGroup {
-  name: string;
-  type: TaskType.GROUP;
-  machines: MachineSpec;
-  tasks: ConfigTask[];
-}
-
-// run a JS function
-interface FunctionTask {
-  name: string;
-  type: TaskType.FUNCTION;
-  machines: MachineSpec;
-  function: (ctx?: ListrContext) => void | ListrTaskResult<any>;
-}
-
-// update a repository
-interface RepoUpdateTask {
-  name: string;
-  type: TaskType.REPO_UPDATE;
-  machines: MachineSpec;
-  directory: string;
-  options: RepoOptions[];
-}
-
-type RepoOptions = 'pull&rebase' | 'push' | 'yarn';
-
-// machine names map to the keys of this object
-// (so that adding a task is easy, because it's done often,
-//  but adding a machine is harder, and is done less often)
-interface MachineMatchConfig {
-  [key: string]: RegExp;
-}
-
-// for checking file names
-interface FileCheck {
-  // I could maybe simplify this to just be string | RegExp, but that' not expressive enough
-  match: ((fileName: string) => boolean) | RegExp | string;
-  // string with '{}' placeholder, like "{} bad characters" (like what Rust does)
-  errorMsg: `${any}{}${any}`;
 }
 
 // TODO: move this config to a separate file (and add CLI option for file path)
@@ -616,6 +510,8 @@ const config: Config = {
   ],
 };
 
+// TODO: all this stuff should go in the library
+
 // return if the input executable is installed or not
 async function isExecutableInstalled(executable: string): Promise<boolean> {
   return which(executable)
@@ -1058,6 +954,8 @@ function configTaskToListrTask(
       };
   }
 }
+
+// TODO: all this stuff should go in the library
 
 const args = process.argv.slice(2);
 // input ldap_pass as an optional argument to this script
