@@ -1,23 +1,17 @@
 #!/usr/bin/env ts-node
 
-// import fs from 'fs';
-// import { promises as fsPromises } from 'fs';
 import os from 'os';
 import path from 'path';
 
-import chalk from 'chalk';
 import execa from 'execa';
-import Listr, { ListrContext, ListrTask, ListrTaskResult } from 'listr';
-// import which from 'which';
-
 import {
   TaskType,
   Config,
-  configTaskToListrTask,
   renameRenameFiles,
   fileNameChecks,
   syncConflictCheck,
   sleep,
+  runTasks,
 } from 'good-morning';
 
 // add things to this, to display after the tasks are run
@@ -491,53 +485,14 @@ const config: Config = {
   ],
 };
 
-// TODO: all this stuff should go in the library
-
 const args = process.argv.slice(2);
 // input ldap_pass as an optional argument to this script
 if (args[0] !== undefined) {
+  // TODO: put this in the initial context
   process.env['LDAP_PASS'] = args[0];
 }
 
-// this machine's name
-const machineName = os.hostname();
-console.log(`Running for machine '${chalk.green(machineName)}'`);
-
-// TODO: read and validate config (all machine names match, etc.)
-
-// set any configured env vars
-if (config.environment) {
-  for (const [key, value] of Object.entries(config.environment)) {
-    process.env[key] = value;
-  }
-}
-
-const tasks: Listr = new Listr(
-  config.tasks.map((task) => configTaskToListrTask(task, config.machines, machineName)),
-  { exitOnError: false }
-);
-
-// TODO: input the initial context with env vars setup
-tasks
-  .run()
-  .then(() => {
-    console.log();
-    console.log('no errors!');
-  })
-  .catch((err) => {
-    // this error has a list of the errors from any failed tasks
-    console.log();
-    console.log(chalk.red(`${err.errors.length} task(s) had an error!`));
-    console.log();
-    // reprint the errors
-    for (let i = 0; i < err.errors.length; i++) {
-      console.log(`Error #${i + 1}`);
-      console.log(err.errors[i]);
-      console.log();
-    }
-  })
-  .then(() => {
-    // things after the tasks
-    console.log(FINAL_OUTPUT.join('\n'));
-    console.log(chalk.green('\nGood Morning!\n'));
-  });
+runTasks(config).then(() => {
+  // things after the tasks
+  console.log(FINAL_OUTPUT.join('\n'));
+});
