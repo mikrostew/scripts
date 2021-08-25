@@ -81,8 +81,12 @@ then
   # TODO: add a prompt or cmd line flag for this?
   if [ -f package.json ]; then
     # I don't run this script very often, so I always need to login
-    do_cmd npm login
-    do_cmd npm publish
+    do_cmd npm login && do_cmd npm publish --access=public
+    if [ "$?" -ne 0 ]
+    then
+      echo_err "failed to publish package"
+      exit 1
+    fi
   fi
 
   echo_info "released as v$tag 🎉"
