@@ -12,7 +12,7 @@ import {
   syncConflictCheck,
   sleep,
   runTasks,
-} from 'good-morning';
+} from '@mikrostew/good-morning';
 
 // add things to this, to display after the tasks are run
 const FINAL_OUTPUT: string[] = [];
