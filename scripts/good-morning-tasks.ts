@@ -1,14 +1,14 @@
 #!/usr/bin/env ts-node
 
-import fs from 'fs';
-import { promises as fsPromises } from 'fs';
+// import fs from 'fs';
+// import { promises as fsPromises } from 'fs';
 import os from 'os';
 import path from 'path';
 
 import chalk from 'chalk';
 import execa from 'execa';
 import Listr, { ListrContext, ListrTask, ListrTaskResult } from 'listr';
-import which from 'which';
+// import which from 'which';
 
 import {
   TaskType,
