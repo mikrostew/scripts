@@ -19,12 +19,12 @@ const FINAL_OUTPUT: string[] = [];
 
 const config: Config = {
   environment: {
-    BASE_SYNC_DIR: /(MacBook-Air|Michaels-Air)/.test(os.hostname())
+    BASE_SYNC_DIR: /(MacBook-Air|Michaels-Air)/i.test(os.hostname())
       ? process.env['HOME']!
       : '/usr/local/SyncThing',
   },
   machines: {
-    homeLaptop: /(MacBook-Air|Michaels-Air)/,
+    homeLaptop: /(MacBook-Air|Michaels-Air)/i,
     workLaptop: /mistewar-mn/,
     workVM: /mistewar-ld/,
   },
