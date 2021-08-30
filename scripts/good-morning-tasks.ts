@@ -446,6 +446,13 @@ const config: Config = {
             'https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit#',
           ],
         },
+        {
+          name: 'Volta pnpm support RFC',
+          type: TaskType.EXEC,
+          machines: ['workLaptop', 'homeLaptop'],
+          command: 'open',
+          args: ['https://github.com/volta-cli/rfcs/pull/46'],
+        },
       ],
     },
 
