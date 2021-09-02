@@ -73,7 +73,7 @@ then
 
   do_git commit -m "release v$tag"
   # using annotated tags, which are a little nicer than plain tags
-  do_git tag -a "v$tag"
+  do_git tag -a -m "release v$tag" "v$tag"
   git log -n1
   do_git push origin "$current_branch"
   do_git push --tags
@@ -84,7 +84,8 @@ then
     do_cmd npm login && do_cmd npm publish --access=public
     if [ "$?" -ne 0 ]
     then
-      echo_err "failed to publish package"
+      echo_err "failed to publish package - you will need to rerun:"
+      echo_err '`npm login && npm publish --access=public`'
       exit 1
     fi
   fi
