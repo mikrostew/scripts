@@ -1,5 +1,8 @@
 #!/usr/bin/env ts-node
 
+// TODO: I'd like to do this, but I'm on node 12.x - probably should upgrade
+//import { readdir } from 'fs/promises';
+import { promises as fsPromises } from 'fs';
 import os from 'os';
 import path from 'path';
 
@@ -256,6 +259,23 @@ const config: Config = {
 
             if (percentFreeSpace > 80) {
               throw new Error(`${percentFreeSpace} free space left (over 80%)`);
+            }
+          },
+        },
+        // check for cluttered Desktop
+        // (more than 20 things)
+        {
+          name: 'Cluttered Desktop',
+          type: TaskType.FUNCTION,
+          machines: ['homeLaptop', 'workLaptop'],
+          function: async () => {
+            const MAX_DESKTOP_ITEMS = 20;
+            const desktopPath = path.join(process.env['HOME']!, 'Desktop');
+            const filesInDesktop = await fsPromises.readdir(desktopPath);
+            if (filesInDesktop.length > MAX_DESKTOP_ITEMS) {
+              throw new Error(
+                `More than ${MAX_DESKTOP_ITEMS} items in Desktop: found ${filesInDesktop.length}`
+              );
             }
           },
         },
