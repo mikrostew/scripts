@@ -452,6 +452,7 @@ const config: Config = {
       ],
     },
 
+    // TODO: this should be a new task type, not an exec task
     {
       name: 'Open pages',
       type: TaskType.GROUP,
@@ -472,6 +473,24 @@ const config: Config = {
           machines: ['workLaptop', 'homeLaptop'],
           command: 'open',
           args: ['https://github.com/volta-cli/rfcs/pull/46'],
+        },
+        {
+          name: 'Work tasks',
+          type: TaskType.EXEC,
+          machines: ['workLaptop'],
+          command: 'open',
+          args: [
+            'https://docs.google.com/spreadsheets/d/1PFz8_EXZ4W6Kb-r7wpqSSxhKNTE5Dx7evonVXteFqJQ/edit#gid=0',
+          ],
+        },
+        {
+          name: 'Things to read',
+          type: TaskType.EXEC,
+          machines: ['workLaptop'],
+          command: 'open',
+          args: [
+            'https://docs.google.com/document/d/1QXoiUy-DKZb76nkzxx4V_bqO63C6pdFnqCAeGV9WGYs/edit',
+          ],
         },
       ],
     },
