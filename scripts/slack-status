@@ -8,15 +8,15 @@ emoji_name="${1:?Missing first argument - emoji name}"
 
 # second argument is the status text
 status_text="${2:?Missing second argument - status text}"
-# TODO: need to check if there are quotes in that?
 
 
 ###### make sure Slack is running ######
 
 osascript -e 'tell application "Slack" to activate'
 
-# if slack was killed, it will take a second to actually be running
-sleep 2
+# if slack was killed, it will take a few seconds to actually be running
+echo "Waiting for slack to be running..."
+sleep 5
 
 ###### make sure Slack is opened ######
 
@@ -37,7 +37,7 @@ sleep 2
 
 # adapted this from https://stackoverflow.com/a/24636884 and https://stackoverflow.com/a/5693137
 osascript <<EOF
-tell the application named "Slack"
+tell application "Slack"
   set theWindow to the first item of windows
   tell theWindow
     set visible to false
@@ -46,35 +46,46 @@ tell the application named "Slack"
 end tell
 EOF
 
+sleep 1
+
 ###### actually set the status ######
 
-# TODO: use delays here, instead of sleep (like interview-feedback script)
-
 # open the status dialog
-osascript -e 'tell application "System Events" to keystroke "Y" using command down'
-
 # shift-tab to select the emoji
-osascript -e 'tell application "System Events" to key code 48 using shift down'
 # enter to open that menu
-osascript -e 'tell application "System Events" to key code 76'
-
-# type the input emoji name, then enter to select it
+# type the input emoji name
 # (this doesn't work, but clipboard does)
 #osascript -e "tell application 'System Events' to keystroke '$emoji_name'"
+# then enter to select it
 osascript <<EOF
 set the clipboard to "$emoji_name"
-tell application "System Events" to keystroke "v" using command down
+tell application "System Events"
+  keystroke "Y" using command down
+  delay 0.5
+  key code 48 using shift down
+  delay 0.5
+  key code 76
+  delay 0.5
+  keystroke "v" using command down
+  delay 0.5
+  key code 76
+end tell
 EOF
+
 sleep 1
-osascript -e 'tell application "System Events" to key code 76'
 
 # tab to get back to the status text entry
-osascript -e 'tell application "System Events" to key code 48'
-sleep 1
-
 # select anything that is already there, and delete it
-osascript -e 'tell application "System Events" to keystroke "a" using command down'
-osascript -e 'tell application "System Events" to key code 51'
+osascript <<EOF
+tell application "System Events"
+  key code 48
+  delay 0.5
+  keystroke "a" using command down
+  delay 0.5
+  key code 51
+end tell
+EOF
+
 sleep 1
 
 # type the input status text, then enter to save everything
@@ -82,8 +93,9 @@ sleep 1
 #osascript -e "tell application 'System Events' to keystroke '$status_text'"
 osascript <<EOF
 set the clipboard to "$status_text"
-tell application "System Events" to keystroke "v" using command down
+tell application "System Events"
+  keystroke "v" using command down
+  delay 0.5
+  key code 76
+end tell
 EOF
-sleep 1
-osascript -e 'tell application "System Events" to key code 76'
-
