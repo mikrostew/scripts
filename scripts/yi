@@ -1,0 +1,4 @@
+#!/usr/bin/env badash
+# Install dependencies with yarn
+
+@wait-for-command yarn install
