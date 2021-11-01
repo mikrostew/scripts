@@ -20,12 +20,18 @@ import {
 // add things to this, to display after the tasks are run
 const FINAL_OUTPUT: string[] = [];
 
+// TODO: or, add an 'all' keyword?
+const allMachines = ['homeLaptop', 'workLaptop', 'workVM'];
+const laptopMachines = ['homeLaptop', 'workLaptop'];
+const workMachines = ['workLaptop', 'workVM'];
+
 const config: Config = {
   environment: {
     BASE_SYNC_DIR: /(MacBook-Air|Michaels-Air)/i.test(os.hostname())
       ? process.env['HOME']!
       : '/usr/local/SyncThing',
   },
+  // TODO: rename this to machineMap?
   machines: {
     homeLaptop: /(MacBook-Air|Michaels-Air)/i,
     workLaptop: /mistewar-mn/,
@@ -56,13 +62,13 @@ const config: Config = {
     {
       name: 'Kill Processes',
       type: TaskType.GROUP,
-      machines: ['homeLaptop', 'workLaptop', 'workVM'],
+      machines: allMachines,
       tasks: [
         {
           name: 'all laptops',
           type: TaskType.KILL_PROC,
           // things to kill on both laptops
-          machines: ['homeLaptop', 'workLaptop'],
+          machines: laptopMachines,
           processes: [
             'Activity Monitor',
             'zoom.us',
@@ -84,7 +90,7 @@ const config: Config = {
     {
       name: 'Check XCode path',
       type: TaskType.FUNCTION,
-      machines: ['homeLaptop', 'workLaptop'],
+      machines: laptopMachines,
       function: async () => {
         const { stdout, stderr } = await execa('xcode-select', ['--print-path']);
         if (!stdout) {
@@ -113,12 +119,12 @@ const config: Config = {
     {
       name: 'Homebrew',
       type: TaskType.GROUP,
-      machines: ['homeLaptop', 'workLaptop'],
+      machines: laptopMachines,
       tasks: [
         {
           name: 'common',
           type: TaskType.HOMEBREW,
-          machines: ['homeLaptop', 'workLaptop'],
+          machines: laptopMachines,
           packages: [
             'bats-core',
             'expect',
@@ -150,7 +156,7 @@ const config: Config = {
 
     {
       type: TaskType.VOLTA_PACKAGE,
-      machines: ['homeLaptop', 'workLaptop', 'workVM'],
+      machines: allMachines,
       packages: [
         { name: '@11ty/eleventy' },
         { name: 'backstopjs' },
@@ -166,7 +172,7 @@ const config: Config = {
     {
       name: 'Rust',
       type: TaskType.EXEC,
-      machines: ['homeLaptop', 'workLaptop', 'workVM'],
+      machines: allMachines,
       command: 'rustup',
       args: ['update'],
     },
@@ -174,7 +180,7 @@ const config: Config = {
     {
       name: 'Downloads',
       type: TaskType.GROUP,
-      machines: ['homeLaptop', 'workLaptop'],
+      machines: laptopMachines,
       tasks: [
         {
           name: 'Moment garden pics & videos',
@@ -203,19 +209,19 @@ const config: Config = {
     {
       name: 'Misc Checks',
       type: TaskType.GROUP,
-      machines: ['homeLaptop', 'workLaptop', 'workVM'],
+      machines: allMachines,
       tasks: [
         {
           name: 'Verify dotfile links are good',
           type: TaskType.EXEC,
-          machines: ['homeLaptop', 'workLaptop', 'workVM'],
+          machines: allMachines,
           command: 'verify-dotfile-links',
           args: [path.join(os.homedir(), 'src/gh/dotfiles')],
         },
         {
           name: 'Make sure syncthing is running',
           type: TaskType.EXEC,
-          machines: ['homeLaptop', 'workLaptop'],
+          machines: laptopMachines,
           command: 'pgrep',
           args: ['syncthing'],
         },
@@ -224,7 +230,7 @@ const config: Config = {
         {
           name: 'Check for sync conflict files',
           type: TaskType.GROUP,
-          machines: ['homeLaptop', 'workLaptop'],
+          machines: laptopMachines,
           tasks: [
             'SyncAudio',
             'SyncCamera',
@@ -237,14 +243,14 @@ const config: Config = {
         {
           name: 'Cleanup shivs',
           type: TaskType.EXEC,
-          machines: ['workLaptop', 'workVM'],
+          machines: workMachines,
           command: 'cleanup-shivs',
           args: [process.env['LDAP_PASS']!],
         },
         {
           name: 'Free space check',
           type: TaskType.FUNCTION,
-          machines: ['homeLaptop', 'workLaptop'],
+          machines: laptopMachines,
           function: async () => {
             const { stdout } = await execa('df', ['-h']);
             const mainVolumeLine = stdout.match(/.*\/System\/Volumes\/Data\n/);
@@ -267,7 +273,7 @@ const config: Config = {
         {
           name: 'Cluttered Desktop',
           type: TaskType.FUNCTION,
-          machines: ['homeLaptop', 'workLaptop'],
+          machines: laptopMachines,
           function: async () => {
             const MAX_DESKTOP_ITEMS = 20;
             const desktopPath = path.join(process.env['HOME']!, 'Desktop');
@@ -285,7 +291,7 @@ const config: Config = {
     {
       name: 'Music Files',
       type: TaskType.GROUP,
-      machines: ['homeLaptop', 'workLaptop'],
+      machines: laptopMachines,
       tasks: [
         {
           name: 'Singalong',
@@ -310,7 +316,7 @@ const config: Config = {
             // {
             //   name: 'Export singalong music playlist',
             //   type: TaskType.FUNCTION,
-            //   machines: ['homeLaptop', 'workLaptop'],
+            //   machines: laptopMachines,
             //   // TODO
             //   function: () => {},
             // },
@@ -339,7 +345,7 @@ const config: Config = {
             // {
             //   name: 'Export workout music playlist',
             //   type: TaskType.FUNCTION,
-            //   machines: ['homeLaptop', 'workLaptop'],
+            //   machines: laptopMachines,
             //   // TODO
             //   function: () => {},
             // },
@@ -383,7 +389,7 @@ const config: Config = {
     {
       name: 'Engtools',
       type: TaskType.GROUP,
-      machines: ['workLaptop', 'workVM'],
+      machines: workMachines,
       tasks: [
         {
           name: 'engtools update for laptop',
@@ -412,26 +418,26 @@ const config: Config = {
     {
       name: 'Update repositories',
       type: TaskType.GROUP,
-      machines: ['homeLaptop', 'workLaptop', 'workVM'],
+      machines: allMachines,
       tasks: [
         {
           name: 'dotfiles',
           type: TaskType.REPO_UPDATE,
-          machines: ['homeLaptop', 'workLaptop', 'workVM'],
+          machines: allMachines,
           directory: path.join(os.homedir(), 'src/gh/dotfiles'),
           options: ['pull&rebase', 'push', 'yarn'],
         },
         {
           name: 'badash',
           type: TaskType.REPO_UPDATE,
-          machines: ['homeLaptop', 'workLaptop', 'workVM'],
+          machines: allMachines,
           directory: '/usr/local/lib/badash/',
           options: ['pull&rebase'],
         },
         {
           name: 'voyager-web',
           type: TaskType.REPO_UPDATE,
-          machines: ['workLaptop', 'workVM'],
+          machines: workMachines,
           directory: path.join(os.homedir(), 'src/li/voyager-web'),
           options: ['pull&rebase'],
         },
@@ -455,7 +461,7 @@ const config: Config = {
     {
       name: 'Open pages - work and home',
       type: TaskType.OPEN_URL,
-      machines: ['workLaptop', 'homeLaptop'],
+      machines: laptopMachines,
       url_config: {
         'Volta pnpm support RFC': 'https://github.com/volta-cli/rfcs/pull/46',
       },
@@ -476,7 +482,7 @@ const config: Config = {
     {
       name: 'Add after-task outputs',
       type: TaskType.GROUP,
-      machines: ['workLaptop', 'homeLaptop', 'workVM'],
+      machines: allMachines,
       tasks: [
         {
           name: 'Upcoming Dates',
