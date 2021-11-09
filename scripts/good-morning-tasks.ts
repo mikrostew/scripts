@@ -476,7 +476,27 @@ const config: Config = {
           'https://docs.google.com/spreadsheets/d/1PFz8_EXZ4W6Kb-r7wpqSSxhKNTE5Dx7evonVXteFqJQ/edit#gid=0',
         reading:
           'https://docs.google.com/document/d/1QXoiUy-DKZb76nkzxx4V_bqO63C6pdFnqCAeGV9WGYs/edit',
+        'acid-tmc-jobs':
+          'https://testmanager2.tools.corp.linkedin.com/#/product-details/voyager-web?taskName=send-acid-metrics',
       },
+    },
+
+    {
+      name: 'Start Apps',
+      type: TaskType.GROUP,
+      machines: laptopMachines,
+      tasks: [
+        {
+          name: 'work laptop',
+          type: TaskType.START_APP,
+          machines: ['workLaptop'],
+          appPaths: [
+            '/Applications/Slack.app/Contents/MacOS/Slack',
+            '/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook',
+          ],
+        },
+        // TODO: anything for my personal laptop?
+      ],
     },
 
     {

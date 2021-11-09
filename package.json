@@ -7,7 +7,7 @@
     "yarn": "1.22.4"
   },
   "dependencies": {
-    "@mikrostew/good-morning": "^0.1.4",
+    "@mikrostew/good-morning": "^0.1.5",
     "chalk": "^3.0.0",
     "cli-table": "^0.3.6",
     "execa": "^5.0.0",
