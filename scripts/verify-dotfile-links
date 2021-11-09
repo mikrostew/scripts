@@ -81,7 +81,8 @@ links[".config/karabiner"]="karabiner"
 links["tsconfig.json"]="tsconfig.json"
 
 # eslint
-links[".eslintrc.js"]=".eslintrc.js"
+# oops, don't include this
+#links[".eslintrc.js"]=".eslintrc.js"
 
 # machine-specific checks
 host_name="$(hostname)"

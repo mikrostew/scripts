@@ -79,7 +79,8 @@ links[".config/karabiner"]="karabiner"
 links["tsconfig.json"]="tsconfig.json"
 
 # eslint
-links[".eslintrc.js"]=".eslintrc.js"
+# oops, don't include this, to avoid interfering with other projects config
+#links[".eslintrc.js"]=".eslintrc.js"
 
 
 # machine-specific
