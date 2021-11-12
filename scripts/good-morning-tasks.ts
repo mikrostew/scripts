@@ -288,6 +288,23 @@ const config: Config = {
       ],
     },
 
+    // TODO: check projects for TODOs over a specified threshold
+    // don't put everything in here, just projects that should actually be a priority
+    // can even specify a subdir of a project, or specific file, if I care about only that
+    // {
+    //   name: 'Project TODOs',
+    //   type: TaskType.GROUP,
+    //   machines: ['homeLaptop'],
+    //   tasks: [
+    //     {
+    //       type: TaskType.PROJECT_TODOS,
+    //       machines: 'inherit',
+    //       location: '~/src/gh/dotfiles',
+    //       threshold: 20,
+    //     },
+    //   ],
+    // },
+
     {
       name: 'Music Files',
       type: TaskType.GROUP,
