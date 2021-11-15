@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# open applications and remind about settings for meetings
+
+# start these apps
+# OBS, camo studio, zoom (to check settings)
+run-app-path '/Applications/OBS.app/Contents/MacOS/obs'
+run-app-path '/Applications/Camo Studio 1.3.9.app/Contents/MacOS/Camo Studio'
+run-app-path '/Applications/zoom.us.app/Contents/MacOS/zoom.us'
+
+# reminders on the screen
+# TODO: show notifications instead?
+echo ""
+echo "Reminders:"
+echo "  Make sure the microphone is on"
+echo "  Make sure the light is on"
+
+# wait before exiting
+echo ""
+echo "Press any key to exit..."
+read -n1 -s
