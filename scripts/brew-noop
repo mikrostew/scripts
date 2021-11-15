@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# this is for noop-ing the `brew` command so it doesn't run during my work day
+
+sleep 1
+exit 0

@@ -117,6 +117,30 @@ const config: Config = {
     },
 
     {
+      name: 'Restore homebrew symlink',
+      type: TaskType.FUNCTION,
+      machines: laptopMachines,
+      function: async () => {
+        const brewSymlinkLocation = '/usr/local/bin/brew';
+        const brewBinaryLocation = '/usr/local/Homebrew/bin/brew';
+        // if I have changed the symlink, change it so it points to the binary
+        // normally this is symlinked to /usr/local/Homebrew/bin/brew
+        // I may have changed that to symlink to scripts/brew-noop
+        const linkStat = await fsPromises.lstat(brewSymlinkLocation);
+        if (linkStat.isSymbolicLink()) {
+          // if it's linked to the original location, ok, otherwise change it back
+          const target = await fsPromises.readlink(brewSymlinkLocation);
+          if (target !== brewBinaryLocation) {
+            await fsPromises.unlink(brewSymlinkLocation);
+            await fsPromises.symlink(brewBinaryLocation, brewSymlinkLocation);
+          }
+        } else {
+          throw new Error(`'${brewSymlinkLocation}' is not a symlink`);
+        }
+      },
+    },
+
+    {
       name: 'Homebrew',
       type: TaskType.GROUP,
       machines: laptopMachines,
@@ -514,6 +538,21 @@ const config: Config = {
         },
         // TODO: anything for my personal laptop?
       ],
+    },
+
+    {
+      name: 'Disable homebrew',
+      type: TaskType.FUNCTION,
+      machines: laptopMachines,
+      function: async () => {
+        const brewSymlinkLocation = '/usr/local/bin/brew';
+        const brewBinaryLocation = '/usr/local/Homebrew/bin/brew';
+        const brewNoopLocation = path.resolve(__dirname, 'brew-noop');
+        // normally this is symlinked to /usr/local/Homebrew/bin/brew
+        // I'm going to change that to symlink to scripts/brew-noop
+        await fsPromises.unlink(brewSymlinkLocation);
+        await fsPromises.symlink(brewNoopLocation, brewSymlinkLocation);
+      },
     },
 
     {
