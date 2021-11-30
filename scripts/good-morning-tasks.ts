@@ -141,6 +141,26 @@ const config: Config = {
     // },
 
     {
+      name: 'Check homebrew things',
+      type: TaskType.GROUP,
+      machines: laptopMachines,
+      tasks: [
+        {
+          name: 'Brew outdated',
+          type: TaskType.FUNCTION,
+          machines: 'inherit',
+          function: async () => execa('brew', ['outdated']),
+        },
+        {
+          name: 'Brew doctor',
+          type: TaskType.FUNCTION,
+          machines: 'inherit',
+          function: async () => execa('brew', ['doctor']),
+        },
+      ],
+    },
+
+    {
       name: 'Homebrew',
       type: TaskType.GROUP,
       machines: laptopMachines,
