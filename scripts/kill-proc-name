@@ -24,4 +24,7 @@ proc-not-found() {
 proc_name="$1"
 
 proc-kill-info "kill" "'$proc_name'"
-pkill "$proc_name" && proc-killed || proc-not-found
+
+# the pattern is treated as a regex, so this needs start/end markers
+# (don't want to match partial things)
+pkill "^$proc_name$" && proc-killed || proc-not-found

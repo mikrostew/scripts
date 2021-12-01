@@ -2,5 +2,9 @@
 
 # this is for noop-ing the `brew` command so it doesn't run during my work day
 
-sleep 1
+# for now, just log every call to this command to see what it's trying to do
+# TODO: should this log then pass thru the args?
+
+echo "[$(date)] $@" >> "$HOME/brew-noop.log"
+
 exit 0
