@@ -2,7 +2,7 @@
 # Paste the link to my Zoom meeting
 
 # Read this from a local file on disk, so I'm not committing the link to a public repo ;)
-zoom_file="$HOME/zoom-link.txt"
+zoom_file="/usr/local/SyncThing/SyncDocs/zoom-link.txt"
 
 # show a dialog if there is an error, since this is used as a keyboard shortcut
 show-dialog() {
@@ -18,15 +18,15 @@ EOSCRIPT
 
 if [ ! -f "$zoom_file" ]
 then
-  show-dialog "File '$HOME/zoom-link.txt' not found"
+  show-dialog "File '$zoom_file' not found"
   exit
 fi
 
-zoom_link="$(<$HOME/zoom-link.txt)"
+zoom_link="$(<$zoom_file)"
 
 if [ -z "$zoom_link" ]
 then
-  show-dialog "File '$HOME/zoom-link.txt' is empty"
+  show-dialog "File '$zoom_file' is empty"
   exit
 fi
 
