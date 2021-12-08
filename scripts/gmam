@@ -1,5 +1,5 @@
 #!/usr/bin/env badash
-# [git] Rebase current branch against main/master (Git Rebase Against Main/Master)
+# [git] Merge main/master into current branch (Git Merge Against Main/Master)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -84,20 +84,15 @@ then
     gc "$default_branch" && gpr
     @exit-on-error "Failed to pull and rebase $default_branch" 'gc "$branch_name"'
 
-    gc "$branch_name" && do_git rebase "$default_branch"
-    while [ "$?" -ne 0 ]; do
-      @wait-for-keypress 'Press any key to continue... '
+    # merge master into current branch
+    gc "$branch_name" && do_git merge "$default_branch"
+    if [ "$?" -ne 0 ]; then
+      echo ""
+      @wait-for-keypress 'Press any key to start resolving conflicts (or Ctrl-C to abort)... '
       need_to_remove_orig_files='yes'
-      # TODO: if I fix conflicts so there have been no changes, need to do `git rebase --skip` here
-      # (have to detect that from the output of `git rebase --continue`)
-      gmt && do_git rebase --continue
-      # TODO: how to detect that I should abort?
-    done
+      gmt
 
-    # delete any *.orig files leftover from merge conflicts
-    if [ "$need_to_remove_orig_files" == 'yes' ]; then
-      echo_info "Cleaning up .orig files from merge conflicts..."
-      grmorig
+      echo "To remove *.orig files leftover from conflicts, run 'grmorig'"
     fi
   fi
 fi
