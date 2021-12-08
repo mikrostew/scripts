@@ -1,9 +1,5 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gundo, and run 'generate-scripts.sh'
-###########################################################################
-#f6b8f1a76f96276ae7cce9cb75a7ab44
+# [git] Undo the last commit (Git Undo)
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -61,11 +57,15 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses-cmds git
+
 if in_git_repo
 then
   last_commit="$(git log -1 --pretty=%B)"
   git_dir="$(git rev-parse --show-toplevel)/.git"
   do_git reset --soft HEAD~1
+
+  # also writes the previous commit message to .git/GITGUI_MSG
   echo "$last_commit" > "$git_dir/GITGUI_MSG"
 fi
