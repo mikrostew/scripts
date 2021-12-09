@@ -155,7 +155,15 @@ const config: Config = {
           name: 'Brew doctor',
           type: TaskType.FUNCTION,
           machines: 'inherit',
-          function: async () => execa('brew', ['doctor']),
+          // this fails because of the check for config scripts (LI has some in ULL/ECL), so skip that one
+          function: async () => {
+            // get a list of all checks, then skip the config check
+            const brewChecks = (await execa('brew', ['doctor', '--list-checks'])).stdout
+              .split('\n')
+              .map((c) => c.trim())
+              .filter((c) => c !== 'check_for_config_scripts');
+            return execa('brew', ['doctor', ...brewChecks]);
+          },
         },
       ],
     },
