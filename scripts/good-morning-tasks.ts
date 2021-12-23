@@ -20,7 +20,7 @@ import {
 // add things to this, to display after the tasks are run
 const FINAL_OUTPUT: string[] = [];
 
-// TODO: or, add an 'all' keyword?
+// TODO: add an 'all' keyword?
 const allMachines = ['homeLaptop', 'workLaptop', 'workVM'];
 const laptopMachines = ['homeLaptop', 'workLaptop'];
 const workMachines = ['workLaptop', 'workVM'];
@@ -149,7 +149,17 @@ const config: Config = {
           name: 'Brew outdated',
           type: TaskType.FUNCTION,
           machines: 'inherit',
-          function: async () => execa('brew', ['outdated']),
+          function: async () => {
+            const outdatedPackages = (await execa('brew', ['outdated'])).stdout.trim().split('\n');
+            const numOutdated = outdatedPackages.length;
+            if (numOutdated > 0) {
+              throw new Error(
+                `Run 'brew upgrade' to update these ${numOutdated} outdated packages: ${outdatedPackages.join(
+                  ', '
+                )}`
+              );
+            }
+          },
         },
         {
           name: 'Brew doctor',
