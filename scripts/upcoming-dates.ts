@@ -127,7 +127,7 @@ function soonestDateFirst(a: FullDateConfig, b: FullDateConfig): number {
 function formatNotes(d: FullDateConfig): FullDateConfig {
   // calculate the anniversary number
   const anniversaryNum = d.anniversary_year
-    ? `anniversay #${d.year - d.anniversary_year}`
+    ? `${d.year - d.anniversary_year} year anniversary`
     : undefined;
   // add that to the existing notes, if there are any
   d.notes = [d.notes, anniversaryNum].filter(Boolean).join(', ');
