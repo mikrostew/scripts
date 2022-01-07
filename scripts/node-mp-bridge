@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# capture args to a log of when this is called
+
+LOG_FILE="$HOME/yarn-install.log"
+
+echo "[$(date)] node-mp-bridge $@" >> "$LOG_FILE"
