@@ -336,7 +336,7 @@ const config: Config = {
             const percentFreeSpace = parseInt(splitLine[4] || '', 10);
 
             if (percentFreeSpace > 80) {
-              throw new Error(`${percentFreeSpace} free space left (over 80%)`);
+              throw new Error(`${percentFreeSpace}% free space left (over 80%)`);
             }
           },
         },
