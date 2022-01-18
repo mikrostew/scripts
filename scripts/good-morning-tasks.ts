@@ -357,6 +357,36 @@ const config: Config = {
             }
           },
         },
+        {
+          name: 'Uptime',
+          type: TaskType.FUNCTION,
+          machines: laptopMachines,
+          function: async () => {
+            const MAX_UPTIME_DAYS = 10;
+            const uptimeStdout = (await execa('uptime')).stdout.trim();
+            // if the machine has been up less than a day, it will be this format
+            const matchedLessThanOneDay = uptimeStdout.match(/[0-9]+:[0-9]+\s*up [0-9]+:[0-9]+,/);
+            if (matchedLessThanOneDay) {
+              return;
+            }
+            // will match this if it has been more than one day
+            const matchedMultipleDays = uptimeStdout.match(/[0-9]+:[0-9]+\s*up ([0-9]*) days/);
+            if (!matchedMultipleDays || !matchedMultipleDays[1]) {
+              throw new Error(`'uptime' stdout:\n${uptimeStdout}\nCould not parse uptime output`);
+            }
+            const numDaysUp = parseInt(matchedMultipleDays[1]);
+            if (Number.isNaN(numDaysUp)) {
+              throw new Error(
+                `'uptime' stdout:\n${uptimeStdout}\nError parsing uptime output, got '${matchedMultipleDays[1]}' days, which is NaN`
+              );
+            }
+            if (numDaysUp > MAX_UPTIME_DAYS) {
+              throw new Error(
+                `Machine has been up for ${numDaysUp} days (> ${MAX_UPTIME_DAYS}), consider restarting it`
+              );
+            }
+          },
+        },
       ],
     },
 
