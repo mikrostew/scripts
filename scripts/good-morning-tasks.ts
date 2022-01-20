@@ -320,6 +320,26 @@ const config: Config = {
           args: [process.env['LDAP_PASS']!],
         },
         {
+          name: 'Rdev check',
+          type: TaskType.FUNCTION,
+          machines: workMachines,
+          function: async () => {
+            const rdevLsStdout = (await execa('rdev', ['ls'])).stdout;
+            const rdevMachines = rdevLsStdout
+              .trim()
+              .split('\n')
+              .filter((s) => s !== '');
+            const numMachines = rdevMachines.length;
+            if (numMachines > 1) {
+              throw new Error(
+                `'rdev ls' output:\n${rdevLsStdout}\nYou have ${numMachines} rdev machines. Run 'rdev delete <machine>' to get rid of at least one of these: ${rdevMachines.join(
+                  ', '
+                )}`
+              );
+            }
+          },
+        },
+        {
           name: 'Free space check',
           type: TaskType.FUNCTION,
           machines: laptopMachines,
