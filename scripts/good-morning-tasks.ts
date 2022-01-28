@@ -326,9 +326,13 @@ const config: Config = {
           function: async () => {
             const rdevLsStdout = (await execa('rdev', ['ls'])).stdout;
             const rdevMachines = rdevLsStdout
-              .trim()
               .split('\n')
-              .filter((s) => s !== '');
+              .map((line) => line.trim())
+              .filter((line) => line !== '')
+              .filter((line) => {
+                // strip out the initial lines that are not actually rdev machines
+                return !(/^Name/.test(line) || /------/.test(line));
+              });
             const numMachines = rdevMachines.length;
             if (numMachines > 1) {
               throw new Error(
