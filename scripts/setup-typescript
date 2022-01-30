@@ -1,0 +1,28 @@
+#!/usr/bin/env badash
+# Setup Typescript for a JS project
+
+# add dependencies
+
+# typescript
+@wait-for-command yarn add typescript --dev
+# optional, to run scripts on the fly
+#@wait-for-command yarn add ts-node --dev
+
+# eslint
+@wait-for-command yarn add eslint --dev
+@wait-for-command yarn add @typescript-eslint/eslint-plugin --dev
+@wait-for-command yarn add @typescript-eslint/parser --dev
+
+# prettier
+@wait-for-command yarn add prettier --dev
+@wait-for-command yarn add eslint-config-prettier --dev
+@wait-for-command yarn add eslint-plugin-prettier --dev
+
+# add scripts in package.json (build, watch, etc.)
+@wait-for-command yarn add npm-add-script --dev
+yarn npmAddScript -k "build" -v "tsc --build"
+yarn npmAddScript -k "build:watch" -v "tsc --build --watch"
+
+# setup config files
+yarn tsc --init
+cp -v "$HOME/src/gh/dotfiles/.eslintrc.js" ./
