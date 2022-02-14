@@ -8,7 +8,7 @@
 
 osascript <<EOScript
 set charcount to 0
-say "can't stop me"
+say "paste"
 tell application "System Events"
   repeat with char in the characters of (the clipboard)
     keystroke char
