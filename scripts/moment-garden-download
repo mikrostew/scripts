@@ -206,11 +206,22 @@ async function downloadMedia(metadataDir, mediaDir) {
 
   try {
     for (const file of allFiles) {
+      if (file === '.DS_Store') {
+        // this will fail, I hate these files, delete it and keep going
+        console.log(`Removing dumb file ${path.join(metadataDir, file)}`);
+        await fsPromises.unlink(path.join(metadataDir, file));
+        continue;
+      }
       let didDownload = false;
 
-      // console.log(`Found file ${file}`);
       const contents = await fsPromises.readFile(path.join(metadataDir, file), 'utf8');
-      const item = JSON.parse(contents);
+      let item;
+      try {
+        item = JSON.parse(contents);
+      } catch(err) {
+        console.error(`Error: Failed to parse file '${path.join(metadataDir, file)}' as JSON`);
+        throw err;
+      }
       const type = parseInt(item.type, 10);
       // console.log(type);
       if (type === TYPE_TEXT) {
@@ -247,9 +258,10 @@ async function downloadMedia(metadataDir, mediaDir) {
       }
     }
   } catch (err) {
-    console.log(`Error: something failed when downloading`);
-    console.log('');
-    console.log(err);
+    console.error('Error: failure when downloading:');
+    console.error(err);
+    // so that this will exit non-zero
+    process.exitCode = 1;
   }
 
   console.log(`Downloaded ${numFilesDownloaded} files`);
