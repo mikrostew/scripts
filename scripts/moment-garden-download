@@ -205,6 +205,7 @@ async function downloadMedia(metadataDir, mediaDir) {
   let numFilesDownloaded = 0;
 
   try {
+    console.log(`Checking ${allFiles.length} metadata items for download`);
     for (const file of allFiles) {
       if (file === '.DS_Store') {
         // this will fail, I hate these files, delete it and keep going
@@ -247,6 +248,7 @@ async function downloadMedia(metadataDir, mediaDir) {
       if (didDownload) {
         numFilesDownloaded++;
         if (numFilesDownloaded >= DOWNLOAD_FILE_LIMIT) {
+          console.log(`(hit download file limit of ${DOWNLOAD_FILE_LIMIT})`);
           break;
         }
 
