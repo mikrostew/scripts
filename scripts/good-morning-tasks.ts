@@ -388,9 +388,10 @@ const config: Config = {
           function: async () => {
             const MAX_UPTIME_DAYS = 10;
             const uptimeStdout = (await execa('uptime')).stdout.trim();
-            // if the machine has been up less than a day, it will be this format
+            // if the machine has been up less than a day, it will be one of these formats
+            const matchedLessThanOneHour = uptimeStdout.match(/[0-9]+:[0-9]+\s*up [0-9]+ mins,/);
             const matchedLessThanOneDay = uptimeStdout.match(/[0-9]+:[0-9]+\s*up [0-9]+:[0-9]+,/);
-            if (matchedLessThanOneDay) {
+            if (matchedLessThanOneHour && matchedLessThanOneDay) {
               return;
             }
             // will match this if it has been more than one day
