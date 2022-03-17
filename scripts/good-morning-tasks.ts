@@ -146,7 +146,7 @@ const config: Config = {
       machines: laptopMachines,
       tasks: [
         {
-          name: 'Brew outdated',
+          name: 'Brew outdated (& upgrade)',
           type: TaskType.FUNCTION,
           machines: 'inherit',
           function: async () => {
@@ -156,12 +156,9 @@ const config: Config = {
               .split('\n')
               .filter((s) => s !== '');
             const numOutdated = outdatedPackages.length;
+            // if there are any outdated packages, update them
             if (numOutdated > 0) {
-              throw new Error(
-                `'brew outdated' output:\n${brewOutdatedStdout}\nRun 'brew upgrade' to update these ${numOutdated} outdated packages: ${outdatedPackages.join(
-                  ', '
-                )}`
-              );
+              return execa('brew', ['upgrade']);
             }
           },
         },
