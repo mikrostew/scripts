@@ -344,23 +344,23 @@ const config: Config = {
           },
         },
         {
-          name: 'Free space check',
+          name: 'Disk space check',
           type: TaskType.FUNCTION,
           machines: laptopMachines,
           function: async () => {
             const { stdout } = await execa('df', ['-h']);
             const mainVolumeLine = stdout.match(/.*\/System\/Volumes\/Data\n/);
             if (mainVolumeLine === null) {
-              throw new Error(`Could not parse free space from ${stdout}`);
+              throw new Error(`Could not parse disk space from ${stdout}`);
             }
             const splitLine = mainVolumeLine[0]?.split(' ').filter((s) => s !== '');
             if (splitLine === undefined) {
-              throw new Error(`Could not parse free space from line ${mainVolumeLine}`);
+              throw new Error(`Could not parse disk space from line ${mainVolumeLine}`);
             }
-            const percentFreeSpace = parseInt(splitLine[4] || '', 10);
+            const percentDiskUsed = parseInt(splitLine[4] || '', 10);
 
-            if (percentFreeSpace > 80) {
-              throw new Error(`${percentFreeSpace}% free space left (over 80%)`);
+            if (percentDiskUsed > 80) {
+              throw new Error(`${percentDiskUsed}% disk used (over 80%)`);
             }
           },
         },
