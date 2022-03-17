@@ -4,11 +4,11 @@
   },
   "volta": {
     "node": "12.16.1",
-    "yarn": "1.22.4"
+    "yarn": "1.22.17"
   },
   "dependencies": {
     "@mikrostew/good-morning": "^0.1.5",
-    "chalk": "^3.0.0",
+    "chalk": "^4",
     "cli-table": "^0.3.6",
     "execa": "^5.0.0",
     "listr": "^0.14.3",
