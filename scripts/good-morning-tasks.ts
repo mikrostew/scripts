@@ -392,7 +392,7 @@ const config: Config = {
               return;
             }
             // will match this if it has been more than one day
-            const matchedMultipleDays = uptimeStdout.match(/[0-9]+:[0-9]+\s*up ([0-9]*) days/);
+            const matchedMultipleDays = uptimeStdout.match(/[0-9]+:[0-9]+\s*up ([0-9]*) days?/);
             if (!matchedMultipleDays || !matchedMultipleDays[1]) {
               throw new Error(`'uptime' stdout:\n${uptimeStdout}\nCould not parse uptime output`);
             }
