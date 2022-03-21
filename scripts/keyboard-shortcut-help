@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+// because I don't remember what all these things do
+
+const fs = require('fs');
+const path = require('path');
+
+// parse the karabiner config file
+const karabinerJson = fs.readFileSync(path.resolve(__dirname, '../karabiner/karabiner.json'), 'utf8');
+const karabinerConfig = JSON.parse(karabinerJson);
+
+const profile = karabinerConfig.profiles[0];
+const rules = profile.complex_modifications.rules;
+
+console.log('Karabiner shortcuts:');
+rules.map((r) => r.description).sort().forEach((rule) => {
+  console.log(` ${rule}`);
+});

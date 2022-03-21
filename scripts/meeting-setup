@@ -9,7 +9,6 @@ run-app-path '/Applications/Camo Studio 1.3.9.app/Contents/MacOS/Camo Studio'
 run-app-path '/Applications/zoom.us.app/Contents/MacOS/zoom.us'
 
 # reminders on the screen
-# TODO: show notifications instead?
 echo ""
 echo "Reminders:"
 echo "  Make sure the microphone is on"

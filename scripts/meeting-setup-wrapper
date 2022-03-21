@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 
 # wrapper for meeting-setup script, so I can use a key combo for this
-# TODO: set this up as a keyboard shortcut - M
 
 # check if iterm2 is running - if not, we need to start it
-pgrep -a iTerm2
-if [ "$?" -eq 0 ]
+if pgrep -a iTerm2
 then
-  # iTerm2 alread running - open a new window
+  # iTerm2 already running - open a new window
   osascript -e 'tell application "iTerm" to create window with default profile'
 else
   # iTerm2 not running - have to start it
