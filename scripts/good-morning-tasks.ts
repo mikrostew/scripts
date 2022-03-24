@@ -357,7 +357,7 @@ const config: Config = {
             const percentDiskUsed = parseInt(splitLine[4] || '', 10);
 
             if (percentDiskUsed > 80) {
-              throw new Error(`${percentDiskUsed}% disk used (over 80%)`);
+              throw new Error(`${percentDiskUsed}% disk used (over 80%). Run something like 'dir-sizes /Applications/* /Users/$USER/* /usr/*' to see disk usage info.`);
             }
           },
         },

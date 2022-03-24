@@ -36,4 +36,4 @@ do
 done
 shift $((OPTIND-1))
 @uses-cmds du sort
-du -skx "$@" | sort --numeric-sort --reverse
+du -skx "$@" 2>/dev/null | sort --numeric-sort --reverse
