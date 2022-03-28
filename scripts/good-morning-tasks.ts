@@ -1,8 +1,6 @@
 #!/usr/bin/env ts-node
 
-// TODO: I'd like to do this, but I'm on node 12.x - probably should upgrade
-//import { readdir } from 'fs/promises';
-import { promises as fsPromises } from 'fs';
+import { readdir } from 'fs/promises';
 import os from 'os';
 import path from 'path';
 
@@ -370,7 +368,7 @@ const config: Config = {
           function: async () => {
             const MAX_DESKTOP_ITEMS = 20;
             const desktopPath = path.join(process.env['HOME']!, 'Desktop');
-            const filesInDesktop = await fsPromises.readdir(desktopPath);
+            const filesInDesktop = await readdir(desktopPath);
             if (filesInDesktop.length > MAX_DESKTOP_ITEMS) {
               throw new Error(
                 `More than ${MAX_DESKTOP_ITEMS} items in Desktop: found ${filesInDesktop.length}`
