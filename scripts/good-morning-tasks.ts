@@ -683,7 +683,7 @@ const config: Config = {
           type: TaskType.FUNCTION,
           machines: ['workLaptop'],
           function: () => {
-            FINAL_OUTPUT.push('', 'Reminders', ' - setup your Slack status now!');
+            FINAL_OUTPUT.push('', 'Reminders', ' - setup your Slack status now!', ' - *** Check email for receipts in Outlook! ***');
           },
         },
       ],
