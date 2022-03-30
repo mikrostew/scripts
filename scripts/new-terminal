@@ -2,8 +2,7 @@
 # Opens new iTerm2 window
 
 # check if iterm2 is running - if not, we need to start it
-pgrep -a iTerm2
-if [ "$?" -eq 0 ]
+if pgrep -a iTerm2
 then
   # iTerm2 alread running - open a new window
   osascript -e 'tell application "iTerm" to create window with default profile'

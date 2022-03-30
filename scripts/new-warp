@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Opens new Warp window
+
+
+# check if Warp is running - if not, we need to start it
+if pgrep -a -f Warp.app
+then
+  # TODO: would be nice if this worked
+  # osascript -e 'tell application "Warp.app" to create window'
+  # have to do this via the menu (like firefox)
+  osascript <<EOF
+tell application "System Events"
+  tell process "Warp"
+    click menu item "New Window" of menu "File" of menu bar 1
+  end tell
+end tell
+tell application "Warp"
+  activate
+end tell
+EOF
+else
+  # Warp not running - have to start it
+  osascript -e 'tell application "Warp.app" to activate'
+fi
