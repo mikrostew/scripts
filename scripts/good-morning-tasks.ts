@@ -113,6 +113,10 @@ const config: Config = {
           return execa('send-passwd-for-sudo', [process.env['LDAP_PASS']!, 'brew', 'upgrade']);
         }
       }),
+      func( 'Brew cleanup', 'inherit', async () => {
+        // free up some disk space
+        return execa('brew', ['cleanup']);
+      }),
       func( 'Brew doctor', 'inherit', async () => {
         // this fails because of the check for config scripts (LI has some in ULL/ECL), so skip that one
         // get a list of all checks, then skip the config check
