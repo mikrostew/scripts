@@ -1,0 +1,36 @@
+#!/usr/bin/env badash
+# [git] Reset the commits in the local branch to the commits in origin (Git Reset Branch)
+# (for when a branch is force-pushed)
+
+# helpers
+current_git_branch () {
+  git rev-parse --abbrev-ref HEAD
+}
+
+branch_name=$(current_git_branch)
+
+# sometimes I'm working on a branch, and someone else force-pushes
+# when I try to pull and rebase, it will likely fail with merge conflicts
+# this resets the commits on the local branch to match origin
+# (https://stackoverflow.com/a/9813888)
+
+echo ""
+echo "Do a hard reset? This will discard any changes to tracked files in the working tree."
+echo -n "Confirm hard reset of branch '$branch_name' [y/N]: "
+read -r confirm_hard
+if [ -z "$confirm_hard" ] || [ "$confirm_hard" == "N" ] || [ "$confirm_hard" == "n" ]
+then
+  echo ""
+  echo "Do a soft reset instead? This will preserve local changes, which you can then commit."
+  echo -n "Confirm soft reset of branch '$branch_name' [y/N]: "
+  read -r confirm_soft
+  if [ -z "$confirm_soft" ] || [ "$confirm_soft" == "N" ] || [ "$confirm_soft" == "n" ]
+  then
+    echo ""
+    echo "Not resetting"
+  else
+    @wait-for-command git reset "origin/$branch_name" --soft
+  fi
+else
+  @wait-for-command git reset "origin/$branch_name" --hard
+fi
