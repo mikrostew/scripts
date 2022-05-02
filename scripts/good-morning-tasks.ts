@@ -366,6 +366,7 @@ const config: Config = {
       start_app( 'work laptop', ['workLaptop'], [
         '/Applications/Slack.app/Contents/MacOS/Slack',
         '/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook',
+        '/Applications/Discord.app/Contents/MacOS/Discord',
       ]),
       // TODO: anything for my personal laptop?
     ]),
