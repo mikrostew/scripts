@@ -9,30 +9,10 @@ COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 current_git_branch ()
 {
     echo "$(git rev-parse --abbrev-ref HEAD)"
-}
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
 }
 echo_err ()
 {
@@ -91,9 +71,14 @@ then
   then
     diff_description="$input_description"
   fi
-  do_git review update --open --diff-description "$diff_description"
+  @wait-for-command git review update --open --diff-description "$diff_description"
 else
   echo_info "No RB for this branch - creating one..."
+  if [ "$branch_name" = "master" ]
+  then
+    echo_err "Don't create a review from the 'master' branch, use a feature branch"
+    exit 1
+  fi
   if [ -z "$input_description" ]
   then
     input_description="$(git log -1 --pretty=%B)"
@@ -104,5 +89,5 @@ else
   then
     rb_description="$input_description"
   fi
-  do_git review create --owners-only --open --description "$rb_description"
+  @wait-for-command git review create --owners-only --open --description "$rb_description"
 fi

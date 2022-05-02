@@ -227,6 +227,7 @@ then
 
   # NOTE: because dcommit ^^ stopped doing this correctly for me
   # (I _think_ it's adding the config before amending the commit, so the config is gone)
+  # TODO: I should check if this exists and write it if necessary
   # add the config for the reviewid
   do_git config branch.master.reviewid "$review_id"
   if [ "$?" -ne 0 ]
