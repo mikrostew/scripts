@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# close applications I use for meetings
+
+# for camera and microphone
+kill-proc-name "obs"
+kill-proc-name "Camo Studio"
+
+# meeting applications
+kill-proc-name "zoom.us"
+kill-proc-name "Teams"
