@@ -3,30 +3,9 @@
 
 # [git] Undo the last commit (Git Undo)
 
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
-}
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -66,7 +45,7 @@ if in_git_repo
 then
   last_commit="$(git log -1 --pretty=%B)"
   git_dir="$(git rev-parse --show-toplevel)/.git"
-  do_git reset --soft HEAD~1
+  @wait-for-command git reset --soft HEAD~1
 
   # also writes the previous commit message to .git/GITGUI_MSG
   echo "$last_commit" > "$git_dir/GITGUI_MSG"

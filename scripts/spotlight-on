@@ -1,26 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
 # Turn off spotlight (usually for local builds)
 
-# colors
-COLOR_FG_GREEN='\033[0;32m'
-COLOR_RESET='\033[0m'
-
-# helper to make this nice
-do_cmd () {
-  local cmd_args="";
-  for arg in "$@";
-  do
-    case "$arg" in
-      *\ *)
-        cmd_args="$cmd_args \"$arg\""
-        ;;
-      *)
-        cmd_args="$cmd_args $arg"
-        ;;
-    esac;
-  done;
-  echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-  command "$@"
-}
-
-do_cmd sudo mdutil -a -i on
+@wait-for-command sudo mdutil -a -i on

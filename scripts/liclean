@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
 # Clean dirs and files in a MP (for LinkedIn workflow)
 
 # how to use this:
@@ -6,28 +8,10 @@
 
 # colors
 COLOR_FG_BOLD_BLUE='\033[1;34m'
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 # imported functions
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -90,14 +74,14 @@ if in_linkedin_mp; then
 
   # stop any processes that have not been properly cleaned up
   echo_info "stopping stray processes..."
-  do_cmd killall node ember java
+  @wait-for-command killall node ember java
 
   # default: remove build products and disk_cache
   echo_info "removing build files..."
-  do_cmd rm -rf .eyeglass_cache/ build/ dist/ tmp/ logs/*.log
+  @wait-for-command rm -rf .eyeglass_cache/ build/ dist/ tmp/ logs/*.log
 
   if [ -n "$disk_cache_dir" ]; then
     echo_info "removing disk cache files..."
-    do_cmd rm -rf "$disk_cache_dir"
+    @wait-for-command rm -rf "$disk_cache_dir"
   fi
 fi

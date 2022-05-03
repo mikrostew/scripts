@@ -12,27 +12,6 @@ current_git_branch ()
 {
     git rev-parse --abbrev-ref HEAD
 }
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
-}
 echo_ack ()
 {
     echo -e "${COLOR_FG_GREEN}$*${COLOR_RESET}" 1>&2
@@ -99,7 +78,7 @@ git_review_board_id ()
 }
 git_undo_merge ()
 {
-    do_git reset --merge ORIG_HEAD && do_git checkout "$1"
+    @wait-for-command git reset --merge ORIG_HEAD && @wait-for-command git checkout "$1"
 }
 in_git_repo ()
 {
@@ -224,7 +203,7 @@ then
   # apply the RB to the commit
   # if this fails, means I don't have the necessary ACLs (for git submit repos)
   # NOTE: this does not seem to be writing the RB ID info correctly anymore?
-  do_git review dcommit -r "$review_id"
+  @wait-for-command git review dcommit -r "$review_id"
   # if dcommit failed, probably missing a shipit from ACL
   # shellcheck disable=SC2016
   @exit-on-error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
@@ -233,7 +212,7 @@ then
   # (I _think_ it's adding the config before amending the commit, so the config is gone)
   # TODO: I should check if this exists and write it if necessary
   # add the config for the reviewid
-  if ! do_git config branch.master.reviewid "$review_id"
+  if ! @wait-for-command git config branch.master.reviewid "$review_id"
   then
     @wait-for-keypress 'That ^^ failed. Try adding it to the config manually, then press any key to continue...'
   fi
@@ -246,13 +225,13 @@ then
   if [ -z "$async_confirm" ] || [ "$async_confirm" == "Y" ] || [ "$async_confirm" == "y" ]
   then
     echo_info "Submitting asynchronously - you can go work on another branch"
-    if ! do_git submit --async; then echo_fail_banner; else echo_success_banner; fi
+    if ! @wait-for-command git submit --async; then echo_fail_banner; else echo_success_banner; fi
     # either way, success or fail, want to undo the merge to preserve the branch
     echo_info "Checking out your original branch..."
     git_undo_merge "$branch_name"
   else
     echo_info "Submitting synchronously - watch this terminal for progress"
-    if ! do_git submit
+    if ! @wait-for-command git submit
     then
       # submit failed, could be precommit, or ACL check, or whatever
       echo_fail_banner

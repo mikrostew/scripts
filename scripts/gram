@@ -4,34 +4,12 @@
 # [git] Rebase current branch against main/master (Git Rebase Against Main/Master)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 current_git_branch ()
 {
     git rev-parse --abbrev-ref HEAD
-}
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
 }
 echo_err ()
 {
@@ -43,11 +21,11 @@ echo_info ()
 }
 gmt ()
 {
-    do_git mergetool --tool=opendiff
+    @wait-for-command git mergetool --tool=opendiff
 }
 grmorig ()
 {
-    do_git ls-files --others --exclude-standard | do_cmd grep \.orig$ | do_cmd xargs rm -v
+    @wait-for-command git ls-files --others --exclude-standard | @wait-for-commnand grep \.orig$ | @wait-for-command xargs rm -v
 }
 in_git_repo ()
 {
@@ -87,14 +65,14 @@ then
     # shellcheck disable=SC2016
     @exit-on-error "Failed to pull and rebase $default_branch" 'gc "$branch_name"'
 
-    gc "$branch_name" && do_git rebase "$default_branch"
+    gc "$branch_name" && @wait-for-command git rebase "$default_branch"
     # shellcheck disable=SC2181
     while [ "$?" -ne 0 ]; do
       @wait-for-keypress 'Press any key to continue... '
       need_to_remove_orig_files='yes'
       # TODO: if I fix conflicts so there have been no changes, need to do `git rebase --skip` here
       # (have to detect that from the output of `git rebase --continue`)
-      gmt && do_git rebase --continue
+      gmt && @wait-for-command git rebase --continue
       # TODO: how to detect that I should abort?
     done
 

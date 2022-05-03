@@ -4,34 +4,12 @@
 # [git] Checkout git branch from list of branches (Git Checkout from List)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 all_git_branches ()
 {
     git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||'
-}
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
 }
 echo_err ()
 {
@@ -85,7 +63,7 @@ then
   if [ -n "$branch_num" ] && (( "$branch_num" <= "$num_branches" ))
   then
     (( branch_index = branch_num - 1 ))
-    do_git checkout "${all_branches[$branch_index]}"
+    @wait-for-command git checkout "${all_branches[$branch_index]}"
   else
     echo_info "no branch selected"
   fi

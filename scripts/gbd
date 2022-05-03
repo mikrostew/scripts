@@ -12,27 +12,6 @@ all_git_branches ()
 {
     git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||'
 }
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
-}
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -113,7 +92,7 @@ then
   if [ -n "$branch_num" ] && (( "$branch_num" <= "$num_branches" ))
   then
     (( branch_index = branch_num - 1 ))
-    do_git branch -d "${all_branches[$branch_index]}"
+    @wait-for-command git branch -d "${all_branches[$branch_index]}"
   else
     echo_info "no branch selected"
   fi
