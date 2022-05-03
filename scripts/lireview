@@ -1,6 +1,8 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# Create a new RB from the local changes, or update existing review
+
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -48,18 +50,33 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 input_description="${1:-}"
+
 @uses-cmds jq git
+
+# SETTINGS
 #ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
+
 branch_name=$(current_git_branch)
 review_id="$(git_review_board_id "$branch_name")"
+
+# check if there is already a RB for this branch
 if [ -n "$review_id" ]
 then
+  # update
+
+  # this doesn't cover platform-review
+  # see go/voyager/web/platform-review for details of that command
+
   echo_info "RB $review_id already exists for this branch - updating..."
+
+  # if there is no argument supplied, use the last commit message
   if [ -z "$input_description" ]
   then
     input_description="$(git log -1 --pretty=%B)"
   fi
+
   echo -n "Description of these changes [$input_description]: "
   read -r diff_description
   if [ -z "$diff_description" ]
@@ -67,10 +84,15 @@ then
     diff_description="$input_description"
   fi
   @wait-for-command git review update --open --diff-description "$diff_description"
+  # use `git review update --help` to figure out how to add other options
 else
+  # create
+
   echo_info "No RB for this branch - creating one..."
+  # if there is an argument supplied, use that for the description
   if [ "$branch_name" = "master" ]
   then
+    # no input description, so use the commit message
     echo_err "Don't create a review from the 'master' branch, use a feature branch"
     exit 1
   fi
@@ -84,5 +106,9 @@ else
   then
     rb_description="$input_description"
   fi
+
+  # previously this was using expect, but sometimes I have to login, and it hangs
   @wait-for-command git review create --owners-only --open --description "$rb_description"
+
+  # use `git review create --help` to figure out how to add other options
 fi

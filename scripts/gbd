@@ -1,10 +1,13 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# [git] Delete git branch from list of branches (Git Branch Delete)
+
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 all_git_branches ()
 {
     git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||'
@@ -66,9 +69,12 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses-cmds sed, git
+
 if in_git_repo
 then
+  # all branches, not including master
   # TODO: also account for 'main'
   all_branches="$(all_git_branches | sed '/^master$/d' | sort)"
   if [ -z "$all_branches" ]
@@ -76,24 +82,34 @@ then
     echo_info "master is the only branch, nothing to delete"
     exit 0
   fi
+
+  # all branches that have been merged (strip out leading asterisk and whitespace
   mapfile -t all_branches <<< "$all_branches"
   num_branches="${#all_branches[@]}"
   mapfile -t all_merged <<< "$(git branch --merged master | sed -e 's/^\* //' -e 's/^  //')"
   num_merged="${#all_merged[@]}"
+
+  # construct an associative array to display if branches are merged
   declare -A merge_status
   for((i=0; i<num_merged; i++))
   do
     name="${all_merged[$i]}"
+    # add color here
     merge_status[$name]="${COLOR_FG_GREEN}(merged)${COLOR_RESET}"
   done
+
+  # display the branches and prompt for choice
   for((i=0; i<num_branches; i++))
   do
     branch_name="${all_branches[$i]}"
+    # display a 1-based index, which is nicer to select
     echo -e "[$(( i + 1 ))] $branch_name ${merge_status[$branch_name]}"
   done
   echo -n "Branch to delete: "
   read -r branch_num
   echo ""
+
+  # validate choice and try to delete
   if [ -n "$branch_num" ] && (( "$branch_num" <= "$num_branches" ))
   then
     (( branch_index = branch_num - 1 ))

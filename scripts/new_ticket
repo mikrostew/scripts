@@ -1,9 +1,12 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# Pastes a template into Description field when creating a new Jira ticket
+
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -19,6 +22,7 @@ show_help_msg() {
   echo 'Options:'
   echo '  -h               Show this help message'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -36,16 +40,21 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses-cmds osascript
+
 join() {
   local IFS="/"
   echo "$*"
 }
+
 TICKET_TASK="task"
 TICKET_BUG="bug"
 TICKET_RESEARCH="research"
+
 ticket_types=( "$TICKET_TASK" "$TICKET_BUG" "$TICKET_RESEARCH" )
 default_type="$TICKET_TASK"
+
 echo -n "Ticket type - $(join "${ticket_types[@]}") [$default_type]: "
 read -r input_type
 if [ -z "$input_type" ]
@@ -54,7 +63,12 @@ then
 else
   ticket_type="$input_type"
 fi
+
+# make sure Chrome window has focus
 osascript -e 'tell application "Google Chrome" to activate'
+
+# emulate keystrokes to type the template into the field
+# it would be nice to allow typing in a partial name as long as it is enough to ID the task
 if [ "$ticket_type" == "$TICKET_TASK" ]
 then
   echo_info "Filling out ticket type '$TICKET_TASK'"

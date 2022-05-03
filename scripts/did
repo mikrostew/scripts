@@ -1,8 +1,12 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# Appends to a very simple did.txt file
+# (adapted from https://theptrk.com/2018/07/11/did-txt-file/)
+
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -31,15 +35,25 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses-cmds vim sed
+
 did_file="$HOME/Dropbox/doc/did.txt"
 timestamp="$(date +"%Y-%m-%d %H:%M:%S %A")"
+
 if [ -n "$1" ]
 then
+  # write the message from the command line
   message="$1"
   echo -e "$timestamp\n- $message\n\n$(cat "$did_file")" > "$did_file"
 else
+  # no message input, do this in vim
   vim +"normal O$timestamp" +'normal o' +'normal ggo-  ' +startinsert "$did_file"
 fi
+
+# then show what I just added to that file - print everything up to the first blank line in the file
 echo ""
+# don't print automatically
+# once it hits a blank line quit (without printing the blank line)
+# otherwise print the non-blank line
 sed -n -e '/^$/ q' -e 'p' "$did_file"

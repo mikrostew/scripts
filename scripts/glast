@@ -1,9 +1,12 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# [git] Show last commit info (Git LAST)
+
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 do_cmd ()
 {
     local cmd_args="";
@@ -36,6 +39,7 @@ show_help_msg() {
   echo 'Options:'
   echo '  -h               Show this help message'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -53,4 +57,5 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @wait-for-command --show-output git log -n1 --color --decorate --pretty=fuller

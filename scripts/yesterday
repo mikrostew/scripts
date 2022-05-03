@@ -3,6 +3,7 @@
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -14,6 +15,7 @@ show_help_msg() {
   echo 'Options:'
   echo '  -h               Show this help message'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -31,16 +33,30 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses-cmds gdate sed
+
 yesterday_date="$(gdate -d '1 day ago' +"%Y-%m-%d")"
 echo "Items from yesterday, $yesterday_date:"
+
 did_file="$HOME/Dropbox/doc/did.txt"
+
+# print all the entries matching yesterday's date
+# (from http://www.grymoire.com/Unix/Sed.html#toc-uh-58)
 sed -n '
+  # if an empty line, check the paragraph
   /^$/ b para
+  # else add it to the hold buffer
   H
+  # at end of file, check paragraph
   $ b para
+  # now branch to end of script
   b
+  # this is where a paragraph is checked for the pattern
   :para
+  # return the entire paragraph
+  # into the pattern space
   x
+  # look for the pattern, if there - print
   /'"$yesterday_date"'/ p
 ' "$did_file"

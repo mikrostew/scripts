@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-# Remove any trailing newlines from the input file
-# (from https://stackoverflow.com/a/12148703)
-
-@arg 'input_file' 'The file to remove the trailing newlines from'
-
-printf %s "$(< $input_file)" > $input_file
-

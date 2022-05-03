@@ -1,8 +1,11 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# [git] Show the current commit hash (Git CURRent)
+
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -18,6 +21,7 @@ show_help_msg() {
   echo 'Options:'
   echo '  -h               Show this help message'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -35,6 +39,7 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 if in_git_repo
 then
   git rev-parse HEAD

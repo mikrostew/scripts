@@ -1,8 +1,12 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# Remove any trailing newlines from the input file
+# (from https://stackoverflow.com/a/12148703)
+
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -17,6 +21,7 @@ show_help_msg() {
   echo 'Arguments:'
   echo '  input_file       The file to remove the trailing newlines from'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -34,5 +39,7 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 input_file="${1:?Missing argument \'input_file\'}"
+
 printf %s "$(< "$input_file")" > "$input_file"

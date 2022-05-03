@@ -1,9 +1,13 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# Serve the files in the current directory
+# (from https://stackoverflow.com/a/7105609)
+
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -18,6 +22,7 @@ show_help_msg() {
   echo 'Arguments:'
   echo '  port             (optional) The port to serve from (defaults to "8080")'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -35,8 +40,11 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 port="${1:-8080}"
+
 @uses-cmds ifconfig awk ruby
+
 address="$(ifconfig | awk '/inet / && $2 != "127.0.0.1"{print $2}')"
 echo -e "Current directory: ${COLOR_FG_BOLD_BLUE}$PWD${COLOR_RESET}"
 echo -e "Serving at ${COLOR_FG_BOLD_BLUE}$address:$port${COLOR_RESET}"

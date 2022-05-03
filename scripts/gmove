@@ -1,10 +1,13 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# [git] Move recent commits from master to a new branch (Git MOVE)
+
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 commit_diff_on_branch ()
 {
     local git_rev_list_origin
@@ -69,6 +72,7 @@ show_help_msg() {
   echo 'Arguments:'
   echo '  new_branch_name   Name of the new branch to move the commits to'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -86,7 +90,9 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 new_branch_name="${1:?Missing argument \'new_branch_name\'}"
+
 if in_git_repo && on_git_branch 'master'
 then
   num_commits="$(commit_diff_on_branch 'master' 'origin/master')"
@@ -100,6 +106,7 @@ then
   read -r confirm
   if [ -z "$confirm" ] || [ "$confirm" == "Y" ] || [ "$confirm" == "y" ]
   then
+    # (see http://stackoverflow.com/a/22654961 for details)
     do_git checkout -b "$new_branch_name" && do_git branch -f master "HEAD~${num_commits}" && do_git branch -u origin/master "$new_branch_name"
   else
     echo_info "Not moving commits"

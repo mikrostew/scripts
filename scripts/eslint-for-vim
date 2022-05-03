@@ -1,8 +1,12 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# Provides a way for syntastic in vim to query the locally installed eslint version
+# (from from https://github.com/vim-syntastic/syntastic/issues/2102)
+
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -14,6 +18,7 @@ show_help_msg() {
   echo 'Options:'
   echo '  -h               Show this help message'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -31,5 +36,9 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses-cmds npx
+
+# run eslint if it's installed globally or locally in node_modules/.bin/
+# don't install eslint if it's not available (this makes vim startup super slow)
 npx --no-install eslint "$@" 2>/dev/null || echo "v1.0.0"

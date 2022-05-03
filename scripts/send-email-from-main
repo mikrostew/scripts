@@ -1,8 +1,11 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# Send email from main email address, using SMTP
+
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -19,6 +22,7 @@ show_help_msg() {
   echo '  subject          Email subject line'
   echo '  message          Email message contents'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -36,12 +40,19 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 to_email="${1:?Missing argument \'to_email\'}"
 subject="${2:?Missing argument \'subject\'}"
 message="${3:?Missing argument \'message\'}"
+
 @uses-cmds sendEmail
+
 GET_API_TOKEN="$HOME/Dropbox/secret/get-api-token"
 user="$($GET_API_TOKEN email-main-user)"
 pass="$($GET_API_TOKEN email-main-pass)"
+
 server="smtp.gmail.com:587"
+
+# from http://caspian.dotconf.net/menu/Software/SendEmail/
+# install with `brew install sendemail` or `yum install sendemail`
 sendEmail -o tls=yes -f "$user" -t "$to_email" -s "$server" -xu "$user" -xp "$pass" -u "$subject" -m "$message"

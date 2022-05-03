@@ -1,10 +1,14 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
+# Show the open tab URLs from Chrome
+# (adapted from https://stackoverflow.com/a/49678861/)
+
 # TODO: this doesn't really work, whatever
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -16,6 +20,7 @@ show_help_msg() {
   echo 'Options:'
   echo '  -h               Show this help message'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -33,5 +38,7 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses-cmds strings grep sort uniq
+
 strings "$HOME/Library/Application Support/Google/Chrome/Default/Sessions/Tabs*" | grep -E '^https?://' | sort | uniq

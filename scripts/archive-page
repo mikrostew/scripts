@@ -1,26 +1,11 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-COLOR_FG_GREEN='\033[0;32m'
+# Download a webpage and all its requisites using wget
+
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
+
 echo_err ()
 {
     echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
@@ -35,6 +20,7 @@ show_help_msg() {
   echo 'Arguments:'
   echo '  page_url         URL of the page to download'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -52,6 +38,15 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 page_url="${1:?Missing argument \'page_url\'}"
 @uses-cmds wget
-do_cmd wget --wait=1 --random-wait --convert-links --page-requisites --user-agent="" "$page_url"
+
+# explanation of the options:
+# --wait=1 - wait 1 second between retrievals, to ease the load on the server
+# --random-wait - vary the request time between 0.5 to 1.5 times the --wait seconds
+# --convert-links - after download, convert links to be suitable for local viewing
+# --page-requisites - download all the files required to display the page
+# --user-agent="" - don't send the user-agent header (TODO: does that work?)
+
+@wait-for-command wget --wait=1 --random-wait --convert-links --page-requisites --user-agent="" "$page_url"
