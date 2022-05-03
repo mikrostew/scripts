@@ -51,6 +51,7 @@ remove-pkg() {
   then
     pkg-found
     # try to remove it
+    # shellcheck disable=SC2015
     adb shell "pm uninstall -k --user 0 $pkg_name" >/dev/null && pkg-removed || pkg-not-removed
   else
     pkg-not-found

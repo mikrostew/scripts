@@ -8,7 +8,7 @@ COLOR_RESET='\033[0m'
 
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 
 show_help_msg() {
@@ -19,6 +19,7 @@ show_help_msg() {
   echo '  -h               Show this help message'
   echo ''
   echo 'Arguments:'
+  # shellcheck disable=SC2016
   echo '  checkout_dir     (optional) The directory where the repo is checked out (defaults to "$HOME/dotfiles")'
 }
 
@@ -110,7 +111,7 @@ do
   if [ -L "$HOME/$i" ]
   then
     # link exists, check that it points to the right location
-    link_target="$(readlink $HOME/$i)"
+    link_target="$(readlink "$HOME/$i")"
     if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
     then
       # wrong location, so remove that

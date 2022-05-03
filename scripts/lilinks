@@ -1,4 +1,5 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
@@ -6,11 +7,11 @@ COLOR_RESET='\033[0m'
 
 echo_err ()
 {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "lilinks - Presents a menu to open various URLs and things for linkedin daily stuff"
@@ -46,6 +47,7 @@ menu_items['Coding Music']='coding_music'
 
 # to account for Linux and Mac
 open_url() {
+  # shellcheck disable=SC2211
   if @system-is-darwin?
   then
     open "$1"
@@ -79,7 +81,7 @@ num_items="${#menu_items_by_index[@]}"
 echo ""
 echo "What do you want to open?"
 
-for(( i = 0; i < $num_items; i++ ))
+for(( i = 0; i < num_items; i++ ))
 do
   # dislplay a 1-based index, which is nicer to select
   echo -e "[$(( i + 1 ))] ${menu_items_by_index[$i]}"
@@ -88,7 +90,7 @@ done
 echo ""
 echo -n "Selection: "
 
-read item_num
+read -r item_num
 if [ -n "$item_num" ] && (( "$item_num" <= "$num_items" ))
 then
   (( item_index = item_num - 1 ))

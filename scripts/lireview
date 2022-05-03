@@ -1,30 +1,25 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/lireview, and run 'generate-scripts.sh'
-###########################################################################
-#9dd803c861495272174d86ad96885d1e
+# shellcheck shell=bash
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 current_git_branch ()
 {
-    echo "$(git rev-parse --abbrev-ref HEAD)"
+    git rev-parse --abbrev-ref HEAD
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 git_review_board_id ()
 {
-    echo "$(git config --get branch.$1.reviewid)"
+    git config --get "branch.$1.reviewid"
 }
 show_help_msg() {
   echo "lireview - Create a new RB from the local changes, or update existing review"
@@ -55,9 +50,9 @@ done
 shift $((OPTIND-1))
 input_description="${1:-}"
 @uses-cmds jq git
-ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
+#ADDITIONAL_USERS_GROUPS="flagship-productivity-reviewers"  # (comma-delimited)
 branch_name=$(current_git_branch)
-review_id="$(git_review_board_id $branch_name)"
+review_id="$(git_review_board_id "$branch_name")"
 if [ -n "$review_id" ]
 then
   echo_info "RB $review_id already exists for this branch - updating..."
@@ -66,7 +61,7 @@ then
     input_description="$(git log -1 --pretty=%B)"
   fi
   echo -n "Description of these changes [$input_description]: "
-  read diff_description
+  read -r diff_description
   if [ -z "$diff_description" ]
   then
     diff_description="$input_description"
@@ -84,7 +79,7 @@ else
     input_description="$(git log -1 --pretty=%B)"
   fi
   echo -n "Description of these changes [$input_description]: "
-  read rb_description
+  read -r rb_description
   if [ -z "$rb_description" ]
   then
     rb_description="$input_description"

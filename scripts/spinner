@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # Show a busy spinner while the input PID is running
 
 # use this like:
@@ -15,7 +17,7 @@ COLOR_RESET='\033[0m'
 
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "spinner - Show a busy spinner while the input PID is running"
@@ -57,9 +59,10 @@ spin_chars='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' # braille dots
 num_chars=${#spin_chars}
 total_length=$(( 2 + ${#spin_msg} ))
 i=0
-while kill -0 $cmd_pid 2>/dev/null
+while kill -0 "$cmd_pid" 2>/dev/null
 do
   i=$(( (i + 1) % num_chars ))
+  # shellcheck disable=SC2059
   printf "\r${spin_chars:$i:1} ${spin_msg}" >&2
   sleep 0.1
 done

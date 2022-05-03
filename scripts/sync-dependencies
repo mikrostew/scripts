@@ -3,4 +3,4 @@
 
 LOG_FILE="$HOME/yarn-install.log"
 
-echo "[$(date)] sync-dependencies $@" >> "$LOG_FILE"
+echo "[$(date)] sync-dependencies $*" >> "$LOG_FILE"

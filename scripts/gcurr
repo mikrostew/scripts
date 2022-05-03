@@ -1,39 +1,11 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gcurr, and run 'generate-scripts.sh'
-###########################################################################
-#d25895c753bbc298cb93ed6b2246ce7e
+# shellcheck shell=bash
 
-# TODO: remove most of this stuff - don't need it
-
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
-}
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 in_git_repo ()
 {

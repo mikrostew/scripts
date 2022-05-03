@@ -1,9 +1,5 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gcl, and run 'generate-scripts.sh'
-###########################################################################
-#e7b8ed335d7f1aa59718f00dca325378
+# shellcheck shell=bash
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -36,11 +32,11 @@ do_git ()
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 in_git_repo ()
 {
@@ -72,14 +68,14 @@ done
 shift $((OPTIND-1))
 if in_git_repo
 then
-  all_branches=( $(all_git_branches | sort) )
+  mapfile -t all_branches <<< "$(all_git_branches | sort)"
   num_branches="${#all_branches[@]}"
-  for((i=0; i<$num_branches; i++))
+  for((i=0; i<num_branches; i++))
   do
     echo -e "[$(( i + 1 ))] ${all_branches[$i]}"
   done
   echo -n "Branch number: "
-  read branch_num
+  read -r branch_num
   if [ -n "$branch_num" ] && (( "$branch_num" <= "$num_branches" ))
   then
     (( branch_index = branch_num - 1 ))

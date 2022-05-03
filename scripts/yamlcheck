@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 # verify that the input files are valid YAML
+# frozen_string_literal: true
+
+# rubocop:disable Style/SingleLineMethods, Style/Documentation, Style/RescueStandardError, Lint/MissingCopEnableDirective
 
 require 'yaml'
 
@@ -32,15 +35,14 @@ class String
   def reverse_color;  "\e[7m#{self}\e[27m" end
 end
 
-
 ARGV.each do |f|
   print f
   begin
     YAML.load_file(f)
   rescue => e
-    puts "  ✗".red
+    puts '  ✗'.red
     puts e.message.bold
   else
-    puts "  ✓".green
+    puts '  ✓'.green
   end
 end

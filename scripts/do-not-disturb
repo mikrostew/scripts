@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# TODO: this doesn't work anymore, for some reason
 
 # Set the "Do Not Disturb" feature in OSX, for a limited amount of time
 # (normally you set it and it's on until midnight, which is not great)
@@ -9,7 +10,7 @@
 
 # input the number of minutes to sleep
 echo -n "DND for how many minutes? [default 30] "
-read sleep_minutes
+read -r sleep_minutes
 if [ -z "$sleep_minutes" ]
 then
   sleep_minutes=30
@@ -24,8 +25,8 @@ killall NotificationCenter
 echo "Turned DND on"
 
 echo "Sleeping for $sleep_minutes minutes..."
-#sleep $sleep_seconds
-sleep 5
+sleep $sleep_seconds
+#sleep 5
 
 # clear DND
 defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false

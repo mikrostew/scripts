@@ -1,16 +1,12 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/serve-dir, and run 'generate-scripts.sh'
-###########################################################################
-#cbf2962116e1292bd95ca9101c2d0442
+# shellcheck shell=bash
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "serve-dir - Serve the files in the current directory"
@@ -44,4 +40,4 @@ port="${1:-8080}"
 address="$(ifconfig | awk '/inet / && $2 != "127.0.0.1"{print $2}')"
 echo -e "Current directory: ${COLOR_FG_BOLD_BLUE}$PWD${COLOR_RESET}"
 echo -e "Serving at ${COLOR_FG_BOLD_BLUE}$address:$port${COLOR_RESET}"
-ruby -run -e httpd . -p $port
+ruby -run -e httpd . -p "$port"

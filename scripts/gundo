@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # [git] Undo the last commit (Git Undo)
 
 COLOR_FG_GREEN='\033[0;32m'
@@ -27,7 +29,7 @@ do_git ()
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 in_git_repo ()
 {

@@ -6,6 +6,7 @@
     "node": "16.14.2",
     "yarn": "1.22.17"
   },
+  "type": "commonjs",
   "dependencies": {
     "@mikrostew/good-morning": "^0.1.9",
     "chalk": "^4",
@@ -24,7 +25,9 @@
     "@typescript-eslint/parser": "^4.24.0",
     "eslint": "^7.26.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jest": "^26.1.5",
     "eslint-plugin-prettier": "^3.4.0",
+    "jest": "^28.0.3",
     "prettier": "^2.3.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"

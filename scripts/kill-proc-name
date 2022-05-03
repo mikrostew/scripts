@@ -27,4 +27,5 @@ proc-kill-info "kill" "'$proc_name'"
 
 # the pattern is treated as a regex, so this needs start/end markers
 # (don't want to match partial things)
+# shellcheck disable=SC2015
 pkill "^$proc_name$" && proc-killed || proc-not-found

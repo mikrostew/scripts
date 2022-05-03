@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # [git] Reset the commits in the local branch to the commits in origin (Git Reset Branch)
 # (for when a branch is force-pushed)
 

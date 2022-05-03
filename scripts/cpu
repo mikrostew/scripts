@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # Show running processes, sorted by CPU usage
 
 COLOR_FG_GREEN='\033[0;32m'
@@ -24,7 +26,7 @@ do_cmd ()
 }
 echo_err ()
 {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "cpu - Show running processes, sorted by CPU usage"
@@ -51,6 +53,8 @@ do
 done
 shift $((OPTIND-1))
 
+# this is a badash thing, shutup shellcheck
+# shellcheck disable=SC2211
 if @system-is-darwin?
 then
   do_cmd top -F -R -o cpu

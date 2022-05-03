@@ -17,4 +17,4 @@ echo "  Make sure the light is on"
 # wait before exiting
 echo ""
 echo "Press any key to exit..."
-read -n1 -s
+read -r -n1 -s

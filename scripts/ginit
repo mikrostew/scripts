@@ -1,39 +1,19 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # [git] Initialize a repo with README, LICENSE, and maybe origin (Git Init)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
-do_cmd ()
-{
-  local cmd_args="";
-  for arg in "$@";
-  do
-    case "$arg" in
-      *\ *)
-        cmd_args="$cmd_args \"$arg\""
-        ;;
-      *)
-        cmd_args="$cmd_args $arg"
-        ;;
-    esac;
-  done;
-  echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-  command "$@"
-}
-do_git ()
-{
-  do_cmd git "$@"
-}
 echo_err ()
 {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "ginit - [git] Initialize a repo with README, LICENSE, and maybe origin (Git Init)"
@@ -75,7 +55,7 @@ my_name="Michael Stewart"
 current_year="$(date +%Y)"
 
 # TODO: move this to the keychain
-api_token="$($HOME/Dropbox/secret/get-api-token github-license-token)"
+api_token="$("$HOME/Dropbox/secret/get-api-token github-license-token")"
 github_license_api="https://api.github.com/licenses"
 
 # Open Source Licenses, from https://api.github.com/licenses
@@ -86,6 +66,7 @@ curl_pid="$!"
 spinner -m "Querying $github_license_api for license info..." $curl_pid
 licenses_info="$(cat <&3)"
 wait $curl_pid
+# shellcheck disable=SC2016
 @exit-on-error 'API call failed' 'echo "JSON output: $licenses_info"'
 
 # put license info into arrays
@@ -96,15 +77,15 @@ num_licenses="${#license_names[@]}"
 echo_info "Got $num_licenses licenses from $github_license_api"
 
 # create the directory for the repository, and CD into it
-do_cmd mkdir -p "$repo_name"
-do_cmd cd "$repo_name"
+@wait-for-command mkdir -p "$repo_name"
+@wait-for-command cd "$repo_name"
 
 # initialize the repo for git
-do_git init
+@wait-for-command git init
 
 # initialize the README with "# repo" at the top, and add anything else in vim
-do_cmd vim +"normal i# $repo_name" README.md
-do_git add README.md
+@wait-for-command vim +"normal i# $repo_name" README.md
+@wait-for-command git add README.md
 
 # choose a license
 
@@ -113,7 +94,7 @@ echo "Choose a license:"
 echo "(When working with a specific community, see https://choosealicense.com/community/)"
 echo ""
 
-for(( i = 0; i < $num_licenses; i++ ))
+for(( i = 0; i < num_licenses; i++ ))
 do
   # dislplay a 1-based index, which is nicer to select
   echo -e "[$(( i + 1 ))] ${license_names[$i]}"
@@ -122,7 +103,7 @@ done
 echo ""
 echo -n "Selection [Enter for none]: "
 
-read item_num
+read -r item_num
 if [ -n "$item_num" ] && (( "$item_num" <= "$num_licenses" ))
 then
   (( item_index = item_num - 1 ))
@@ -137,11 +118,12 @@ then
   spinner -m "Getting text of $license_name from $license_url..." $curl_pid
   license_info="$(cat <&3)"
   wait $curl_pid
+  # shellcheck disable=SC2016
   @exit-on-error 'API call failed' 'echo "JSON output: $license_info"'
 
   # save the license text in the LICENSE file
   echo "$license_info" | jq -r '.body' | sed -e "s/\[year\]/$current_year/" -e "s/\[fullname\]/$my_name/" > LICENSE
-  do_git add LICENSE
+  @wait-for-command git add LICENSE
 else
   echo_info "(no license selected)"
 fi
@@ -149,19 +131,19 @@ fi
 # show what will be committed
 echo ""
 echo "What will be committed:"
-do_git diff --cached
+@wait-for-command git diff --cached
 
 echo -n "Confirm commit [Y/n]: "
-read confirm
+read -r confirm
 if [ -z "$confirm" ] || [ "$confirm" == "Y" ] || [ "$confirm" == "y" ]
 then
-  do_git commit -m "initial setup"
+  @wait-for-command git commit -m "initial setup"
 
   # push changes to origin if it was specified on the command line
   if [ -n "$repo_origin" ]
   then
-    do_git remote add origin git@github.com:mikrostew/badash.git
-    do_git push -u origin master
+    @wait-for-command git remote add origin git@github.com:mikrostew/badash.git
+    @wait-for-command git push -u origin master
   fi
 else
   echo_info "Not committing"

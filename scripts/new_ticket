@@ -1,20 +1,16 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/new_ticket, and run 'generate-scripts.sh'
-###########################################################################
-#6981835966565ac3c5fbe2a88468bf6c
+# shellcheck shell=bash
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "new_ticket - Pastes a template into Description field when creating a new Jira ticket"
@@ -48,10 +44,10 @@ join() {
 TICKET_TASK="task"
 TICKET_BUG="bug"
 TICKET_RESEARCH="research"
-ticket_types=( $TICKET_TASK $TICKET_BUG $TICKET_RESEARCH )
+ticket_types=( "$TICKET_TASK" "$TICKET_BUG" "$TICKET_RESEARCH" )
 default_type="$TICKET_TASK"
-echo -n "Ticket type - $(join ${ticket_types[@]}) [$default_type]: "
-read input_type
+echo -n "Ticket type - $(join "${ticket_types[@]}") [$default_type]: "
+read -r input_type
 if [ -z "$input_type" ]
 then
   ticket_type="$default_type"

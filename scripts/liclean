@@ -30,11 +30,11 @@ do_cmd ()
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "liclean - Clean dirs and files in a MP (for LinkedIn workflow)"
@@ -63,7 +63,7 @@ shift $((OPTIND-1))
 
 in_linkedin_mp() {
   local file_to_check="product-spec.json"
-  [ -f "$file_to_check" ] && return 0 || echo_err "$(pwd) is not a LinkedIn MultiProduct (missing $file_to_check)" && return -1
+  [ -f "$file_to_check" ] && return 0 || echo_err "$(pwd) is not a LinkedIn MultiProduct (missing $file_to_check)" && return 1
 }
 
 if in_linkedin_mp; then

@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # [git] Fork a repo from github and clone locally (Git Fork & Clone)
 
 # colors
@@ -8,38 +10,17 @@ COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 # imported functions
-do_cmd ()
-{
-    local cmd_args="";
-    for arg in "$@";
-    do
-        case "$arg" in
-            *\ *)
-                cmd_args="$cmd_args \"$arg\""
-            ;;
-            *)
-                cmd_args="$cmd_args $arg"
-            ;;
-        esac;
-    done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-    command "$@"
-}
-do_git ()
-{
-    do_cmd git "$@"
-}
 echo_ack ()
 {
-    echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_GREEN}$*${COLOR_RESET}" 1>&2
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 git_parse_repo_url ()
 {
@@ -94,7 +75,8 @@ repo_url="${1:?Missing argument \'repo_url\'}"
 my_username="mikrostew"
 
 # will split into array because it's 2 strings separated by space
-repo_info=( $(git_parse_repo_url $repo_url) )
+mapfile -t repo_info <<< "$(git_parse_repo_url "$repo_url")"
+
 username=${repo_info[0]}
 repo_name=${repo_info[1]}
 
@@ -108,10 +90,11 @@ then
   exit 1
 fi
 
-# not using do_cmd here because I don't want the API token echoed to the screen
+# don't echo the API token to the screen
 echo_ack "(curl -X POST -u '$my_username:XXXXX' 'https://api.github.com/repos/$username/$repo_name/forks')"
 output="$(curl -X POST -u "$my_username:$api_token" "https://api.github.com/repos/$username/$repo_name/forks")"
 # (Note that running that multiple times won't create multiple forks)
+# shellcheck disable=SC2016
 @exit-on-error 'API call to fork the repository failed' 'echo "JSON output: $output"'
 
 # TODO - check 'output' for error
@@ -120,7 +103,7 @@ echo_info "Waiting 10 seconds for github to create the fork..."
 sleep 10
 
 # clone the repo locally (use the 'ssh_url' property from the returned JSON)
-ssh_url="$(echo $output | jq --raw-output '.ssh_url')"
+ssh_url="$(echo "$output" | jq --raw-output '.ssh_url')"
 if [ "$ssh_url" == "null" ]
 then
   echo_err "Unable to get the 'ssh-url' property"
@@ -129,17 +112,17 @@ then
   exit 1
 fi
 
-do_git clone "$ssh_url" "$repo_name"
 # check for error, wait, and retry once if it failed
-if [ "$?" -ne 0 ]
+if ! @wait-for-command git clone "$ssh_url" "$repo_name"
 then
   echo_info "Waiting 10 more seconds and retrying once..."
   sleep 10
-  do_git clone "$ssh_url" "$repo_name"
+  @wait-for-command git clone "$ssh_url" "$repo_name"
   # if it failed again then something is wrong
+  # shellcheck disable=SC2016
   @exit-on-error 'Failed to clone the repository - check if https://github.com/$my_username/$repo_name exists'
 fi
 
 # cd into that folder && set upstream to the original repo
-cd "$repo_name" && do_git remote add upstream "$repo_url"
-do_git remote -v
+cd "$repo_name" && @wait-for-command git remote add upstream "$repo_url"
+@wait-for-command --show-output git remote -v

@@ -1,60 +1,39 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # [git] Merge main/master into current branch (Git Merge Main into Branch)
 
-COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 current_git_branch ()
 {
-  echo "$(git rev-parse --abbrev-ref HEAD)"
-}
-do_cmd ()
-{
-  local cmd_args="";
-  for arg in "$@";
-  do
-    case "$arg" in
-      *\ *)
-        cmd_args="$cmd_args \"$arg\""
-        ;;
-      *)
-        cmd_args="$cmd_args $arg"
-        ;;
-    esac;
-  done;
-  echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
-  command "$@"
-}
-do_git ()
-{
-  do_cmd git "$@"
+    git rev-parse --abbrev-ref HEAD
 }
 echo_err ()
 {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
-gmt ()
+echo_info ()
 {
-  do_git mergetool --tool=opendiff
+    echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 in_git_repo ()
 {
-  git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
+    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
 }
 no_uncommitted_changes ()
 {
-  [ "$(git status --porcelain --untracked-files=no)" != "" ] && echo_err ">_<  You have uncommitted changes" && return -1 || return 0
+    [ "$(git status --porcelain --untracked-files=no)" != "" ] && echo_err ">_<  You have uncommitted changes" && return 1 || return 0
 }
 not_on_git_branch ()
 {
-  [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
+    [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return 1 || return 0
 }
 
-if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
+if in_git_repo && no_uncommitted_changes
 then
-  branch_name=$(current_git_branch)
-
   # is the default branch main or master?
   # see https://stackoverflow.com/q/5167957
   if git show-ref --verify --quiet refs/heads/main
@@ -64,18 +43,22 @@ then
   then
     default_branch="master"
   else
-    echo "Error: default branch is not 'main' or 'master'"
+    echo_err "Error: default branch is not 'main' or 'master'"
     exit 1
   fi
 
-  # merge straight from origin, without updating local main/master
-  @wait-for-command git merge "origin/$default_branch"
-
-  # error recovery to fix merge conflicts
-  if [ "$?" -ne 0 ]
+  if not_on_git_branch "$default_branch"
   then
-    echo_err "Dang it! merge failed - good luck"
-    @wait-for-keypress "Press any key to start merge resolution... "
-    gmt
+    # merge straight from origin, without updating local main/master
+    if ! @wait-for-command git merge "origin/$default_branch"
+    then
+      echo_info "Merge failed"
+      @wait-for-keypress 'Press any key to start resolving conflicts (or Ctrl-C to abort)... '
+      gmt
+
+      echo "To remove *.orig files leftover from conflicts, run 'grmorig'"
+    fi
+  else
+    echo_err "Already on default branch '$default_branch'"
   fi
 fi

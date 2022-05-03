@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # Open the browser with info on the input stock
 
 COLOR_FG_RED='\033[0;31m'
@@ -6,7 +8,7 @@ COLOR_RESET='\033[0m'
 
 echo_err ()
 {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+  echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "stock - Open the browser with info on the input stock"
@@ -43,6 +45,7 @@ stock_symbol="${1:?Missing argument \'stock_symbol\'}"
 
 stock_url="https://finance.yahoo.com/quote/$stock_symbol/"
 
+# shellcheck disable=SC2211
 if @system-is-linux?
 then
   xdg-open "$stock_url"

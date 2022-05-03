@@ -6,7 +6,7 @@
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_RESET='\033[0m'
 echo_info () {
-  echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}"
+  echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}"
 }
 
 echo_info "WTF is going on here? let's see..."
@@ -21,7 +21,7 @@ then
   #  `-F`     : don't include shared libraries/frameworks
   #  `-R`     : don't traverse and report the memory object map for each process (default)
   #  `-stats` : the stats to display (otherwise it will do everything which line-wraps and is impossible to read)
-  top_arguments=( -o cpu -n 10 -l 2 -F -R -stats pid,ppid,command,user,cpu,cpu_me,cpu_others,time,threads,mem,purg )
+  top_arguments=( -o cpu -n 10 -l 2 -F -R -stats "pid,ppid,command,user,cpu,cpu_me,cpu_others,time,threads,mem,purg" )
 else  # assume Linux
   # `top` options:
   #  `-o +%CPU` : order by CPU usage, descending
@@ -44,8 +44,8 @@ then
   # no PID input, use `top` to list the top 10 processes so I can select one
   # - using `tail` so this only prints out the valid process info, not the first invalid samples, and none of the overall stats
   # - and using process substitution to capture the output asynchronously, while showing a spinner
-  echo "top ${top_arguments[@]}"
-  exec 3< <(top ${top_arguments[@]} | tail -n12 )
+  echo "top ${top_arguments[*]}"
+  exec 3< <(top "${top_arguments[@]}" | tail -n12 )
   spinner -m "collecting process info..." $!
 
   # display that
@@ -53,7 +53,7 @@ then
 
   # prompt for PID of the process
   echo -n "Which PID? "
-  read target_pid
+  read -r target_pid
   if [ -z "$target_pid" ]
   then
     echo "no PID entered"
@@ -94,7 +94,7 @@ echo_info "Current info from top"
 cleanup_top_output() {
   seen_header=0
   # read from stdin
-  while read line
+  while read -r line
   do
     # if the line starts with the header, show that once
     if [[ "$line" =~ ^PID ]] && [ "$seen_header" -eq 0 ]

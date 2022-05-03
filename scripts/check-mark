@@ -5,6 +5,7 @@
 sleep 0.5
 
 # use the clipboard
+# TODO: save current clipboard contents?
 osascript <<EOF
 set the clipboard to "✅"
 tell application "System Events" to keystroke "v" using command down

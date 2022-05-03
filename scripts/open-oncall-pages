@@ -1,21 +1,20 @@
 #!/usr/bin/env bash
-# Open the oncall monitoring pages in the browser
+# Open the oncall info pages in the browser
 
-# opened in reverse order, to see the ones I care about more first
+# backlog grooming
+open 'https://docs.google.com/document/d/1FCXglaAH7DFS7NGQGcD9q6XyaBySRlxWIREwUIp90TM/edit'
 
-# C2P
-open 'https://productivity.tools.corp.linkedin.com/ui/#/c2p?product=voyager-web'
+# oncall logs
+open 'https://docs.google.com/document/d/1-r-ZEMDNTtJgpbLExl2JC69ErBfxNI6JhjaHVnIg6ac/edit'
 
-# failed precommit
-open 'https://crt.prod.linkedin.com/#/events?products=%5B%22voyager-api%22%5D&statuses=%5B%22FAILED%22%5D&types=%5B%22PRE%22%5D'
-open 'https://crt.prod.linkedin.com/#/events?products=%5B%22voyager-web%22%5D&statuses=%5B%22FAILED%22%5D&types=%5B%22PRE%22%5D'
+# oncall runbook
+open 'https://docs.google.com/document/d/1wHlGDt6-I6BmU0uc520GhShPSVxZnwqV0FOC68nK9OI/edit'
 
-# failed PCX
-open 'https://crt.prod.linkedin.com/#/events?products=%5B%22voyager-api%22%5D&statuses=%5B%22FAILED%22%5D&types=%5B%22PCX%22%5D'
-open 'https://crt.prod.linkedin.com/#/events?products=%5B%22voyager-web%22%5D&statuses=%5B%22FAILED%22%5D&types=%5B%22PCX%22%5D'
+# FI-Web backlog
+open 'https://jira01.corp.linkedin.com:8443/secure/Dashboard.jspa?selectPageId=38130'
 
-# precommit status
-open 'https://crt.prod.linkedin.com/#/multiproducts/monitor?eventTypes=%5B%22PRE%22%5D&products=%5B%22*voyager-api%22%2C%22*voyager-web%22%5D&starredView=true'
+# weekly email summary template
+open 'https://docs.google.com/document/d/17syn-SRRZjnig5tymhfYRDf3WoqFrANYXaGwXCB2-58/edit'
 
-# PCL status
-open 'https://crt.prod.linkedin.com/#/multiproducts/monitor?eventTypes=%5B%22PCX%22%5D&products=%5B%22*voyager-api%22%2C%22*voyager-web%22%5D&starredView=true'
+# another playbook (will be migrated to main docs)
+open 'https://pages.linkedin.githubprivate.com/multiproduct/voyager-docs/pillars/infra/web/playbooks/oncall'

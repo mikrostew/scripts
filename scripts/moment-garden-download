@@ -2,18 +2,18 @@
 
 // TODO: convert this to use TS
 
-function printUsage() {
-  console.log('Usage:');
-  console.log('  moment-garden-download [options]');
-  console.log('');
-  // TODO
-  // Options
-  //  --full   --> go thru the whole garden, download everything to check if I missed something
-  //  --local, or --no-cache    --> don't query the MG site, just download anything that doesn't exist locally
-  //  --limit     --> limit the number of files downloaded (default is all)
-  //  --verbose    --> log everything
-  //  --help    --> show this message
-}
+// function printUsage() {
+//   console.log('Usage:');
+//   console.log('  moment-garden-download [options]');
+//   console.log('');
+//   // TODO
+//   // Options
+//   //  --full   --> go thru the whole garden, download everything to check if I missed something
+//   //  --local, or --no-cache    --> don't query the MG site, just download anything that doesn't exist locally
+//   //  --limit     --> limit the number of files downloaded (default is all)
+//   //  --verbose    --> log everything
+//   //  --help    --> show this message
+// }
 
 const chalk = require('chalk');
 const fs = require('fs');
@@ -157,6 +157,7 @@ async function downloadMomentMetadata(gardenId, cookies, metadataDir) {
   let currentPage = 1;
   let newItemsFound = 0;
 
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const requestSpinner = ora(`${chalk.yellow('request')}: moment metadata`).start();
     const someMoments = await requestMoments(gardenId, currentPage, PER_PAGE, TIMESTAMP, cookies);
@@ -219,7 +220,7 @@ async function downloadMedia(metadataDir, mediaDir) {
       let item;
       try {
         item = JSON.parse(contents);
-      } catch(err) {
+      } catch (err) {
         console.error(`Error: Failed to parse file '${path.join(metadataDir, file)}' as JSON`);
         throw err;
       }

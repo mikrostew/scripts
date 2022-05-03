@@ -1,0 +1,73 @@
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
+# lint the input scripts, based on the shebang
+
+# trim whitespace
+# (https://stackoverflow.com/a/3352015)
+trim() {
+  local var="$1"
+  # remove leading whitespace characters
+  var="${var#"${var%%[![:space:]]*}"}"
+  # remove trailing whitespace characters
+  var="${var%"${var##*[![:space:]]}"}"   
+  printf '%s' "$var"
+}
+
+error_files=()
+
+# input files are command line args
+
+for file in "$@"; do
+  read -r firstline <"$file"
+  shebang=$(trim "$firstline")
+  #echo "file: $file, shebang: '$shebang'"
+
+  case "$shebang" in
+    "#!/usr/bin/env bash")
+      if ! @wait-for-command shellcheck "$file"
+      then
+        error_files+=( "$file" )
+      fi
+      ;;
+    "#!/usr/bin/env badash")
+      if ! @wait-for-command shellcheck "$file"
+      then
+        error_files+=( "$file" )
+      fi
+      ;;
+    "#!/usr/bin/env node")
+      if ! @wait-for-command yarn eslint "$file"
+      then
+        error_files+=( "$file" )
+      fi
+      ;;
+    "#!/usr/bin/env ts-node")
+      if ! @wait-for-command yarn eslint "$file"
+      then
+        error_files+=( "$file" )
+      fi
+      ;;
+    "#!/usr/bin/env ruby")
+      if ! @wait-for-command rubocop "$file"
+      then
+        error_files+=( "$file" )
+      fi
+      ;;
+    *)
+      echo "$file:"
+      echo "Unrecognized shebang '$shebang'"
+      error_files+=( "$file" )
+      ;;
+  esac
+done
+
+if [ "${#error_files[@]}" -ne 0 ]
+then
+  echo ""
+  echo "${#error_files[@]} failures:"
+  for file in "${error_files[@]}"
+  do
+    echo "$file"
+  done
+fi

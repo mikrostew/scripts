@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # [git] Push current local branch to origin, and set upstream (Git Push Branch)
 
 COLOR_FG_RED='\033[0;31m'
@@ -6,11 +8,11 @@ COLOR_RESET='\033[0m'
 
 current_git_branch ()
 {
-    echo "$(git rev-parse --abbrev-ref HEAD)"
+    git rev-parse --abbrev-ref HEAD
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 in_git_repo ()
 {

@@ -14,11 +14,11 @@ const AUDIO_FILE_EXTENSIONS = ['.flac', '.opus', '.mp3'];
 
 // creative commons copyrights that I can use
 const COPYRIGHTS = {
-  "CC BY 4.0": "Attribution: http://creativecommons.org/licenses/by/4.0/",
-  "CC BY 3.0": "Attribution: http://creativecommons.org/licenses/by/3.0/",
-  "CC BY-NC 4.0": "Attribution-NonCommercial: http://creativecommons.org/licenses/by-nc/4.0/",
-  "CC BY-NC 3.0": "Attribution-NonCommercial: http://creativecommons.org/licenses/by-nc/3.0/",
-}
+  'CC BY 4.0': 'Attribution: http://creativecommons.org/licenses/by/4.0/',
+  'CC BY 3.0': 'Attribution: http://creativecommons.org/licenses/by/3.0/',
+  'CC BY-NC 4.0': 'Attribution-NonCommercial: http://creativecommons.org/licenses/by-nc/4.0/',
+  'CC BY-NC 3.0': 'Attribution-NonCommercial: http://creativecommons.org/licenses/by-nc/3.0/',
+};
 // the names of those ^^, in an array for later
 const COPYRIGHTS_ARR = Object.keys(COPYRIGHTS).sort();
 
@@ -29,14 +29,13 @@ const COPYRIGHTS_ARR = Object.keys(COPYRIGHTS).sort();
 //   url: "http://...",             // url for this artist
 //   copyright: "Attribution...",   // copyright for this artist
 // }
-const METADATA_PER_ARTIST = {}
+const METADATA_PER_ARTIST = {};
 
 // need to get input from the user for this
 const READLINE_INTERFACE = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
-
 
 function isAudioFile(file) {
   const ext = path.extname(file);
@@ -76,7 +75,7 @@ function getInputFiles() {
           // add all the things in this dir to the list of things to process (then process them)
           const filesInDir = fs.readdirSync(fileOrDir);
           // have to prepend the dir to get the full path
-          const thingsToProcess = filesInDir.map(f => path.join(fileOrDir, f));
+          const thingsToProcess = filesInDir.map((f) => path.join(fileOrDir, f));
           filesAndDirsToProcess = filesAndDirsToProcess.concat(thingsToProcess);
           numDirsFound++;
         } else if (stat.isFile()) {
@@ -89,7 +88,7 @@ function getInputFiles() {
           haveError = true;
           break;
         }
-      };
+      }
       if (!haveError) {
         console.log(`Found ${allAudioFiles.length} audio files (in ${numDirsFound} directories)`);
         resolve(allAudioFiles);
@@ -109,19 +108,26 @@ async function modifyFiles(files) {
 
 // parse the metadata for the file, then modify it if needed
 function parseMetadataAndModify(filename) {
+  // modify the file based on the artist
   return getFileTags(filename)
-    // modify the file based on the artist
     .then((jsonData) => parseMetadataTags(jsonData))
     .then((metadataTags) => modifyFileInfo(filename, metadataTags));
 }
-
 
 // get the metadata tags for the input file
 function getFileTags(filename) {
   return new Promise((resolve, reject) => {
     // use ffprobe to get the metadata tags for the file in JSON format
-    let tagsJsonData = "";
-    const ffprobe = spawn('ffprobe', ['-loglevel', 'error', '-of', 'json', '-show_entries', 'stream_tags:format_tags', filename]);
+    let tagsJsonData = '';
+    const ffprobe = spawn('ffprobe', [
+      '-loglevel',
+      'error',
+      '-of',
+      'json',
+      '-show_entries',
+      'stream_tags:format_tags',
+      filename,
+    ]);
 
     ffprobe.stdout.on('data', (data) => {
       tagsJsonData += data;
@@ -186,13 +192,15 @@ function getFileTags(filename) {
 //     }
 // }
 function parseMetadataTags(tagJson) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let tags = {};
     if (tagJson['streams'] !== undefined && Array.isArray(tagJson['streams'])) {
-      tagJson['streams'].forEach(stream => {
+      tagJson['streams'].forEach((stream) => {
         if (stream['tags'] !== undefined) {
           // store these tags first, converting everything to lowercase
-          Object.keys(stream['tags']).forEach(tag => tags[tag.toLowerCase()] = stream['tags'][tag]);
+          Object.keys(stream['tags']).forEach(
+            (tag) => (tags[tag.toLowerCase()] = stream['tags'][tag])
+          );
         }
       });
     }
@@ -200,7 +208,9 @@ function parseMetadataTags(tagJson) {
     if (tagJson['format'] !== undefined && tagJson['format']['tags'] !== undefined) {
       // store these tags now, converting everything to lowercase
       // (and possibly overwriting the previous tags - these win in precedence)
-      Object.keys(tagJson['format']['tags']).forEach(tag => tags[tag.toLowerCase()] = tagJson['format']['tags'][tag]);
+      Object.keys(tagJson['format']['tags']).forEach(
+        (tag) => (tags[tag.toLowerCase()] = tagJson['format']['tags'][tag])
+      );
     }
 
     resolve(tags);
@@ -209,13 +219,13 @@ function parseMetadataTags(tagJson) {
 
 function promptForCopyright(artist) {
   return new Promise((resolve, reject) => {
-    console.log(`What copyright does ${artist} use?`)
+    console.log(`What copyright does ${artist} use?`);
     for (let i = 0; i < COPYRIGHTS_ARR.length; i++) {
       console.log(`[${i}] ${COPYRIGHTS_ARR[i]}`);
     }
-    READLINE_INTERFACE.question("> ", function(inputCopyright) {
-      if (inputCopyright === "") {
-        reject("No copyright input given");
+    READLINE_INTERFACE.question('> ', function (inputCopyright) {
+      if (inputCopyright === '') {
+        reject('No copyright input given');
       } else {
         // if the index was valid, return that copyright text
         if (COPYRIGHTS_ARR[inputCopyright] !== undefined) {
@@ -223,7 +233,7 @@ function promptForCopyright(artist) {
           console.log(`(input '${copyrightType}')`);
           resolve(COPYRIGHTS[copyrightType]);
         } else {
-          reject("Did not select a valid copyright");
+          reject('Did not select a valid copyright');
         }
       }
     });
@@ -232,10 +242,10 @@ function promptForCopyright(artist) {
 
 function promptForURL(artist) {
   return new Promise((resolve, reject) => {
-    console.log(`What URL to use for ${artist}?`)
-    READLINE_INTERFACE.question("> ", function(inputUrl) {
-      if (inputUrl === "") {
-        reject("No URL input given");
+    console.log(`What URL to use for ${artist}?`);
+    READLINE_INTERFACE.question('> ', function (inputUrl) {
+      if (inputUrl === '') {
+        reject('No URL input given');
       } else {
         resolve(inputUrl);
       }
@@ -264,7 +274,7 @@ async function getArtistInfo(artist) {
   const metadata = METADATA_PER_ARTIST[artist];
   return {
     url: metadata.url,
-    copyright: metadata.copyright
+    copyright: metadata.copyright,
   };
 }
 
@@ -276,14 +286,25 @@ function writeMetadata(file, url, copyright) {
 
   return new Promise((resolve, reject) => {
     // use ffprobe to get the metadata tags for the file in JSON format
-    let ffmpegStdout = "";
-    let ffmpegStderr = "";
+    let ffmpegStdout = '';
+    let ffmpegStderr = '';
     // write the updated file to the temp file
     // NOTES:
     // * '-y' here is for overwriting the temp file that already exists
     // * the stream specifier ":s:a:0" is for the first audio stream, since this doesn't work otherwise
     // TODO: is there a way I can detect that ^^ and pick the right stream automatically?
-    const ffmpeg = spawn('ffmpeg', ['-y', '-i', file, '-metadata:s:a:0', `copyright=${copyright}`, '-metadata:s:a:0', `url=${url}`, '-codec', 'copy', tempFile.name]);
+    const ffmpeg = spawn('ffmpeg', [
+      '-y',
+      '-i',
+      file,
+      '-metadata:s:a:0',
+      `copyright=${copyright}`,
+      '-metadata:s:a:0',
+      `url=${url}`,
+      '-codec',
+      'copy',
+      tempFile.name,
+    ]);
 
     ffmpeg.stdout.on('data', (data) => {
       ffmpegStdout += data;
@@ -311,21 +332,23 @@ function writeMetadata(file, url, copyright) {
 // make sure the new file got the right info
 function verifyNewFile(fileName, url, copyright) {
   // get the updated file tags
-  return getFileTags(fileName)
-    // and parse that
-    .then((jsonData) => parseMetadataTags(jsonData))
-    .then((metadataTags) => {
-      return new Promise((resolve, reject) => {
-        if (url === metadataTags.url && copyright === metadataTags.copyright) {
-          console.log(`${url}, ${copyright} ✅`);
-          resolve();
-        } else {
-          console.log(`${metadataTags.url}, ${metadataTags.copyright} ❌`);
-          console.log(`expected: ${url}, ${copyright}`);
-          reject('metadata did not update correctly');
-        }
-      });
-    });
+  return (
+    getFileTags(fileName)
+      // and parse that
+      .then((jsonData) => parseMetadataTags(jsonData))
+      .then((metadataTags) => {
+        return new Promise((resolve, reject) => {
+          if (url === metadataTags.url && copyright === metadataTags.copyright) {
+            console.log(`${url}, ${copyright} ✅`);
+            resolve();
+          } else {
+            console.log(`${metadataTags.url}, ${metadataTags.copyright} ❌`);
+            console.log(`expected: ${url}, ${copyright}`);
+            reject('metadata did not update correctly');
+          }
+        });
+      })
+  );
 }
 
 // output the file info to the console
@@ -345,14 +368,12 @@ async function modifyFileInfo(file, tags) {
   fs.renameSync(newFile, file);
 }
 
-
-
 getInputFiles()
-.then((audioFiles) => modifyFiles(audioFiles))
-.catch((err) => {
-  console.error(`Error: ${err}`);
-  process.exit(1);
-})
-.finally(() => {
-  READLINE_INTERFACE.close();
-});
+  .then((audioFiles) => modifyFiles(audioFiles))
+  .catch((err) => {
+    console.error(`Error: ${err}`);
+    process.exit(1);
+  })
+  .finally(() => {
+    READLINE_INTERFACE.close();
+  });

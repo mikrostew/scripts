@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # Setup Typescript for a JS project
 
 # add dependencies

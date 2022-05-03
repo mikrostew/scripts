@@ -5,7 +5,6 @@
 
 const { spawn } = require('child_process');
 
-
 // get the input file location from the arguments to this script
 function getInputFile() {
   return new Promise((resolve, reject) => {
@@ -24,8 +23,16 @@ function getInputFile() {
 function getFileTags(filename) {
   return new Promise((resolve, reject) => {
     // use ffprobe to get the metadata tags for the file in JSON format
-    let tagsJsonData = "";
-    const ffprobe = spawn('ffprobe', ['-loglevel', 'error', '-of', 'json', '-show_entries', 'stream_tags:format_tags', filename]);
+    let tagsJsonData = '';
+    const ffprobe = spawn('ffprobe', [
+      '-loglevel',
+      'error',
+      '-of',
+      'json',
+      '-show_entries',
+      'stream_tags:format_tags',
+      filename,
+    ]);
 
     ffprobe.stdout.on('data', (data) => {
       tagsJsonData += data;
@@ -89,13 +96,15 @@ function getFileTags(filename) {
 //     }
 // }
 function parseMetadataTags(tagJson) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let tags = {};
     if (tagJson['streams'] !== undefined && Array.isArray(tagJson['streams'])) {
-      tagJson['streams'].forEach(stream => {
+      tagJson['streams'].forEach((stream) => {
         if (stream['tags'] !== undefined) {
           // store these tags first, converting everything to lowercase
-          Object.keys(stream['tags']).forEach(tag => tags[tag.toLowerCase()] = stream['tags'][tag]);
+          Object.keys(stream['tags']).forEach(
+            (tag) => (tags[tag.toLowerCase()] = stream['tags'][tag])
+          );
         }
       });
     }
@@ -105,7 +114,9 @@ function parseMetadataTags(tagJson) {
     if (tagJson['format'] !== undefined && tagJson['format']['tags'] !== undefined) {
       // store these tags now, converting everything to lowercase
       // (and possibly overwriting the previous tags - these win in precedence)
-      Object.keys(tagJson['format']['tags']).forEach(tag => tags[tag.toLowerCase()] = tagJson['format']['tags'][tag]);
+      Object.keys(tagJson['format']['tags']).forEach(
+        (tag) => (tags[tag.toLowerCase()] = tagJson['format']['tags'][tag])
+      );
     }
     //console.log('after format tags');
     //console.log(tags);
@@ -116,19 +127,18 @@ function parseMetadataTags(tagJson) {
 
 // output the tag info to the console
 function outputTagInfo(tags) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     // this is all I need to do
     console.log(JSON.stringify(tags));
     resolve();
   });
 }
 
-
 getInputFile()
-.then((filename) => getFileTags(filename))
-.then((jsonData) => parseMetadataTags(jsonData))
-.then((metadataTags) => outputTagInfo(metadataTags))
-.catch((err) => {
-  console.error(`Error: ${err}`);
-  process.exit(1);
-});
+  .then((filename) => getFileTags(filename))
+  .then((jsonData) => parseMetadataTags(jsonData))
+  .then((metadataTags) => outputTagInfo(metadataTags))
+  .catch((err) => {
+    console.error(`Error: ${err}`);
+    process.exit(1);
+  });

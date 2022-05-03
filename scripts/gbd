@@ -1,9 +1,5 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gbd, and run 'generate-scripts.sh'
-###########################################################################
-#fb624871fd5989e10dff36cb7404e672
+# shellcheck shell=bash
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -36,11 +32,11 @@ do_git ()
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 in_git_repo ()
 {
@@ -73,28 +69,30 @@ shift $((OPTIND-1))
 @uses-cmds sed, git
 if in_git_repo
 then
-  all_branches=( $(all_git_branches | sed '/^master$/d' | sort) )
-  num_branches="${#all_branches[@]}"
-  if [ "$num_branches" -eq 0 ]
+  # TODO: also account for 'main'
+  all_branches="$(all_git_branches | sed '/^master$/d' | sort)"
+  if [ -z "$all_branches" ]
   then
     echo_info "master is the only branch, nothing to delete"
     exit 0
   fi
-  all_merged=( $(git branch --merged master | sed -e 's/^\* //' -e 's/^  //') )
+  mapfile -t all_branches <<< "$all_branches"
+  num_branches="${#all_branches[@]}"
+  mapfile -t all_merged <<< "$(git branch --merged master | sed -e 's/^\* //' -e 's/^  //')"
   num_merged="${#all_merged[@]}"
   declare -A merge_status
-  for((i=0; i<$num_merged; i++))
+  for((i=0; i<num_merged; i++))
   do
     name="${all_merged[$i]}"
     merge_status[$name]="${COLOR_FG_GREEN}(merged)${COLOR_RESET}"
   done
-  for((i=0; i<$num_branches; i++))
+  for((i=0; i<num_branches; i++))
   do
     branch_name="${all_branches[$i]}"
     echo -e "[$(( i + 1 ))] $branch_name ${merge_status[$branch_name]}"
   done
   echo -n "Branch to delete: "
-  read branch_num
+  read -r branch_num
   echo ""
   if [ -n "$branch_num" ] && (( "$branch_num" <= "$num_branches" ))
   then

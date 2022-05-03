@@ -1,15 +1,11 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/yesterday, and run 'generate-scripts.sh'
-###########################################################################
-#2fbf561fb7f1c97dab4c486bb185005a
+# shellcheck shell=bash
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "yesterday "
@@ -46,5 +42,5 @@ sed -n '
   b
   :para
   x
-  /'$yesterday_date'/ p
+  /'"$yesterday_date"'/ p
 ' "$did_file"

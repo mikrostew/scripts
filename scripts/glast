@@ -1,9 +1,5 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/glast, and run 'generate-scripts.sh'
-###########################################################################
-#3c39f69acc1ed76dfceba010346394d5
+# shellcheck shell=bash
 
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
@@ -31,7 +27,7 @@ do_git ()
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "glast - [git] Show last commit info (Git LAST)"
@@ -57,4 +53,4 @@ do
   esac
 done
 shift $((OPTIND-1))
-do_git log -n1 --pretty=fuller
+@wait-for-command --show-output git log -n1 --color --decorate --pretty=fuller

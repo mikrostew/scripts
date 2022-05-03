@@ -19,8 +19,8 @@ then
   then
     # it's a time - figure out how many minutes away that is
     # (adapted from https://stackoverflow.com/a/14309184)
-    IFS=: read next_hour next_min <<< "$1"
-    IFS=: read now_hour now_min <<< "$(date +%H:%M)"
+    IFS=: read -r next_hour next_min <<< "$1"
+    IFS=: read -r now_hour now_min <<< "$(date +%H:%M)"
 
     # convert to seconds from Unix epoch time
     next_seconds=$(date -j -f "%Y-%m-%d %H:%M:%S" "1970-01-01 $next_hour:$next_min:00" +%s)

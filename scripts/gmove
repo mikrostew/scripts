@@ -1,9 +1,5 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/gmove, and run 'generate-scripts.sh'
-###########################################################################
-#8407f88b3937bc1fae46980b42e9e107
+# shellcheck shell=bash
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
@@ -11,22 +7,25 @@ COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 commit_diff_on_branch ()
 {
-    local git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)";
+    local git_rev_list_origin
+    git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)"
+    # shellcheck disable=SC2181
     if [ "$?" -eq 0 ] && [ -n "$git_rev_list_origin" ]; then
-        local git_origin_arr=($git_rev_list_origin);
+        local git_origin_arr
+        mapfile -t git_origin_arr <<< "$git_rev_list_origin"
         echo "${git_origin_arr[0]}";
     else
-        echo "0";
+        echo "0"
     fi
 }
 current_git_branch ()
 {
-    echo "$(git rev-parse --abbrev-ref HEAD)"
+    git rev-parse --abbrev-ref HEAD
 }
 do_cmd ()
 {
-    local cmd_args="";
-    for arg in "$@";
+    local cmd_args=""
+    for arg in "$@"
     do
         case "$arg" in
             *\ *)
@@ -37,7 +36,7 @@ do_cmd ()
             ;;
         esac;
     done;
-    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2;
+    echo -e "${COLOR_FG_GREEN}($cmd_args )${COLOR_RESET}" 1>&2
     command "$@"
 }
 do_git ()
@@ -46,11 +45,11 @@ do_git ()
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 in_git_repo ()
 {
@@ -58,7 +57,7 @@ in_git_repo ()
 }
 on_git_branch ()
 {
-    [ "$(current_git_branch)" != "$1" ] && echo_err ">_<  Must be on branch '$1' for this" && return -1 || return 0
+    [ "$(current_git_branch)" != "$1" ] && echo_err ">_<  Must be on branch '$1' for this" && return 1 || return 0
 }
 show_help_msg() {
   echo "gmove - [git] Move recent commits from master to a new branch (Git MOVE)"
@@ -98,10 +97,10 @@ then
   fi
   echo_info "${num_commits} commit(s) will be moved to branch '$new_branch_name'"
   echo -n "Confirm moving these commits [Y/n]: "
-  read confirm
+  read -r confirm
   if [ -z "$confirm" ] || [ "$confirm" == "Y" ] || [ "$confirm" == "y" ]
   then
-    do_git checkout -b "$new_branch_name" && do_git branch -f master HEAD~${num_commits} && do_git branch -u origin/master "$new_branch_name"
+    do_git checkout -b "$new_branch_name" && do_git branch -f master "HEAD~${num_commits}" && do_git branch -u origin/master "$new_branch_name"
   else
     echo_info "Not moving commits"
   fi

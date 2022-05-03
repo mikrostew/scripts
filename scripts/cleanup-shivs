@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # Cleanup old dirs in the ~/.shiv/ directory
 
 # Arguments
@@ -17,13 +19,14 @@ declare -A shivs
 # counters
 num_deleted_dirs=0
 
-cd "$HOME/.shiv/"
+cd "$HOME/.shiv/" || exit
 
 # figure out what's there
 for dirname in *
 do
-  exec_name="$(echo $dirname | sed 's/_.*//')"
-  #echo "$exec_name: $dirname"
+  # remove everything after the '_'
+  exec_name="${dirname%_*}"
+  echo "$exec_name: $dirname"
 
   if [ -z "${shivs[$exec_name]}" ]
   then
@@ -39,8 +42,12 @@ done
 for shiv_name in "${!shivs[@]}"
 do
   # convert to an array
-  shiv_dirs=( ${shivs[$shiv_name]} )
+  mapfile -t shiv_dirs <<< "${shivs[$shiv_name]}"
+  echo "shiv dirs"
+  echo "${shiv_dirs[@]}"
   num_dirs="${#shiv_dirs[@]}"
+  echo "num dirs"
+  echo "${num_dirs[@]}"
 
   # don't worry about shivs that only have on directory
   #echo "$shiv_name: $num_dirs dir(s)"
@@ -56,7 +63,7 @@ do
   for shiv_dir in "${shiv_dirs[@]}"
   do
     # last modification time
-    mod_time="$(stat -f%c $shiv_dir)"
+    mod_time="$(stat -f%c "$shiv_dir")"
     #echo "$shiv_name: $mod_time $shiv_dir"
 
     if [ "$mod_time" -gt "$last_mod_time" ]
@@ -101,7 +108,9 @@ done
 echo "removed $num_deleted_dirs" directories
 
 # clear any extra passwords typed into stdin
-read -t 1 -n 1024 discard
+# 'discard' is not used, on purpose
+# shellcheck disable=SC2034
+read -r -t 1 -n 1024 discard
 
 # read returns non-zero exit code if it hits EOF (and I don't care about that), so make sure we exit cleanly
 exit 0

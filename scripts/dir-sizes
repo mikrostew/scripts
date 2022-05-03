@@ -1,15 +1,11 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/dir-sizes, and run 'generate-scripts.sh'
-###########################################################################
-#8d6888b60f8ae99c2ca7590580c76e84
+# shellcheck shell=bash
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "dir-sizes - Show the sizes of the input dirs, sorted largest to smallest"

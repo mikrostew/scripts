@@ -48,7 +48,7 @@ then
   echo "resolution is $display_width x $display_height"
   # reposition this 80 pixels up from the bottom, and 10 pixels from the left, which looks about right
   xpos="10"
-  ypos="$(( $display_height - 80 ))"
+  ypos="$(( display_height - 80 ))"
   echo "repositioning to $xpos, $ypos"
   printf '\033[3;%s;%st' "$xpos" "$ypos"
 else

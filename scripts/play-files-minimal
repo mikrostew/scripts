@@ -10,7 +10,6 @@ const { spawn } = require('child_process');
 // extensions that I currently use
 const AUDIO_FILE_EXTENSIONS = ['.flac', '.opus', '.mp3'];
 
-
 function isAudioFile(file) {
   const ext = path.extname(file);
   return AUDIO_FILE_EXTENSIONS.includes(ext);
@@ -60,7 +59,7 @@ function getRandomizedInputFiles() {
           // add all the things in this dir to the list of things to process (then process them)
           const filesInDir = fs.readdirSync(fileOrDir);
           // have to prepend the dir to get the full path
-          const thingsToProcess = filesInDir.map(f => path.join(fileOrDir, f));
+          const thingsToProcess = filesInDir.map((f) => path.join(fileOrDir, f));
           filesAndDirsToProcess = filesAndDirsToProcess.concat(thingsToProcess);
           numDirsFound++;
         } else if (stat.isFile()) {
@@ -73,7 +72,7 @@ function getRandomizedInputFiles() {
           haveError = true;
           break;
         }
-      };
+      }
       if (!haveError) {
         console.log(`Found ${allAudioFiles.length} audio files (in ${numDirsFound} directories)`);
         resolve(shuffleArray(allAudioFiles));
@@ -93,21 +92,30 @@ async function playFiles(files) {
 
 // display the metadata for the file, then play it
 function displayAndPlay(filename) {
-  return getFileTags(filename)
-    // display the file info
-    .then((jsonData) => parseMetadataTags(jsonData))
-    .then((metadataTags) => outputFileInfo(metadataTags))
-    // play it
-    .then(() => playAudioFile(filename));
+  return (
+    getFileTags(filename)
+      // display the file info
+      .then((jsonData) => parseMetadataTags(jsonData))
+      .then((metadataTags) => outputFileInfo(metadataTags))
+      // play it
+      .then(() => playAudioFile(filename))
+  );
 }
-
 
 // get the metadata tags for the input file
 function getFileTags(filename) {
   return new Promise((resolve, reject) => {
     // use ffprobe to get the metadata tags for the file in JSON format
-    let tagsJsonData = "";
-    const ffprobe = spawn('ffprobe', ['-loglevel', 'error', '-of', 'json', '-show_entries', 'stream_tags:format_tags', filename]);
+    let tagsJsonData = '';
+    const ffprobe = spawn('ffprobe', [
+      '-loglevel',
+      'error',
+      '-of',
+      'json',
+      '-show_entries',
+      'stream_tags:format_tags',
+      filename,
+    ]);
 
     ffprobe.stdout.on('data', (data) => {
       tagsJsonData += data;
@@ -171,13 +179,15 @@ function getFileTags(filename) {
 //     }
 // }
 function parseMetadataTags(tagJson) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let tags = {};
     if (tagJson['streams'] !== undefined && Array.isArray(tagJson['streams'])) {
-      tagJson['streams'].forEach(stream => {
+      tagJson['streams'].forEach((stream) => {
         if (stream['tags'] !== undefined) {
           // store these tags first, converting everything to lowercase
-          Object.keys(stream['tags']).forEach(tag => tags[tag.toLowerCase()] = stream['tags'][tag]);
+          Object.keys(stream['tags']).forEach(
+            (tag) => (tags[tag.toLowerCase()] = stream['tags'][tag])
+          );
         }
       });
     }
@@ -187,7 +197,9 @@ function parseMetadataTags(tagJson) {
     if (tagJson['format'] !== undefined && tagJson['format']['tags'] !== undefined) {
       // store these tags now, converting everything to lowercase
       // (and possibly overwriting the previous tags - these win in precedence)
-      Object.keys(tagJson['format']['tags']).forEach(tag => tags[tag.toLowerCase()] = tagJson['format']['tags'][tag]);
+      Object.keys(tagJson['format']['tags']).forEach(
+        (tag) => (tags[tag.toLowerCase()] = tagJson['format']['tags'][tag])
+      );
     }
     //console.log('after format tags');
     //console.log(tags);
@@ -199,26 +211,28 @@ function parseMetadataTags(tagJson) {
 // output the file info to the console
 function outputFileInfo(tags) {
   // blank line so this will scroll down to only show the next 2 lines
-  console.log("");
+  console.log('');
   // black music notes with a white background
   const notes = chalk.green.bold('♪');
   // note the en dash here (not a hyphen)
   let artistAndAlbum = `${tags.artist} – ${tags.title}`;
   // limit this length to 80 chars, adding ellipsis for anything longer (some titles are very long…)
   if (artistAndAlbum.length > 80) {
-    artistAndAlbum = `${artistAndAlbum.substring(0,79)}…`;
+    artistAndAlbum = `${artistAndAlbum.substring(0, 79)}…`;
   }
   const artistAndAlbumColored = chalk.green.bold(artistAndAlbum);
   console.log(`${notes} ${artistAndAlbumColored}`);
   // show a URL to the artist's page below the song that's playing
   // (spaced nicely so it lines up with above)
-  console.log(`   ${tags.url ? tags.url : ""}`);
+  console.log(`   ${tags.url ? tags.url : ''}`);
 }
 
 // play the file
 function playAudioFile(file) {
   return new Promise((resolve, reject) => {
-    const ffplay = spawn('ffplay', ['-nodisp', '-autoexit', '-volume', '4', file], { stdio: 'ignore' });
+    const ffplay = spawn('ffplay', ['-nodisp', '-autoexit', '-volume', '4', file], {
+      stdio: 'ignore',
+    });
 
     ffplay.on('close', (code) => {
       if (code !== 0) {
@@ -230,11 +244,9 @@ function playAudioFile(file) {
   });
 }
 
-
-
 getRandomizedInputFiles()
-.then((audioFiles) => playFiles(audioFiles))
-.catch((err) => {
-  console.error(`Error: ${err}`);
-  process.exit(1);
-});
+  .then((audioFiles) => playFiles(audioFiles))
+  .catch((err) => {
+    console.error(`Error: ${err}`);
+    process.exit(1);
+  });

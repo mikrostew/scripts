@@ -1,4 +1,6 @@
 #!/usr/bin/env ts-node
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 // show upcoming dates, from the input config file
 
 import path from 'path';

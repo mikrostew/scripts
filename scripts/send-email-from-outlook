@@ -1,15 +1,11 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/send-email-from-outlook, and run 'generate-scripts.sh'
-###########################################################################
-#47e4c4c8ec250c914b6b72bbeb9cdcaf
+# shellcheck shell=bash
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "send-email-from-outlook - Send email from outlook address, using SMTP"
@@ -49,4 +45,4 @@ from_addr="$($GET_API_TOKEN outlook-email)"
 user="$($GET_API_TOKEN outlook-user)"
 pass="$($GET_API_TOKEN outlook-pass)"
 outlook_smtp='smtp-mail.outlook.com:587'
-sendEmail -o tls=yes -f "$from_addr" -t "$to_email" -s "$outlook_smtp" -xu "$user" -xp "$pass" -u "$subject" -m "$email_contents"
+sendEmail -o tls=yes -f "$from_addr" -t "$to_email" -s "$outlook_smtp" -xu "$user" -xp "$pass" -u "$subject" -m "$message"

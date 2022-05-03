@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # Set my status in Slack
 
 # (key code reference: https://eastmanreference.com/complete-list-of-applescript-key-codes)

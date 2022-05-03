@@ -13,7 +13,7 @@ app-run-info() {
   path="$2"
 
   # likely the app name, display that to be nice
-  app_name="${app_path##*/}"
+  app_name="${path##*/}"
 
   echo -e -n "  ${COLOR_FG_BOLD_GREEN}$action${COLOR_RESET} $app_name..."
 }
@@ -29,4 +29,5 @@ app_path="$1"
 app-run-info "start" "$app_path"
 "$app_path" >/dev/null 2>&1 &
 app_pid="$!"
+# shellcheck disable=SC2015
 kill -0 "$app_pid" && app-started || app-error

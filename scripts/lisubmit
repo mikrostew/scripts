@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # Squash commits, rebase, merge, and submit, for LI workflow
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
@@ -8,7 +10,7 @@ COLOR_RESET='\033[0m'
 
 current_git_branch ()
 {
-    echo "$(git rev-parse --abbrev-ref HEAD)"
+    git rev-parse --abbrev-ref HEAD
 }
 do_cmd ()
 {
@@ -33,11 +35,11 @@ do_git ()
 }
 echo_ack ()
 {
-    echo -e "${COLOR_FG_GREEN}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_GREEN}$*${COLOR_RESET}" 1>&2
 }
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_fail_banner ()
 {
@@ -47,7 +49,7 @@ echo_fail_banner ()
 }
 echo_info ()
 {
-    echo -e "${COLOR_FG_BOLD_BLUE}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 echo_success_banner ()
 {
@@ -59,7 +61,8 @@ get_li_rb_api_def ()
 {
     local api_def="";
     local cache_file="$DOTFILES_DIR/cache/li-rb-api-def.cache";
-    local cache_file_expired="$(find $cache_file -mtime +1 2>/dev/null)";
+    # shellcheck disable=SC2155
+    local cache_file_expired="$(find "$cache_file" -mtime +1 2>/dev/null)";
     if [ ! -f "$cache_file" ] || [ -n "$cache_file_expired" ]; then
         echo_info "RB API definitions not cached, requesting...";
         api_def="$(curl -X GET -H 'Accept: application/json' 'https://rb.corp.linkedin.com/api/' 2>/dev/null)";
@@ -92,7 +95,7 @@ get_li_rb_uri_template ()
 }
 git_review_board_id ()
 {
-    echo "$(git config --get branch.$1.reviewid)"
+    git config --get "branch.$1.reviewid"
 }
 git_undo_merge ()
 {
@@ -104,11 +107,11 @@ in_git_repo ()
 }
 no_uncommitted_changes ()
 {
-    [ "$(git status --porcelain --untracked-files=no)" != "" ] && echo_err ">_<  You have uncommitted changes" && return -1 || return 0
+    [ "$(git status --porcelain --untracked-files=no)" != "" ] && echo_err ">_<  You have uncommitted changes" && return 1 || return 0
 }
 not_on_git_branch ()
 {
-    [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return -1 || return 0
+    [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return 1 || return 0
 }
 
 show_help_msg() {
@@ -148,7 +151,7 @@ commit_msg_extra_line="${2:-}"
 
 in_mint_submit_repo() {
   if [ -f "$PWD/product-spec.json" ]; then
-    submit_def="$(cat $PWD/product-spec.json | jq '.build.commands.submit')"
+    submit_def="$(jq '.build.commands.submit' < "$PWD/product-spec.json")"
     [ "$submit_def" != 'null' ]
     return
   else
@@ -157,11 +160,11 @@ in_mint_submit_repo() {
 }
 
 branch_name="$(current_git_branch)"
-review_id="$(git_review_board_id $branch_name)"
+review_id="$(git_review_board_id "$branch_name")"
 @exit-on-error "Dang it! Getting the review board ID failed"
 
 echo_info "Submitting RB $review_id..."
-review_title="$(get_li_rb_title $review_id)"
+review_title="$(get_li_rb_title "$review_id")"
 
 if [ -z "$commit_msg" ]
 then
@@ -171,7 +174,7 @@ fi
 
 # prompt for things
 echo -n "Commit message [$commit_msg]: "
-read read_commit_msg
+read -r read_commit_msg
 if [ -n "$read_commit_msg" ]
 then
   commit_msg="$read_commit_msg"
@@ -193,7 +196,7 @@ echo "  LIXOVERDUEOVERRIDE    - if precommit is being blocked by an overdue lix 
 echo "  DISABLEDTESTOVERRIDE  - bypass enforcement of disabled tests per pillar (doesn't override precommit altogether)"
 echo "  DIFF_VERIFY_OVERRIDE  - change has diffs from last ship-it and a reviewer is not available"
 echo -n "[$commit_msg_extra_line]: "
-read commit_msg_extra
+read -r commit_msg_extra
 if [ -n "$commit_msg_extra" ]; then commit_msg_extra_line="$commit_msg_extra"; fi
 
 if in_git_repo && no_uncommitted_changes
@@ -223,14 +226,14 @@ then
   # NOTE: this does not seem to be writing the RB ID info correctly anymore?
   do_git review dcommit -r "$review_id"
   # if dcommit failed, probably missing a shipit from ACL
+  # shellcheck disable=SC2016
   @exit-on-error "Dang it! 'git review dcommit' failed, undoing the merge" 'git_undo_merge "$branch_name"'
 
   # NOTE: because dcommit ^^ stopped doing this correctly for me
   # (I _think_ it's adding the config before amending the commit, so the config is gone)
   # TODO: I should check if this exists and write it if necessary
   # add the config for the reviewid
-  do_git config branch.master.reviewid "$review_id"
-  if [ "$?" -ne 0 ]
+  if ! do_git config branch.master.reviewid "$review_id"
   then
     @wait-for-keypress 'That ^^ failed. Try adding it to the config manually, then press any key to continue...'
   fi
@@ -239,19 +242,18 @@ then
 
   # use --async?
   echo -n "Submit async? (to work on another branch) [Y/n]: "
-  read async_confirm
+  read -r async_confirm
   if [ -z "$async_confirm" ] || [ "$async_confirm" == "Y" ] || [ "$async_confirm" == "y" ]
   then
     echo_info "Submitting asynchronously - you can go work on another branch"
-    do_git submit --async
-    if [ "$?" -ne 0 ]; then echo_fail_banner; else echo_success_banner; fi
+    if ! do_git submit --async; then echo_fail_banner; else echo_success_banner; fi
     # either way, success or fail, want to undo the merge to preserve the branch
     echo_info "Checking out your original branch..."
     git_undo_merge "$branch_name"
   else
     echo_info "Submitting synchronously - watch this terminal for progress"
-    do_git submit
-    if [ "$?" -ne 0 ]; then
+    if ! do_git submit
+    then
       # submit failed, could be precommit, or ACL check, or whatever
       echo_fail_banner
       echo_info "Undoing the merge..."

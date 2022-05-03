@@ -1,4 +1,6 @@
 #!/usr/bin/env badash
+# shellcheck shell=bash
+
 # [git] Pull changes from origin and rebase local changes (Git Pull Rebase)
 
 # helpers

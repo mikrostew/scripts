@@ -36,7 +36,7 @@ space_ids="$(echo "$spaces_json" | /usr/local/bin/jq -r '.SpacesDisplayConfigura
 
 # loop over that, to find the index matching our current ID
 index=0
-for id in $(echo "$space_ids"); do
+for id in $space_ids; do
   if [ "$id" == "$current_id" ]
   then
     current_index="$index"

@@ -5,6 +5,6 @@
 # for now, just log every call to this command to see what it's trying to do
 # TODO: should this log then pass thru the args?
 
-echo "[$(date)] $@" >> "$HOME/brew-noop.log"
+echo "[$(date)] $*" >> "$HOME/brew-noop.log"
 
 exit 0

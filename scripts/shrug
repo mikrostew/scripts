@@ -11,6 +11,8 @@
 # So I'm using the clipboard workaround from:
 # https://apple.stackexchange.com/questions/288536/is-it-possible-to-keystroke-special-characters-in-applescript
 
+# TODO: save and restore the clipboard contents?
+
 osascript <<'EOF'
 set the clipboard to "¯\\_(ツ)_/¯"
 tell application "System Events" to keystroke "v" using command down

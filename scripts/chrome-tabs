@@ -1,15 +1,13 @@
 #!/usr/bin/env badash
-###########################################################################
-# DO NOT EDIT! This script was auto-generated. To update this script, edit
-# the file ~/dotfiles/script-gen/chrome-tabs, and run 'generate-scripts.sh'
-###########################################################################
-#e2a1b36f2567daaf857ab5b05396233d
+# shellcheck shell=bash
+
+# TODO: this doesn't really work, whatever
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 echo_err ()
 {
-    echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" 1>&2
+    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 show_help_msg() {
   echo "chrome-tabs - Show the open tab URLs from Chrome"
@@ -36,4 +34,4 @@ do
 done
 shift $((OPTIND-1))
 @uses-cmds strings grep sort uniq
-strings "$HOME/Library/Application Support/Google/Chrome/Default/Current Session" | grep -E '^https?://' | sort | uniq
+strings "$HOME/Library/Application Support/Google/Chrome/Default/Sessions/Tabs*" | grep -E '^https?://' | sort | uniq

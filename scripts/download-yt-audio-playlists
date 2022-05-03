@@ -51,8 +51,8 @@ download_playlist() {
 for playlist in $(echo "$playlist_config" | jq -r '.[] | @base64')
 do
   # TODO: refactor this duplication to a function?
-  name="$(echo $playlist | base64 --decode | jq -r '.name')"
-  list_id="$(echo $playlist | base64 --decode | jq -r '.playlistID')"
+  name="$(echo "$playlist" | base64 --decode | jq -r '.name')"
+  list_id="$(echo "$playlist" | base64 --decode | jq -r '.playlistID')"
 
   download_dir="$BASE_DIR/$name"
   download_playlist "$name" "$list_id" "$download_dir"
