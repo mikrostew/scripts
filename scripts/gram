@@ -23,10 +23,6 @@ gmt ()
 {
     @wait-for-command git mergetool --tool=opendiff
 }
-grmorig ()
-{
-    @wait-for-command git ls-files --others --exclude-standard | @wait-for-commnand grep \.orig$ | @wait-for-command xargs rm -v
-}
 in_git_repo ()
 {
     git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1

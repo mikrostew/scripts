@@ -1,0 +1,12 @@
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
+# [git] - delete *.orig files, usually leftover after merge or rebase with conflicts
+
+set -o pipefail
+
+# running ls-files only looks at the working directory
+# so change to the top level dir, in case I happen to be in a subdirectory
+pushd "$(git rev-parse --show-toplevel)" >/dev/null
+@wait-for-command git ls-files --others --exclude-standard | @wait-for-command grep \.orig$ | @wait-for-command xargs rm -v
+popd >/dev/null
