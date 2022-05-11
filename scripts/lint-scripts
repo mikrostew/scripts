@@ -10,13 +10,18 @@ trim() {
   # remove leading whitespace characters
   var="${var#"${var%%[![:space:]]*}"}"
   # remove trailing whitespace characters
-  var="${var%"${var##*[![:space:]]}"}"   
+  var="${var%"${var##*[![:space:]]}"}"
   printf '%s' "$var"
 }
 
-error_files=()
+errors=0
 
 # input files are command line args
+
+# first group the files by type, using their shebang
+shellcheck_files=()
+eslint_files=()
+rubocop_files=()
 
 for file in "$@"; do
   read -r firstline <"$file"
@@ -24,50 +29,48 @@ for file in "$@"; do
   #echo "file: $file, shebang: '$shebang'"
 
   case "$shebang" in
-    "#!/usr/bin/env bash")
-      if ! @wait-for-command shellcheck "$file"
-      then
-        error_files+=( "$file" )
-      fi
+    "#!/usr/bin/env bash"|"#!/usr/bin/env badash")
+      shellcheck_files+=( "$file" )
       ;;
-    "#!/usr/bin/env badash")
-      if ! @wait-for-command shellcheck "$file"
-      then
-        error_files+=( "$file" )
-      fi
-      ;;
-    "#!/usr/bin/env node")
-      if ! @wait-for-command yarn eslint "$file"
-      then
-        error_files+=( "$file" )
-      fi
-      ;;
-    "#!/usr/bin/env ts-node")
-      if ! @wait-for-command yarn eslint "$file"
-      then
-        error_files+=( "$file" )
-      fi
+    "#!/usr/bin/env node"|"#!/usr/bin/env ts-node")
+      eslint_files+=( "$file" )
       ;;
     "#!/usr/bin/env ruby")
-      if ! @wait-for-command rubocop "$file"
-      then
-        error_files+=( "$file" )
-      fi
+      rubocop_files+=( "$file" )
       ;;
     *)
-      echo "$file:"
-      echo "Unrecognized shebang '$shebang'"
-      error_files+=( "$file" )
+      echo "Unrecognized shebang '$shebang' in $file"
+        (( errors+=1 ))
       ;;
   esac
 done
 
-if [ "${#error_files[@]}" -ne 0 ]
+# then actually run the linting on those files
+if [ "${#shellcheck_files[@]}" -gt 0 ]
+then
+  if ! @wait-for-command shellcheck "${shellcheck_files[@]}"
+  then
+    (( errors+=1 ))
+  fi
+fi
+if [ "${#eslint_files[@]}" -gt 0 ]
+then
+  if ! @wait-for-command yarn eslint "${eslint_files[@]}"
+  then
+    (( errors+=1 ))
+  fi
+fi
+if [ "${#rubocop_files[@]}" -gt 0 ]
+then
+  if ! @wait-for-command rubocop "${rubocop_files[@]}"
+  then
+    (( errors+=1 ))
+  fi
+fi
+
+if [ "$errors" -ne 0 ]
 then
   echo ""
-  echo "${#error_files[@]} failures:"
-  for file in "${error_files[@]}"
-  do
-    echo "$file"
-  done
+  echo "There were errors"
+  exit 1
 fi
