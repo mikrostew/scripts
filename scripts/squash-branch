@@ -28,7 +28,9 @@ commit_diff_on_branch ()
     local git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)";
     # shellcheck disable=SC2181
     if [ "$?" -eq 0 ] && [ -n "$git_rev_list_origin" ]; then
-        local git_origin_arr=( "$git_rev_list_origin" );
+        # There will be two whitespace separated values in this var, and do I want to split that
+        # shellcheck disable=SC2206
+        local git_origin_arr=( $git_rev_list_origin );
         echo "${git_origin_arr[0]}";
     else
         echo "0";
