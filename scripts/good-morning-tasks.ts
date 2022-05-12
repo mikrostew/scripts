@@ -194,27 +194,8 @@ const config: Config = {
           syncConflictCheck(dir)
         )
       ),
-
+      exec('Lint script files', workMachines, 'lint-scripts', ['scripts/*']),
       exec('Cleanup shivs', workMachines, 'cleanup-shivs', [process.env['LDAP_PASS']!]),
-      func('Rdev check', workMachines, async () => {
-        const rdevLsStdout = (await execa('rdev', ['ls'])).stdout;
-        const rdevMachines = rdevLsStdout
-          .split('\n')
-          .map((line) => line.trim())
-          .filter((line) => line !== '')
-          .filter((line) => {
-            // strip out the initial lines that are not actually rdev machines
-            return !(/^Name/.test(line) || /------/.test(line));
-          });
-        const numMachines = rdevMachines.length;
-        if (numMachines > 1) {
-          throw new Error(
-            `'rdev ls' output:\n${rdevLsStdout}\nYou have ${numMachines} rdev machines. Run 'rdev delete <machine>' to get rid of at least one of these: ${rdevMachines.join(
-              ', '
-            )}`
-          );
-        }
-      }),
       func('Disk space check', laptopMachines, async () => {
         const { stdout } = await execa('df', ['-h']);
         const mainVolumeLine = stdout.match(/.*\/System\/Volumes\/Data\n/);
@@ -340,6 +321,26 @@ const config: Config = {
           await sleep(timeoutDelaySeconds * 1000);
           numAttempts++;
         }
+      }
+    }),
+
+    func('Rdev check', workMachines, async () => {
+      const rdevLsStdout = (await execa('rdev', ['ls'])).stdout;
+      const rdevMachines = rdevLsStdout
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line !== '')
+        .filter((line) => {
+          // strip out the initial lines that are not actually rdev machines
+          return !(/^Name/.test(line) || /------/.test(line));
+        });
+      const numMachines = rdevMachines.length;
+      if (numMachines > 1) {
+        throw new Error(
+          `'rdev ls' output:\n${rdevLsStdout}\nYou have ${numMachines} rdev machines. Run 'rdev delete <machine>' to get rid of at least one of these: ${rdevMachines.join(
+            ', '
+          )}`
+        );
       }
     }),
 
