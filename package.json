@@ -8,7 +8,7 @@
   },
   "type": "commonjs",
   "dependencies": {
-    "@mikrostew/good-morning": "^0.1.9",
+    "@mikrostew/good-morning": "^0.1.11",
     "chalk": "^4",
     "cli-table": "^0.3.6",
     "execa": "^5.0.0",
