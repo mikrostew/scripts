@@ -2,9 +2,6 @@
 # shellcheck shell=bash
 
 # Show the open tab URLs from Chrome
-# (adapted from https://stackoverflow.com/a/49678861/)
-
-# TODO: this doesn't really work, whatever
 
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -39,6 +36,20 @@ do
 done
 shift $((OPTIND-1))
 
-@uses-cmds strings grep sort uniq
+# adapted from https://superuser.com/a/1535814
+wincount="$(osascript -e 'tell application "Google Chrome" to get number of windows')"
+#echo "windows: $wincount"
 
-strings "$HOME/Library/Application Support/Google/Chrome/Default/Sessions/Tabs*" | grep -E '^https?://' | sort | uniq
+for (( win = 1; win <= wincount; win++ ))
+do
+
+  tabcount="$(osascript -e 'tell application "Google Chrome" to get number of tabs in window '$win)"
+  #echo "window: $win, tabcount: $tabcount"
+
+  for (( tab = 1; tab <= tabcount; tab++ ))
+  do
+    url="$(osascript -e 'tell application "Google Chrome" to get URL of tab '$tab' of window '$win)"
+    echo "$url"
+  done
+
+done
