@@ -2,6 +2,7 @@
 
 # open applications and remind about settings for meetings
 
+echo "Starting Apps"
 # start these apps
 # OBS, camo studio, zoom (to check settings)
 run-app-path '/Applications/OBS.app/Contents/MacOS/obs'
@@ -13,8 +14,3 @@ echo ""
 echo "Reminders:"
 echo "  Make sure the microphone is on"
 echo "  Make sure the light is on"
-
-# wait before exiting
-echo ""
-echo "Press any key to exit..."
-read -r -n1 -s

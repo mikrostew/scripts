@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Opens new iTerm2 window, types out the input command string, and hits enter
+
+# optional flag to hit a key before closing the term window
+if [ "$1" = "--exit-conf" ]
+then
+  confirm_exit=" ; echo ''; echo -n 'Press any key to exit...'; read -n1 -s; exit"
+  shift
+else
+  confirm_exit=""
+fi
+
+# flag to resize the window (for good-morning)
+if [ "$1" = "--resize" ]
+then
+  shift
+  # TODO: input the actual size
+  resize="printf '\\\\033[8;56;108t'; "
+else
+  resize=""
+fi
+
+# check if iterm2 is running - if not, we need to start it
+if pgrep -a iTerm2
+then
+  # iTerm2 already running - open a new window
+  osascript -e 'tell application "iTerm" to create window with default profile'
+else
+  # iTerm2 not running - have to start it
+  osascript -e 'tell application "Iterm" to activate'
+fi
+
+
+# small delay for terminal startup,
+# resize if indicated
+# clear terminal window to make it look nicer
+# type out the input command string
+# possibly confirm the exit
+# hit return to run all of that
+osascript <<EOF
+tell application "System Events"
+  delay 0.5
+  keystroke "${resize}clear; ${1}${confirm_exit}" & return
+end tell
+EOF
