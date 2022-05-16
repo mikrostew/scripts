@@ -6,17 +6,12 @@
 # colors
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
-COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 # imported functions
 echo_ack ()
 {
     echo -e "${COLOR_FG_GREEN}$*${COLOR_RESET}" 1>&2
-}
-echo_err ()
-{
-    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
@@ -56,11 +51,11 @@ do
       show_help_msg && exit 0
       ;;
     \?)
-      echo_err "$0: invalid option '-$OPTARG'"
+      @echo-err "$0: invalid option '-$OPTARG'"
       exit 1
       ;;
     :)
-      echo_err "$0: option '-$OPTARG' requires an argument"
+      @echo-err "$0: option '-$OPTARG' requires an argument"
       exit 1
       ;;
   esac
@@ -86,7 +81,7 @@ repo_name=${repo_info[1]}
 api_token="$(security find-generic-password -ga github-fork-token -w)"
 if [ -z "$api_token" ]
 then
-  echo_err "Unable to get the API token"
+  @echo-err "Unable to get the API token"
   exit 1
 fi
 
@@ -106,7 +101,7 @@ sleep 10
 ssh_url="$(echo "$output" | jq --raw-output '.ssh_url')"
 if [ "$ssh_url" == "null" ]
 then
-  echo_err "Unable to get the 'ssh-url' property"
+  @echo-err "Unable to get the 'ssh-url' property"
   echo "Output is:"
   echo "$output"
   exit 1

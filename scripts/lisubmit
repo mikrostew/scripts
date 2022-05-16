@@ -5,7 +5,6 @@
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
-COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 current_git_branch ()
@@ -16,15 +15,11 @@ echo_ack ()
 {
     echo -e "${COLOR_FG_GREEN}$*${COLOR_RESET}" 1>&2
 }
-echo_err ()
-{
-    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
-}
 echo_fail_banner ()
 {
-    echo_err "***************";
-    echo_err "*  Failed :(  *";
-    echo_err "***************"
+    @echo-err "***************";
+    @echo-err "*  Failed :(  *";
+    @echo-err "***************"
 }
 echo_info ()
 {
@@ -47,7 +42,7 @@ get_li_rb_api_def ()
         api_def="$(curl -X GET -H 'Accept: application/json' 'https://rb.corp.linkedin.com/api/' 2>/dev/null)";
         exit_code="$?";
         if [ "$exit_code" -ne 0 ]; then
-            echo_err "Failed to get RB API definitions. Exit code was: $exit_code";
+            @echo-err "Failed to get RB API definitions. Exit code was: $exit_code";
         else
             echo "$api_def" > "$cache_file";
         fi;
@@ -82,15 +77,15 @@ git_undo_merge ()
 }
 in_git_repo ()
 {
-    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
+    git status > /dev/null && return 0 || @echo-err "Not in git repo" && return 1
 }
 no_uncommitted_changes ()
 {
-    [ "$(git status --porcelain --untracked-files=no)" != "" ] && echo_err ">_<  You have uncommitted changes" && return 1 || return 0
+    [ "$(git status --porcelain --untracked-files=no)" != "" ] && @echo-err ">_<  You have uncommitted changes" && return 1 || return 0
 }
 not_on_git_branch ()
 {
-    [ "$(current_git_branch)" == "$1" ] && echo_err ">_<  Doesn't work on branch '$1'" && return 1 || return 0
+    [ "$(current_git_branch)" == "$1" ] && @echo-err ">_<  Doesn't work on branch '$1'" && return 1 || return 0
 }
 
 show_help_msg() {
@@ -112,11 +107,11 @@ do
       show_help_msg && exit 0
       ;;
     \?)
-      echo_err "$0: invalid option '-$OPTARG'"
+      @echo-err "$0: invalid option '-$OPTARG'"
       exit 1
       ;;
     :)
-      echo_err "$0: option '-$OPTARG' requires an argument"
+      @echo-err "$0: option '-$OPTARG' requires an argument"
       exit 1
       ;;
   esac

@@ -1,16 +1,6 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-# colors
-COLOR_FG_RED='\033[0;31m'
-COLOR_RESET='\033[0m'
-
-# helper functions
-echo_err ()
-{
-    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
-}
-
 # help text
 show_help_msg() {
   echo "verify-dotfile-links - Verify the links to the dotfiles haven't changed"
@@ -32,11 +22,11 @@ do
       show_help_msg && exit 0
       ;;
     \?)
-      echo_err "$0: invalid option '-$OPTARG'"
+      @echo-err "$0: invalid option '-$OPTARG'"
       exit 1
       ;;
     :)
-      echo_err "$0: option '-$OPTARG' requires an argument"
+      @echo-err "$0: option '-$OPTARG' requires an argument"
       exit 1
       ;;
   esac
@@ -101,7 +91,7 @@ then
   # work vm
   links[".ssh/config.custom"]=".ssh-config-linux"
 else
-  echo_err "Machine '$host_name' has not been configured for this script"
+  @echo-err "Machine '$host_name' has not been configured for this script"
   exit 1
 fi
 
@@ -115,12 +105,12 @@ do
     link_target="$(readlink "$HOME/$i")"
     if [ "$link_target" != "$checkout_dir/${links[$i]}" ]
     then
-      echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' is the wrong target!"
-      echo_err "        (points to '$link_target')"
+      @echo-err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' is the wrong target!"
+      @echo-err "        (points to '$link_target')"
       (( link_errors+=1 ))
     fi
   else
-    echo_err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' does not exist!"
+    @echo-err "symlink '$HOME/$i => $checkout_dir/${links[$i]}' does not exist!"
   fi
 done
 

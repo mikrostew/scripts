@@ -22,10 +22,6 @@ COPYRIGHTS['CC BY-NC 4.0']='Attribution-NonCommercial: http://creativecommons.or
 COPYRIGHTS['CC BY-NC 3.0']='Attribution-NonCommercial: http://creativecommons.org/licenses/by-nc/3.0/'
 
 
-# display errors and info
-echo_error() {
-  echo "[error] $*" 1>&2
-}
 echo_info() {
   echo "[info] $*" 1>&2
 }
@@ -70,7 +66,7 @@ prompt_for_copyright() {
     local copyright_text="${COPYRIGHTS[$copyright_type]}"
     if [ -z "$copyright_text" ]
     then
-      echo_error "Blank copyright"
+      @echo-err "Blank copyright"
       exit 1
     fi
     # output the text of the copyright to write to the files
@@ -117,7 +113,7 @@ elif [ -d "/usr/local/SyncThing/SyncAudio" ]
 then
   base_dir="/usr/local/SyncThing/SyncAudio/streaming"
 else
-  echo_error "Could not find the SyncAudio/ directory"
+  @echo-err "Could not find the SyncAudio/ directory"
   exit 1
 fi
 
@@ -165,14 +161,14 @@ do
   temp_dir="$(mktemp -d "$TMPDIR/$PROGRAM_NAME.XXXXXX")"
   if [ -z "$temp_dir" ]
   then
-    echo_error "could not create a temp dir"
+    @echo-err "could not create a temp dir"
   fi
   echo_info "Created temp dir '$temp_dir'"
 
   # `unzip` to that temp directory
   if ! @wait-for-command unzip "$zip_file" -d "$temp_dir"
   then
-    echo_error "Failed to unzip '$zip_file'"
+    @echo-err "Failed to unzip '$zip_file'"
     exit 1
   fi
 
@@ -185,7 +181,7 @@ do
   # echo_info "Extracted $num_extracted_files files"
   # if [ "$num_extracted_files" -eq 0 ]
   # then
-  #   echo_error "Extracted 0 files"
+  #   @echo-err "Extracted 0 files"
   #   echo_info "stdout:"
   #   echo "$(cat <"$ASYNC_STDOUT")"
   #   echo_info "stderr:"
@@ -206,7 +202,7 @@ do
     echo_info "Processing FLAC file '$file_base.$file_ext'..."
     if [ -z "$file_base" ] || [ -z "$file_ext" ]
     then
-      echo_error "Empty file base or ext"
+      @echo-err "Empty file base or ext"
       exit 1
     fi
 
@@ -221,7 +217,7 @@ do
     # check that none of those are empty
     if [ -z "$song_artist" ] || [ -z "$song_album" ] || [ -z "$song_title" ] || [ -z "$song_track" ]
     then
-      echo_error "At least one of those metadata ^^^ fields is empty"
+      @echo-err "At least one of those metadata ^^^ fields is empty"
       exit 1
     fi
 
@@ -275,7 +271,7 @@ do
     # add the URL and copyright info to the file
     if ! @wait-for-command ffmpeg -i "$flac_file" -metadata copyright="$song_copyright_fmt" -metadata url="$song_url_fmt" -codec copy "$flac_metadata_file"
     then
-      echo_error "Failed to add metadata"
+      @echo-err "Failed to add metadata"
       exit 1
     fi
     echo_info "wrote file '$file_base-METADATA.$file_ext'"
@@ -288,7 +284,7 @@ do
     # (using --force to force overwrite of existing files)
     if ! @wait-for-command ffmpeg-normalize "$flac_metadata_file" --video-disable --force --audio-codec libopus --audio-bitrate 128k -o "$final_output_file"
     then
-      echo_error "Failed to normalize and convert"
+      @echo-err "Failed to normalize and convert"
       exit 1
     fi
     echo_info "wrote file '$song_track_fmt - $song_title_fmt.opus'"
@@ -318,7 +314,7 @@ do
   if ! rmdir "$temp_dir"
   then
     echo ""
-    echo_error "Could not remove directory $temp_dir"
+    @echo-err "Could not remove directory $temp_dir"
     exit 1
   else
     # so the exit trap doesn't try to delete the already deleted dir

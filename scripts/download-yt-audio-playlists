@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
 # download audio playlists from youtube
 
 # different paths for different machines
@@ -10,7 +12,7 @@ elif [[ "$HOST_NAME" =~ mistewar-mn ]]
 then
   BASE_DIR="/usr/local/SyncThing/SyncPhone/Music"
 else
-  echo_err "Machine '$HOST_NAME' has not been configured for script $0"
+  @echo-err "Machine '$HOST_NAME' has not been configured for script $0"
   exit 1
 fi
 

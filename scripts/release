@@ -7,25 +7,19 @@
 #  - [optional] publish to npm
 # (adapted from https://github.com/stefanpenner/dotfiles/)
 
-# colors
 COLOR_FG_BOLD_BLUE='\033[1;34m'
-COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 # helper functions
 current_git_branch() {
   git rev-parse --abbrev-ref HEAD
 }
-echo_err()
-{
-  echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
-}
 echo_info()
 {
   echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
 in_git_repo() {
-  git status >/dev/null && return 0 || echo_err "Not in git repo" && return 1
+  git status >/dev/null && return 0 || @echo-err "Not in git repo" && return 1
 }
 on_main_branch() {
   current_branch="$(current_git_branch)"
@@ -33,7 +27,7 @@ on_main_branch() {
   then
     return 0
   else
-    echo_err ">_<  Must be on branch 'main' or 'master' for this"
+    @echo-err ">_<  Must be on branch 'main' or 'master' for this"
     return 1
   fi
 }
@@ -62,9 +56,9 @@ then
     # I don't run this script very often, so I always need to login
     if ! ( npm login && @wait-for-command npm publish --access=public )
     then
-      echo_err "failed to publish package - you will need to rerun:"
+      @echo-err "failed to publish package - you will need to rerun:"
       # shellcheck disable=SC2016
-      echo_err '`npm login && npm publish --access=public`'
+      @echo-err '`npm login && npm publish --access=public`'
       exit 1
     fi
   fi

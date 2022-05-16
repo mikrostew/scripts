@@ -4,16 +4,11 @@
 # Create a new RB from the local changes, or update existing review
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
-COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 current_git_branch ()
 {
     git rev-parse --abbrev-ref HEAD
-}
-echo_err ()
-{
-    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
@@ -40,11 +35,11 @@ do
       show_help_msg && exit 0
       ;;
     \?)
-      echo_err "$0: invalid option '-$OPTARG'"
+      @echo-err "$0: invalid option '-$OPTARG'"
       exit 1
       ;;
     :)
-      echo_err "$0: option '-$OPTARG' requires an argument"
+      @echo-err "$0: option '-$OPTARG' requires an argument"
       exit 1
       ;;
   esac
@@ -93,7 +88,7 @@ else
   if [ "$branch_name" = "master" ]
   then
     # no input description, so use the commit message
-    echo_err "Don't create a review from the 'master' branch, use a feature branch"
+    @echo-err "Don't create a review from the 'master' branch, use a feature branch"
     exit 1
   fi
   if [ -z "$input_description" ]

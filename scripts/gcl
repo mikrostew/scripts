@@ -4,16 +4,11 @@
 # [git] Checkout git branch from list of branches (Git Checkout from List)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
-COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
 
 all_git_branches ()
 {
     git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||'
-}
-echo_err ()
-{
-    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
 }
 echo_info ()
 {
@@ -21,7 +16,7 @@ echo_info ()
 }
 in_git_repo ()
 {
-    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
+    git status > /dev/null && return 0 || @echo-err "Not in git repo" && return 1
 }
 show_help_msg() {
   echo "gcl - [git] Checkout git branch from list of branches (Git Checkout from List)"
@@ -38,11 +33,11 @@ do
       show_help_msg && exit 0
       ;;
     \?)
-      echo_err "$0: invalid option '-$OPTARG'"
+      @echo-err "$0: invalid option '-$OPTARG'"
       exit 1
       ;;
     :)
-      echo_err "$0: option '-$OPTARG' requires an argument"
+      @echo-err "$0: option '-$OPTARG' requires an argument"
       exit 1
       ;;
   esac

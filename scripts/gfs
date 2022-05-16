@@ -3,20 +3,13 @@
 
 # [git] Sync main/master branch to the upstream fork (Git Fork Sync)
 
-COLOR_FG_RED='\033[0;31m'
-COLOR_RESET='\033[0m'
-
 current_git_branch ()
 {
   git rev-parse --abbrev-ref HEAD
 }
-echo_err ()
-{
-  echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
-}
 in_git_repo ()
 {
-  git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
+  git status > /dev/null && return 0 || @echo-err "Not in git repo" && return 1
 }
 on_symbolic_ref ()
 {
@@ -37,11 +30,11 @@ do
       show_help_msg && exit 0
       ;;
     \?)
-      echo_err "$0: invalid option '-$OPTARG'"
+      @echo-err "$0: invalid option '-$OPTARG'"
       exit 1
       ;;
     :)
-      echo_err "$0: option '-$OPTARG' requires an argument"
+      @echo-err "$0: option '-$OPTARG' requires an argument"
       exit 1
       ;;
   esac
@@ -54,7 +47,7 @@ then
 
   # first try to update upstream, and fail early since I often mess this up
   @wait-for-command git fetch upstream
-  @exit-on-error "" "echo_err \"Error: Looks like 'upstream' is not setup - use 'git remote add upstream <repo>' to set it\""
+  @exit-on-error "" "@echo-err \"Error: Looks like 'upstream' is not setup - use 'git remote add upstream <repo>' to set it\""
 
   # also update this
   @wait-for-command git fetch origin
@@ -81,7 +74,7 @@ then
   if [ "$upstream_default" != "$origin_default" ]
   then
     @wait-for-command git checkout "$upstream_default"
-    echo_err "You need to update the default branch $origin_default --> $upstream_default on your fork"
+    @echo-err "You need to update the default branch $origin_default --> $upstream_default on your fork"
   fi
 
   # push changes to sync my fork with upstream

@@ -3,20 +3,13 @@
 
 # [git] Push current local branch to origin, and set upstream (Git Push Branch)
 
-COLOR_FG_RED='\033[0;31m'
-COLOR_RESET='\033[0m'
-
 current_git_branch ()
 {
     git rev-parse --abbrev-ref HEAD
 }
-echo_err ()
-{
-    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
-}
 in_git_repo ()
 {
-    git status > /dev/null && return 0 || echo_err "Not in git repo" && return 1
+    git status > /dev/null && return 0 || @echo-err "Not in git repo" && return 1
 }
 
 if in_git_repo

@@ -3,13 +3,6 @@
 
 # [git] Squash the input number of commits on the current branch
 
-COLOR_FG_RED='\033[0;31m'
-COLOR_RESET='\033[0m'
-
-echo_err ()
-{
-    echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" 1>&2
-}
 show_help_msg() {
   echo "squash-commits - [git] Squash the input number of commits on the current branch"
   echo 'Usage: squash-commits [options] num_commits commit_msg [commit_msg_extra_line]'
@@ -30,11 +23,11 @@ do
       show_help_msg && exit 0
       ;;
     \?)
-      echo_err "$0: invalid option '-$OPTARG'"
+      @echo-err "$0: invalid option '-$OPTARG'"
       exit 1
       ;;
     :)
-      echo_err "$0: option '-$OPTARG' requires an argument"
+      @echo-err "$0: option '-$OPTARG' requires an argument"
       exit 1
       ;;
   esac
