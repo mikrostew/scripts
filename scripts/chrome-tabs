@@ -43,12 +43,12 @@ wincount="$(osascript -e 'tell application "Google Chrome" to get number of wind
 for (( win = 1; win <= wincount; win++ ))
 do
 
-  tabcount="$(osascript -e 'tell application "Google Chrome" to get number of tabs in window '$win)"
+  tabcount="$(osascript -e 'tell application "Google Chrome" to get number of tabs in window '"$win")"
   #echo "window: $win, tabcount: $tabcount"
 
   for (( tab = 1; tab <= tabcount; tab++ ))
   do
-    url="$(osascript -e 'tell application "Google Chrome" to get URL of tab '$tab' of window '$win)"
+    url="$(osascript -e 'tell application "Google Chrome" to get URL of tab '"$tab"' of window '"$win")"
     echo "$url"
   done
 
