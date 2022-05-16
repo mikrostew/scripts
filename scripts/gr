@@ -1,0 +1,10 @@
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
+# typical arguments I use for grep
+
+grep_output="$(@wait-for-command --show-output grep -nIr --color=always --exclude-dir node_modules "$@")"
+
+echo "$grep_output"
+echo ""
+echo "total: $(wc -l <<< "$grep_output")"
