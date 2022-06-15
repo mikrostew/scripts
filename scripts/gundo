@@ -42,4 +42,8 @@ then
 
   # also writes the previous commit message to .git/GITGUI_MSG
   echo "$last_commit" > "$git_dir/GITGUI_MSG"
+
+  # show the log of the current commit
+  echo ""
+  git log -n1
 fi
