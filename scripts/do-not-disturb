@@ -41,3 +41,44 @@ message="Do Not Disturb was on for $sleep_minutes minutes"
 # use terminal-notifier instead of osascript (see https://github.com/julienXX/terminal-notifier)
 # so that I don't have to re-quote everything
 terminal-notifier -message "$message" -title "$title" -sound "$sound_name"
+
+
+
+# TODO: ok so none of that ^^^ works anymore, not surprising, it's not using any kind of API
+
+# anyway, found this: https://github.com/joeyhoer/dnd/
+# (which also doesn't work)
+
+# but, it may be on the right track
+
+
+# so this plist file has some settings, but the ones that ^^^ script uses aren't right anymore
+#   $ plutil -extract dnd_prefs xml1 -o - /Users/mistewar/Library/Preferences/com.apple.ncprefs.plist | xmllint --xpath "string(//data)" - | base64 --decode | plutil -convert xml1 - -o -
+#   <?xml version="1.0" encoding="UTF-8"?>
+#   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+#   <plist version="1.0">
+#   <dict>
+#   	<key>dndDisplayLock</key>
+#   	<false/>
+#   	<key>dndDisplaySleep</key>
+#   	<false/>
+#   	<key>dndMirrored</key>
+#   	<true/>
+#   	<key>facetimeCanBreakDND</key>
+#   	<false/>
+#   	<key>repeatedFacetimeCallsBreaksDND</key>
+#   	<false/>
+#   </dict>
+#   </plist>
+
+# using
+#   $ plutil -p /Users/mistewar/Library/Preferences/com.apple.ncprefs.plist
+#
+# the rest of that file looks like prefs for individual apps, so maybe there's something else...
+
+# looking to see if any settings are changed when DND is enabled
+#   $ for file in ~/Library/Preferences/*.plist; do echo "file: $file" >>~/before-dnd.txt; plutil -p "$file" >>~/before-dnd.txt; done
+# then enable it
+#   $ for file in ~/Library/Preferences/*.plist; do echo "file: $file" >>~/after-dnd.txt; plutil -p "$file" >>~/after-dnd.txt; done
+#
+# diff-ing those doesn't show any changes :(
