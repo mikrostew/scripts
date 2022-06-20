@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Opens new Chrome window
 
+# TODO: use applescript for this instead?
 clipboard_contents="$(pbpaste)"
 
 if [[ "$clipboard_contents" =~ ^http ]]

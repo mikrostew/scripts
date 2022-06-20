@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Paste the link to my Zoom meeting
 
+# initial delay to this doesn't capture the keyboard shortcut chars
+sleep 0.3
+
 # Read this from a local file on disk, so I'm not committing the link to a public repo ;)
 zoom_file="/usr/local/SyncThing/SyncDocs/zoom-link.txt"
 
@@ -34,7 +37,11 @@ fi
 #osascript -e "tell application 'System Events' to keystroke '$zoom_link'"
 
 # but using the clipboard does
+# (saving and restoring any existing clipboard contents)
 osascript <<EOF
+set save_clipboard to get the clipboard
 set the clipboard to "$zoom_link"
 tell application "System Events" to keystroke "v" using command down
+delay 0.3
+set the clipboard to save_clipboard
 EOF

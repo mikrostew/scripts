@@ -2,11 +2,14 @@
 # Paste a red X ❌
 
 # initial delay to this doesn't capture the keyboard shortcut chars
-sleep 0.5
+sleep 0.3
 
 # use the clipboard
-# TODO: save and restore the clipboard contents?
+# (saving and restoring any existing clipboard contents)
 osascript <<EOF
+set save_clipboard to get the clipboard
 set the clipboard to "❌"
 tell application "System Events" to keystroke "v" using command down
+delay 0.3
+set the clipboard to save_clipboard
 EOF
