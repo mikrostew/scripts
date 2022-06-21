@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-# TODO: this doesn't work anymore, for some reason
 
 # Set the "Do Not Disturb" feature in OSX, for a limited amount of time
 # (normally you set it and it's on until midnight, which is not great)
 
-# from:
-# https://apple.stackexchange.com/a/303400
-# https://heyfocus.com/blog/enabling-do-not-disturb-mode/
-
 # input the number of minutes to sleep
-echo -n "DND for how many minutes? [default 30] "
+echo -n "Do Not Disturb (Focus) for how many minutes? [30] "
 read -r sleep_minutes
 if [ -z "$sleep_minutes" ]
 then
@@ -18,33 +13,36 @@ fi
 # and get seconds for the sleep command
 sleep_seconds=$(( sleep_minutes * 60 ))
 
-# set DND
-defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean true
-defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturbDate -date "$(date -u +"%Y-%m-%d %H:%M:%S +0000")"
-killall NotificationCenter
-echo "Turned DND on"
+## from:
+## https://apple.stackexchange.com/a/303400
+## https://heyfocus.com/blog/enabling-do-not-disturb-mode/
+#
+## set DND
+#defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean true
+#defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturbDate -date "$(date -u +"%Y-%m-%d %H:%M:%S +0000")"
+#killall NotificationCenter
+#echo "Turned DND on"
+#
+#echo "Sleeping for $sleep_minutes minutes..."
+#sleep $sleep_seconds
+##sleep 5
+#
+## clear DND
+#defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false
+#killall NotificationCenter
+#echo "Turned DND off"
+#
+## and send a notification, now that can see them again
+#sound_name="Glass" # see /System/Library/Sounds/ for list of sounds
+#title="Notifications are re-enabled"
+#message="Do Not Disturb was on for $sleep_minutes minutes"
+#
+## use terminal-notifier instead of osascript (see https://github.com/julienXX/terminal-notifier)
+## so that I don't have to re-quote everything
+#terminal-notifier -message "$message" -title "$title" -sound "$sound_name"
 
-echo "Sleeping for $sleep_minutes minutes..."
-sleep $sleep_seconds
-#sleep 5
 
-# clear DND
-defaults -currentHost write ~/Library/Preferences/ByHost/com.apple.notificationcenterui doNotDisturb -boolean false
-killall NotificationCenter
-echo "Turned DND off"
-
-# and send a notification, now that can see them again
-sound_name="Glass" # see /System/Library/Sounds/ for list of sounds
-title="Notifications are re-enabled"
-message="Do Not Disturb was on for $sleep_minutes minutes"
-
-# use terminal-notifier instead of osascript (see https://github.com/julienXX/terminal-notifier)
-# so that I don't have to re-quote everything
-terminal-notifier -message "$message" -title "$title" -sound "$sound_name"
-
-
-
-# TODO: ok so none of that ^^^ works anymore, not surprising, it's not using any kind of API
+# ok so none of that ^^^ works anymore, not surprising, it's not using any kind of API
 
 # anyway, found this: https://github.com/joeyhoer/dnd/
 # (which also doesn't work)
@@ -82,3 +80,55 @@ terminal-notifier -message "$message" -title "$title" -sound "$sound_name"
 #   $ for file in ~/Library/Preferences/*.plist; do echo "file: $file" >>~/after-dnd.txt; plutil -p "$file" >>~/after-dnd.txt; done
 #
 # diff-ing those doesn't show any changes :(
+
+
+# there is also https://github.com/sindresorhus/do-not-disturb-cli
+#
+# but that is not working since 11.x
+# https://github.com/sindresorhus/do-not-disturb/issues/9
+# https://github.com/sindresorhus/do-not-disturb/issues/12
+
+# looks like the best way at this point is to use Shortcuts.app
+# (that will _maybe_ stay consistent from one OS release to the next?)
+
+# how to create a shortcut
+# open Shortcuts.app
+# click the "+"
+# name the shortcut "DND Focus Mode"
+# search for "if", and click and drag the "If" action into the left side
+# select "Shortcut Input" in that,
+# then setup the input task above it to "Receive 'Text' input from 'Nowhere'"
+#   and if there's no input, "Stop and Respond" "You need to pass 'on' or 'off' to this shortcut"
+# in the "If", click "Shortcut Input" and for type select "Text"
+# setup the IF to be "If Shortcut Input contains on"
+#   (I tried "is on", but that didn't work ¯\_(ツ)_/¯)
+# search for "focus" in the search bar on the right side
+# drag the "Set Focus" action so that it is under the "If"
+# set that up to be "Turn Do Not Disturb On until Turned Off"
+# drag another "Set Focus" action so that it is under the "Otherwise"
+# set that up to be "Turn Do Not Disturb Off"
+# that should do it
+
+SHORTCUT_NAME="DND Focus Mode"
+
+dnd_off() {
+  shortcuts run "$SHORTCUT_NAME" <<< "off"
+	#killall NotificationCenter
+	echo "DND -> off"
+}
+
+# first check that there is a shortcut
+if shortcuts list | grep "$SHORTCUT_NAME" >/dev/null
+then
+  shortcuts run "$SHORTCUT_NAME" <<< "on"
+	#killall NotificationCenter
+	echo "DND -> on"
+  # if this is Ctrl-C-ed, or it exits, clean up by turning off DND
+  trap dnd_off SIGINT EXIT
+
+	echo "(waiting for $sleep_minutes minute(s)...)"
+	sleep $sleep_seconds
+else
+  echo "Error: shortcut '$SHORTCUT_NAME' does not exist, please create it"
+  exit 1
+fi
