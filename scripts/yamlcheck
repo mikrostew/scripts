@@ -2,6 +2,12 @@
 # verify that the input files are valid YAML
 # frozen_string_literal: true
 
+# TODO: instead of just Ruby, run YAML checks in multiple langs
+#   - Ruby
+#   - Javascript
+#   - Rust
+#   - anything else?
+
 # rubocop:disable Style/SingleLineMethods, Style/Documentation, Style/RescueStandardError, Lint/MissingCopEnableDirective
 
 require 'yaml'
