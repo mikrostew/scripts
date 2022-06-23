@@ -41,7 +41,8 @@ commit_msg_extra_line="${3:-}"
 # "squashes" commits by combining them into a single commit
 if [ -n "$commit_msg_extra_line" ]; then
   # multiple lines of commit messages
-  @wait-for-command git reset --soft "HEAD~$num_commits" && @wait-for-command git commit -m "$commit_msg" -m "$commit_msg_extra_line"
+  # (use -n so any precommit stuff does not run)
+  @wait-for-command git reset --soft "HEAD~$num_commits" && @wait-for-command git commit -n -m "$commit_msg" -m "$commit_msg_extra_line"
 else
-  @wait-for-command git reset --soft "HEAD~$num_commits" && @wait-for-command git commit -m "$commit_msg"
+  @wait-for-command git reset --soft "HEAD~$num_commits" && @wait-for-command git commit -n -m "$commit_msg"
 fi
