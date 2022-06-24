@@ -43,43 +43,38 @@ shift $((OPTIND-1))
 repo_name="${1:?Missing argument \'repo_name\'}"
 repo_origin="${2:-}"
 
-@uses-cmds vim curl jq spinner
+@uses-cmds curl jq
 
 my_username="mikrostew"
 my_name="Michael Stewart"
-current_year="$(date +%Y)"
-
-# TODO: move this to the keychain
-api_token="$("$HOME/Dropbox/secret/get-api-token github-license-token")"
 github_license_api="https://api.github.com/licenses"
+
+current_year="$(date +%Y)"
 
 # Open Source Licenses, from https://api.github.com/licenses
 
-# use process substitution to capture the output asynchronously
-exec 3< <(curl -sSLf -u "$my_username:$api_token" "$github_license_api")
-curl_pid="$!"
-spinner -m "Querying $github_license_api for license info..." $curl_pid
-licenses_info="$(cat <&3)"
-wait $curl_pid
+tmp_licenses_json_file="$(mktemp "$TMPDIR/licenses-json.XXXXXX")"
+@wait-for-command --show-output curl -sSLf "$github_license_api" > "$tmp_licenses_json_file"
 # shellcheck disable=SC2016
-@exit-on-error 'API call failed' 'echo "JSON output: $licenses_info"'
+@exit-on-error 'API call failed' 'echo "JSON output: $(cat $tmp_licenses_json_file)"'
 
 # put license info into arrays
-readarray -t license_names <<< "$(echo "$licenses_info" | jq -r '.[] | .name')"
-readarray -t license_urls <<< "$(echo "$licenses_info" | jq -r '.[] | .url')"
+readarray -t license_names <<< "$(cat "$tmp_licenses_json_file" | jq -r '.[] | .name')"
+readarray -t license_urls <<< "$(cat "$tmp_licenses_json_file" | jq -r '.[] | .url')"
+rm "$tmp_licenses_json_file"
 num_licenses="${#license_names[@]}"
 
 echo_info "Got $num_licenses licenses from $github_license_api"
 
 # create the directory for the repository, and CD into it
 @wait-for-command mkdir -p "$repo_name"
-@wait-for-command cd "$repo_name"
+cd "$repo_name"
 
 # initialize the repo for git
 @wait-for-command git init
 
-# initialize the README with "# repo" at the top, and add anything else in vim
-@wait-for-command vim +"normal i# $repo_name" README.md
+# initialize the README with "# repo" at the top
+echo "# $repo_name" > README.md
 @wait-for-command git add README.md
 
 # choose a license
@@ -107,17 +102,13 @@ then
   echo_info "Selected $license_name"
 
   # get text of the license
-  # use process substitution to capture the output asynchronously
-  exec 3< <(curl -sSLf -u "$my_username:$api_token" "$license_url")
-  curl_pid="$!"
-  spinner -m "Getting text of $license_name from $license_url..." $curl_pid
-  license_info="$(cat <&3)"
-  wait $curl_pid
+  tmp_license_info_file="$(mktemp "$TMPDIR/license-info.XXXXXX")"
+  @wait-for-command --show-output curl -sSLf "$license_url" > "$tmp_license_info_file"
   # shellcheck disable=SC2016
-  @exit-on-error 'API call failed' 'echo "JSON output: $license_info"'
+  @exit-on-error 'API call failed' 'echo "JSON output: $(cat $tmp_license_info_file)"'
 
   # save the license text in the LICENSE file
-  echo "$license_info" | jq -r '.body' | sed -e "s/\[year\]/$current_year/" -e "s/\[fullname\]/$my_name/" > LICENSE
+  cat "$tmp_license_info_file" | jq -r '.body' | sed -e "s/\[year\]/$current_year/" -e "s/\[fullname\]/$my_name/" > LICENSE
   @wait-for-command git add LICENSE
 else
   echo_info "(no license selected)"
@@ -126,7 +117,7 @@ fi
 # show what will be committed
 echo ""
 echo "What will be committed:"
-@wait-for-command git diff --cached
+@wait-for-command --show-output git diff --cached --color
 
 echo -n "Confirm commit [Y/n]: "
 read -r confirm
@@ -137,9 +128,9 @@ then
   # push changes to origin if it was specified on the command line
   if [ -n "$repo_origin" ]
   then
-    @wait-for-command git remote add origin git@github.com:mikrostew/badash.git
+    @wait-for-command git remote add origin "$repo_origin"
     @wait-for-command git push -u origin master
   fi
 else
-  echo_info "Not committing"
+  echo_info "(not committing)"
 fi
