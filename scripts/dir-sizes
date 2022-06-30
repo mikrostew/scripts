@@ -8,6 +8,7 @@ show_help_msg() {
   echo 'Options:'
   echo '  -h               Show this help message'
 }
+
 while getopts ":h" opt
 do
   case $opt in
@@ -25,5 +26,12 @@ do
   esac
 done
 shift $((OPTIND-1))
+
 @uses-cmds du sort
-du -skx "$@" 2>/dev/null | sort --numeric-sort --reverse
+
+i=1
+num_dirs=$#
+for dir in "$@"; do
+  @wait-for-command --clear --show-output --msg "scanning $dir ($i of $num_dirs)" du -skx "$dir"
+  (( i++ ))
+done | sort --numeric-sort --reverse
