@@ -61,7 +61,7 @@ do
   # if a file exists there, don't mess that that
   elif [ -f "$bin_path" ]
   then
-    echo -e " [${COLOR_FG_RED}fail${COLOR_RESET}] file '$link_target' already exists"
+    echo -e " [${COLOR_FG_RED}fail${COLOR_RESET}] file '$bin_path' already exists"
     (( failed++ ))
   else
     ln -s "$repo_path" "$bin_path"
