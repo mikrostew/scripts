@@ -9,17 +9,18 @@ COLOR_FG_YELLOW='\033[0;33m'
 COLOR_RESET='\033[0m'
 
 # TODO: input options
-#  - overwrite (for the install dir)
+#  - update (the install dir)
 #  - prefix dir
-force_links=""
+prompt_links=""
 prefix_dir=/usr/local
 
 while [ "$#" -gt 0 ]
 do
   case "$1" in
-    --force)
+    # prompt for each conflicting link, giving the option to overwrite
+    --prompt)
       shift
-      force_links="true"
+      prompt_links="true"
       ;;
     *)
       echo "Unknown argument '$1'"
@@ -32,29 +33,30 @@ install_dir="$prefix_dir/lib/scripts"
 installed_bin_dir="$install_dir/bin"
 bin_dir="$prefix_dir/bin"
 
+# TODO: check & install pre-reqs - git, volta, node, yarn, python, ruby, etc.
+
 if [ -d "$install_dir" ]
 then
-  echo -e -n "${COLOR_FG_BOLD_BLUE}Dir '$install_dir' already exists, overwrite? [y/N]${COLOR_RESET} "
+  echo -e -n "${COLOR_FG_BOLD_BLUE}Dir '$install_dir' exists, overwrite? [y/N]${COLOR_RESET} "
   read -r overwrite_confirm
   if [ "$overwrite_confirm" == "Y" ] || [ "$overwrite_confirm" == "y" ]
   then
     rm -rf "$install_dir"
-  else
-    exit
+    git clone https://github.com/mikrostew/scripts.git "$install_dir"
   fi
+else
+  git clone https://github.com/mikrostew/scripts.git "$install_dir"
 fi
 
-# TODO: check/install pre-reqs - git, volta, node, yarn, python, ruby, etc.
-
-git clone https://github.com/mikrostew/scripts.git "$install_dir"
-
-added=0
+linked=0
+aliased=0
 skipped=0
-failed=0
-forced=0
+overwrote=0
+total=0
 
 for repo_path in "$installed_bin_dir"/*
 do
+  (( total++ ))
   # delete up to the last slash
   script="${repo_path##*/}"
   bin_path="$bin_dir/$script"
@@ -67,43 +69,84 @@ do
     link_target="$(readlink "$bin_path")"
     if [ "$link_target" != "$repo_path" ]
     then
-      if [ "$force_links" = "true" ]
+      if [ "$prompt_links" = "true" ]
       then
-        rm "$bin_path"
-        ln -s "$repo_path" "$bin_path"
-        echo -e -n " [${COLOR_FG_GREEN}OK${COLOR_RESET}]"
-        (( total_length += 5 ))
-        printf "\r%-${total_length}s\r" ' '
-        (( forced++ ))
+        echo -e -n "\r${COLOR_FG_BOLD_BLUE}'$bin_path' links to '$link_target' - (A)lias/(O)verwrite/(S)kip? [A]${COLOR_RESET} "
+        read -r link_action
+        if [ "$link_action" == "A" ] || [ "$link_action" == "a" ] || [ -z "$link_action" ]
+        then
+          # alias (default)
+          if ! grep -F "alias $script=$repo_path" "$HOME/.bashrc" >/dev/null
+          then
+            echo "alias $script=$repo_path" >> "$HOME/.bashrc"
+            echo -e "(${COLOR_FG_YELLOW}aliased${COLOR_RESET})"
+            (( aliased++ ))
+          else
+            (( skipped++ ))
+          fi
+        elif [ "$link_action" == "O" ] || [ "$link_action" == "o" ]
+        then
+          # overwrite
+          rm "$bin_path"
+          ln -s "$repo_path" "$bin_path"
+          echo -e "(${COLOR_FG_RED}overwrite${COLOR_RESET})"
+          (( overwrote++ ))
+        elif [ "$link_action" == "S" ] || [ "$link_action" == "s" ]
+        then
+          # skip
+          echo -e "(${COLOR_FG_YELLOW}skipped${COLOR_RESET})"
+          (( skipped++ ))
+        else
+          exit
+        fi
       else
-        echo -e " [${COLOR_FG_RED}fail${COLOR_RESET}] links to '$link_target'"
-        (( failed++ ))
+        # add an alias instead of failing or overwriting
+        if ! grep -F "alias $script=$repo_path" "$HOME/.bashrc" >/dev/null
+        then
+          echo "alias $script=$repo_path" >> "$HOME/.bashrc"
+          echo -e " (${COLOR_FG_YELLOW}aliased${COLOR_RESET}) in .bashrc"
+          (( aliased++ ))
+        else
+          printf "\r%-${total_length}s\r" ' '
+          (( skipped++ ))
+        fi
       fi
     else
-      echo -e -n " [${COLOR_FG_YELLOW}skip${COLOR_RESET}]"
+      echo -e -n " (${COLOR_FG_YELLOW}skip${COLOR_RESET})"
       (( total_length += 7 ))
       printf "\r%-${total_length}s\r" ' '
       (( skipped++ ))
     fi
-  # if a file exists there, don't mess that that
+  # if a file exists there, don't mess with that
   elif [ -f "$bin_path" ]
   then
-    echo -e " [${COLOR_FG_RED}fail${COLOR_RESET}] file '$bin_path' already exists"
-    (( failed++ ))
+    # add an alias instead of failing or overwriting
+    if ! grep -F "alias $script=$repo_path" "$HOME/.bashrc" >/dev/null
+    then
+      echo "alias $script=$repo_path" >> "$HOME/.bashrc"
+      echo -e " (${COLOR_FG_YELLOW}aliased${COLOR_RESET}) in .bashrc"
+      (( aliased++ ))
+    else
+      printf "\r%-${total_length}s\r" ' '
+      (( skipped++ ))
+    fi
   else
     ln -s "$repo_path" "$bin_path"
-    echo -e -n " [${COLOR_FG_GREEN}OK${COLOR_RESET}]"
+    echo -e -n " (${COLOR_FG_GREEN}OK${COLOR_RESET})"
     (( total_length += 5 ))
     printf "\r%-${total_length}s\r" ' '
-    (( added++ ))
+    (( linked++ ))
   fi
 done
 
-if [ "$force_links" = "true" ]
+echo "$total scripts"
+echo "  linked:    $linked"
+echo "  aliased:   $aliased"
+echo "  skipped:   $skipped"
+
+if [ "$prompt_links" = "true" ]
 then
-  echo "linked scripts: $added added, $forced forced, $skipped skipped, $failed failed"
-else
-  echo "linked scripts: $added added, $skipped skipped, $failed failed"
+  echo "  overwrote: $overwrote"
 fi
 
 cd "$install_dir" && yarn install
