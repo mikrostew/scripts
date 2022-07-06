@@ -52,11 +52,11 @@ then
   if not_on_git_branch "$default_branch"
   then
     # update main/master
-    @@SCRIPT_DIR@@/gc "$default_branch" && @@SCRIPT_DIR@@/gpr
+    @@SCRIPT-DIR@@/gc "$default_branch" && @@SCRIPT-DIR@@/gpr
     # shellcheck disable=SC2016
     @exit-on-error "Failed to pull and rebase $default_branch" 'gc "$branch_name"'
 
-    @@SCRIPT_DIR@@/gc "$branch_name" && git rebase "$default_branch"
+    @@SCRIPT-DIR@@/gc "$branch_name" && git rebase "$default_branch"
     # shellcheck disable=SC2181
     while [ "$?" -ne 0 ]; do
       @wait-for-keypress 'Press any key to continue... '
@@ -70,7 +70,7 @@ then
     # delete any *.orig files leftover from merge conflicts
     if [ "$need_to_remove_orig_files" == 'yes' ]; then
       echo_info "Cleaning up .orig files from merge conflicts..."
-      @@SCRIPT_DIR@@/grmorig
+      @@SCRIPT-DIR@@/grmorig
     fi
   fi
 fi
