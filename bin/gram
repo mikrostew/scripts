@@ -52,11 +52,11 @@ then
   if not_on_git_branch "$default_branch"
   then
     # update main/master
-    gc "$default_branch" && gpr
+    @@SCRIPT_DIR@@/gc "$default_branch" && @@SCRIPT_DIR@@/gpr
     # shellcheck disable=SC2016
     @exit-on-error "Failed to pull and rebase $default_branch" 'gc "$branch_name"'
 
-    gc "$branch_name" && @wait-for-command git rebase "$default_branch"
+    @@SCRIPT_DIR@@/gc "$branch_name" && git rebase "$default_branch"
     # shellcheck disable=SC2181
     while [ "$?" -ne 0 ]; do
       @wait-for-keypress 'Press any key to continue... '
@@ -64,13 +64,13 @@ then
       # TODO: if I fix conflicts so there have been no changes, need to do `git rebase --skip` here
       # (have to detect that from the output of `git rebase --continue`)
       gmt && git rebase --continue
-      # TODO: how to detect that I should abort?
+      # TODO: how to detect that I should abort? change the "press a key" prompt?
     done
 
     # delete any *.orig files leftover from merge conflicts
     if [ "$need_to_remove_orig_files" == 'yes' ]; then
       echo_info "Cleaning up .orig files from merge conflicts..."
-      grmorig
+      @@SCRIPT_DIR@@/grmorig
     fi
   fi
 fi
