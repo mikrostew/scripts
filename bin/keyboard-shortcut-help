@@ -2,11 +2,12 @@
 // because I don't remember what all these things do
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 // parse the karabiner config file
 const karabinerJson = fs.readFileSync(
-  path.resolve(__dirname, '../karabiner/karabiner.json'),
+  path.join(os.homedir(), '.config/karabiner/karabiner.json'),
   'utf8'
 );
 const karabinerConfig = JSON.parse(karabinerJson);
