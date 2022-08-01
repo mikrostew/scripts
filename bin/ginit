@@ -45,7 +45,7 @@ repo_origin="${2:-}"
 
 @uses-cmds curl jq
 
-my_username="mikrostew"
+#my_username="mikrostew"
 my_name="Michael Stewart"
 github_license_api="https://api.github.com/licenses"
 
@@ -59,8 +59,8 @@ tmp_licenses_json_file="$(mktemp "$TMPDIR/licenses-json.XXXXXX")"
 @exit-on-error 'API call failed' 'echo "JSON output: $(cat $tmp_licenses_json_file)"'
 
 # put license info into arrays
-readarray -t license_names <<< "$(cat "$tmp_licenses_json_file" | jq -r '.[] | .name')"
-readarray -t license_urls <<< "$(cat "$tmp_licenses_json_file" | jq -r '.[] | .url')"
+readarray -t license_names <<< "$(jq -r '.[] | .name' < "$tmp_licenses_json_file" )"
+readarray -t license_urls <<< "$(jq -r '.[] | .url' < "$tmp_licenses_json_file" )"
 rm "$tmp_licenses_json_file"
 num_licenses="${#license_names[@]}"
 
@@ -68,7 +68,7 @@ echo_info "Got $num_licenses licenses from $github_license_api"
 
 # create the directory for the repository, and CD into it
 @wait-for-command mkdir -p "$repo_name"
-cd "$repo_name"
+cd "$repo_name" || exit
 
 # initialize the repo for git
 @wait-for-command git init
@@ -108,7 +108,7 @@ then
   @exit-on-error 'API call failed' 'echo "JSON output: $(cat $tmp_license_info_file)"'
 
   # save the license text in the LICENSE file
-  cat "$tmp_license_info_file" | jq -r '.body' | sed -e "s/\[year\]/$current_year/" -e "s/\[fullname\]/$my_name/" > LICENSE
+  jq -r '.body' < "$tmp_license_info_file" | sed -e "s/\[year\]/$current_year/" -e "s/\[fullname\]/$my_name/" > LICENSE
   @wait-for-command git add LICENSE
 else
   echo_info "(no license selected)"
