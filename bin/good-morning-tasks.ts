@@ -194,7 +194,9 @@ const config: Config = {
           syncConflictCheck(dir)
         )
       ),
-      exec('Lint script files', workMachines, 'lint-scripts', ['scripts/*'], { shell: true }),
+      exec('Lint script files', workMachines, 'lint-scripts', [`${__dirname}/*`], {
+        shell: true,
+      }),
       exec('Cleanup shivs', workMachines, 'cleanup-shivs', [process.env['LDAP_PASS']!]),
       func('Disk space check', laptopMachines, async () => {
         const { stdout } = await execa('df', ['-h']);
