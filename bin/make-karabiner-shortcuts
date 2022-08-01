@@ -1,0 +1,139 @@
+#!/usr/bin/env badash
+# shellcheck type=shell
+
+# write config for the keyboard shortcuts and mappings I use in karabiner
+
+@uses-cmds jq shasum
+
+# TODO: make this an input option?
+prefix="/usr/local/bin"
+
+# some keys require special key codes
+get-key-code() {
+  local key="$1"
+  case "$key" in
+    /) echo "slash" ;;
+    *) echo "$key" ;;
+  esac
+}
+
+# build up rules for the complex_modifications that need to be added
+declare -A key_mappings
+declare -A complex_mod_rules
+
+while read -r line
+do
+  # extract the fields from the entry
+  IFS=$'\n' read -r -d '' key description cmd <<< "$(echo "$line" | jq --raw-output '.key, .description, .cmd')"
+  #echo "key: $key, description: $description, cmd: $cmd"
+
+  # start with the keymapping, which I can compare separately
+  key_mapping="$(jq --null-input --compact-output \
+    --arg key_code "$(get-key-code $key)" \
+    '{ "key_code": $key_code, "modifiers": { "mandatory": [ "control", "option", "command" ], "optional": [ "caps_lock" ] } }')"
+
+  # hash that, and add it to the hashmap
+  keymap_hash="$(echo -n "$key_mapping" | shasum -a 256 | awk '{ print $1 }')"
+  key_mappings[$keymap_hash]="$key_mapping"
+
+  # build the full rule config
+  rule_config="$(jq --null-input --compact-output \
+    --arg descr "Ctrl-Opt-Cmd-${key^^} - $description" \
+    --argjson from "$key_mapping" \
+    --arg shell_cmd "$cmd" \
+    '{"description": $descr, "manipulators": [{"type": "basic", "from": $from, "to": [{ "shell_command": $shell_cmd }] }] }')"
+
+  # hash that, and add it to the hashmap
+  rule_hash="$(echo -n "$rule_config" | shasum -a 256 | awk '{ print $1 }')"
+  complex_mod_rules[$rule_hash]="$rule_config"
+
+done <<END_OF_ENTRIES
+{ "key":"c", "description":"New Chrome Window", "cmd":"$prefix/new-chrome" }
+{ "key":"f", "description":"New Firefox Window", "cmd":"$prefix/new-firefox" }
+{ "key":"g", "description":"Good morning script", "cmd":"$prefix/script-wrapper --resize good-morning-tasks.ts" }
+{ "key":"m", "description":"Open Apps for Meetings", "cmd":"$prefix/script-wrapper --exit-conf meeting-setup" }
+{ "key":"b", "description":"Close Apps for Meetings", "cmd":"$prefix/script-wrapper --exit-conf meeting-teardown" }
+{ "key":"o", "description":"Open oncall links in browser", "cmd":"$prefix/open-oncall-pages" }
+{ "key":"s", "description":"Type the shrug emoji ¯\\\_(ツ)_/¯", "cmd":"$prefix/shrug" }
+{ "key":"t", "description":"New iTerm2 Window", "cmd":"$prefix/new-terminal" }
+{ "key":"v", "description":"Paste using System Events", "cmd":"$prefix/mac-paste" }
+{ "key":"z", "description":"Paste my Zoom meeting link", "cmd":"$prefix/zoom-link" }
+{ "key":"i", "description":"Paste a checkmark ✅", "cmd":"$prefix/check-mark" }
+{ "key":"x", "description":"Paste a red X ❌", "cmd":"$prefix/red-x" }
+{ "key":"/", "description":"Show keyboard shortcut help", "cmd":"$prefix/script-wrapper --exit-conf keyboard-shortcut-help" }
+{ "key":"w", "description":"New Warp window", "cmd":"$prefix/new-warp" }
+END_OF_ENTRIES
+
+# check if the rules exist, and write them if not
+karabiner_config_file="$HOME/.config/karabiner/karabiner.json"
+karabiner_config="$(cat "$karabiner_config_file")"
+
+readarray -t config_rules <<< "$(echo "$karabiner_config" | jq --compact-output --unbuffered '.profiles[0].complex_modifications.rules[]')"
+
+removals=()
+declare -A dont_overwrite
+
+index=0
+for existing_rule in "${config_rules[@]}"
+do
+  # hash the rule and the key mapping, see if either one matches
+  key_mapping="$(echo "$existing_rule" | jq --compact-output '.manipulators[0].from')"
+  keymap_hash="$(echo -n "$key_mapping" | shasum -a 256 | awk '{ print $1 }')"
+  rule_hash="$(echo -n "$existing_rule" | shasum -a 256 | awk '{ print $1 }')"
+
+  if [ -n "${key_mappings[$keymap_hash]}" ]
+  then
+    echo "found matching key mapping $key_mapping"
+    if [ -n "${complex_mod_rules[$rule_hash]}" ]
+    then
+      echo "rule already exists, skipping..."
+      unset complex_mod_rules[$rule_hash]
+    else
+      echo "Error: rule does not match"
+      echo "found in config file:"
+      echo "$existing_rule"
+      echo -n "Overwrite? [y/N]: "
+      read -r overwrite
+      if [ "$overwrite" == "y" ] || [ "$overwrite" == "Y" ]
+      then
+        echo "(will overwrite)"
+        # save the index to remove before adding the new config
+        removals+=( "$index" )
+      else
+        echo "(not overwriting)"
+        dont_overwrite[$keymap_hash]="no overwrite"
+      fi
+    fi
+  else
+    echo "key mapping not found, removing..."
+    removals+=( "$index" )
+  fi
+  (( index++ ))
+done
+
+# actually write the rules to the config file
+tmp="$(mktemp)"
+
+# first, remove anything marked for that
+if [ "${#removals[@]}" -gt 0 ]
+then
+  indices="$(IFS=, ; echo "${removals[*]}")"
+  echo "removing ${#removals[@]} rules, indices $indices"
+  karabiner_config="$(echo "$karabiner_config" | jq "del(.profiles[0].complex_modifications.rules[$indices])")"
+fi
+
+# then, add new things to the rules
+for key in "${!complex_mod_rules[@]}"
+do
+  value="${complex_mod_rules[$key]}"
+  # check for things that should not overwrite
+  key_mapping="$(echo "$value" | jq --compact-output '.manipulators[0].from')"
+  keymap_hash="$(echo -n "$key_mapping" | shasum -a 256 | awk '{ print $1 }')"
+  if [ -z "${dont_overwrite[$keymap_hash]}" ]
+  then
+    karabiner_config="$(echo "$karabiner_config" | jq ".profiles[0].complex_modifications.rules += [$value]")"
+  fi
+done
+
+# actually write the file
+echo "$karabiner_config" >"$karabiner_config_file"
