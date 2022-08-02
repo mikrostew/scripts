@@ -196,6 +196,7 @@ const config: Config = {
       ),
       exec('Lint script files', workMachines, 'lint-scripts', [`${__dirname}/*`], {
         shell: true,
+        cwd: path.resolve(__dirname, '..'),
       }),
       exec('Cleanup shivs', workMachines, 'cleanup-shivs', [process.env['LDAP_PASS']!]),
       func('Disk space check', laptopMachines, async () => {
