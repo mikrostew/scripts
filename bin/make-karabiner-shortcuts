@@ -8,6 +8,12 @@
 # TODO: make this an input option?
 prefix="/usr/local/bin"
 
+# the config file uses 4 spaces for indentation
+indent_spaces=4
+
+COLOR_FG_YELLOW='\033[0;33m'
+COLOR_RESET='\033[0m'
+
 # some keys require special key codes
 get-key-code() {
   local key="$1"
@@ -66,7 +72,7 @@ END_OF_ENTRIES
 
 # check if the rules exist, and write them if not
 karabiner_config_file="$HOME/.config/karabiner/karabiner.json"
-karabiner_config="$(cat "$karabiner_config_file")"
+karabiner_config="$(jq --indent "$indent_spaces" '.' < "$karabiner_config_file")"
 
 readarray -t config_rules <<< "$(echo "$karabiner_config" | jq --compact-output --unbuffered '.profiles[0].complex_modifications.rules[]')"
 
@@ -86,7 +92,7 @@ do
     echo "found matching key mapping $key_mapping"
     if [ -n "${complex_mod_rules[$rule_hash]}" ]
     then
-      echo "rule already exists, skipping..."
+      echo -e "rule already exists (${COLOR_FG_YELLOW}skipping${COLOR_RESET})"
       unset "complex_mod_rules[$rule_hash]"
     else
       echo "Error: rule does not match"
@@ -118,7 +124,7 @@ if [ "${#removals[@]}" -gt 0 ]
 then
   indices="$(IFS=, ; echo "${removals[*]}")"
   echo "removing ${#removals[@]} rules, indices $indices"
-  karabiner_config="$(echo "$karabiner_config" | jq "del(.profiles[0].complex_modifications.rules[$indices])")"
+  karabiner_config="$(echo "$karabiner_config" | jq --indent "$indent_spaces" "del(.profiles[0].complex_modifications.rules[$indices])")"
 fi
 
 # then, add new things to the rules
@@ -130,7 +136,7 @@ do
   keymap_hash="$(echo -n "$key_mapping" | shasum -a 256 | awk '{ print $1 }')"
   if [ -z "${dont_overwrite[$keymap_hash]}" ]
   then
-    karabiner_config="$(echo "$karabiner_config" | jq ".profiles[0].complex_modifications.rules += [$value]")"
+    karabiner_config="$(echo "$karabiner_config" | jq --indent "$indent_spaces" ".profiles[0].complex_modifications.rules += [$value]")"
   fi
 done
 
