@@ -1,5 +1,5 @@
 #!/usr/bin/env badash
-# shellcheck type=shell
+# shellcheck shell=bash
 
 # write config for the keyboard shortcuts and mappings I use in karabiner
 
@@ -29,7 +29,7 @@ do
 
   # start with the keymapping, which I can compare separately
   key_mapping="$(jq --null-input --compact-output \
-    --arg key_code "$(get-key-code $key)" \
+    --arg key_code "$(get-key-code "$key")" \
     '{ "key_code": $key_code, "modifiers": { "mandatory": [ "control", "option", "command" ], "optional": [ "caps_lock" ] } }')"
 
   # hash that, and add it to the hashmap
@@ -87,7 +87,7 @@ do
     if [ -n "${complex_mod_rules[$rule_hash]}" ]
     then
       echo "rule already exists, skipping..."
-      unset complex_mod_rules[$rule_hash]
+      unset "complex_mod_rules[$rule_hash]"
     else
       echo "Error: rule does not match"
       echo "found in config file:"
@@ -112,7 +112,6 @@ do
 done
 
 # actually write the rules to the config file
-tmp="$(mktemp)"
 
 # first, remove anything marked for that
 if [ "${#removals[@]}" -gt 0 ]
