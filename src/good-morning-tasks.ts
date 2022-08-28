@@ -1,4 +1,3 @@
-#!/usr/bin/env ts-node
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { readdir } from 'fs/promises';

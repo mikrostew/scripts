@@ -56,7 +56,7 @@ do
 done <<END_OF_ENTRIES
 { "key":"c", "description":"New Chrome Window", "cmd":"$prefix/new-chrome" }
 { "key":"f", "description":"New Firefox Window", "cmd":"$prefix/new-firefox" }
-{ "key":"g", "description":"Good morning script", "cmd":"$prefix/script-wrapper --resize good-morning-tasks.ts" }
+{ "key":"g", "description":"Good morning script", "cmd":"$prefix/script-wrapper --resize good-morning-tasks" }
 { "key":"m", "description":"Open Apps for Meetings", "cmd":"$prefix/script-wrapper --exit-conf meeting-setup" }
 { "key":"b", "description":"Close Apps for Meetings", "cmd":"$prefix/script-wrapper --exit-conf meeting-teardown" }
 { "key":"o", "description":"Open oncall links in browser", "cmd":"$prefix/open-oncall-pages" }

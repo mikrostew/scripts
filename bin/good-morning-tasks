@@ -1,0 +1,6 @@
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
+# A shim to run the corresponding JS file
+# Note: this will use the NodeJS version of the system, not this repo (_should_ be ok)
+node @@SCRIPT-DIR@@/../node/good-morning-tasks.js "$@"

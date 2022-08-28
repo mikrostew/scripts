@@ -16,3 +16,11 @@ There are other prerequisites which will be checked by the install script, at so
 ## What are all of these scripts?
 
 Eventually (TM) I will add descriptions for these things
+
+## How these are organized
+
+Executable scripts are in `bin/`.
+
+Source Node scripts are in `src/`, and are compiled by `tsc` into JS files in `node/` during postinstall.
+
+Unused things are in `unused/`, unsurprisingly.

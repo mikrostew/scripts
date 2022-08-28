@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "removeComments": false,
+    "outDir": "node",
+    "sourceMap": false
+  },
+  "include": ["src/*.ts"],
+  "exclude": ["node_modules"]
+}
