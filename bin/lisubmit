@@ -155,6 +155,7 @@ then
 fi
 
 # from the "how to override your commit like a pro" gdoc
+# TODO: move these to a synced file?
 echo "Commit message 2nd line, for overrides"
 echo "These should only be used by oncall, or for immediate response situations:"
 echo ""
