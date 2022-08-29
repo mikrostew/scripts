@@ -51,11 +51,17 @@ shift $((OPTIND-1))
 if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
 then
   branch_name=$(current_git_branch)
-  if ! @wait-for-command git checkout master && @wait-for-command git merge "$branch_name"
-  # error recovery to fix merge conflicts
+  if @wait-for-command git checkout master
   then
-    @echo-err "Dang it! merge failed - good luck"
-    @wait-for-keypress "Press any key to start merge resolution... "
-    gmt
+    if @wait-for-command git merge "$branch_name"
+    then
+      echo "Merged into master branch"
+      exit
+    fi
   fi
+
+  # error recovery to fix merge conflicts
+  @echo-err "Dang it! merge failed - good luck"
+  @wait-for-keypress "Press any key to start merge resolution... "
+  gmt
 fi
