@@ -47,6 +47,23 @@ const config: Config = {
     workVM: /mistewar-ld/,
   },
   tasks: [
+    // first check that passwords that I need later exist in the keychain
+    func('Check passwords exist', laptopMachines, async () => {
+      const missing = await Promise.all(
+        ['ldap_pass', 'open-weather-map', 'github-fork-token'].map(async (password_name) => {
+          try {
+            await execa('security', ['find-generic-password', '-ga', password_name, '-w']);
+            return undefined;
+          } catch (err) {
+            return password_name;
+          }
+        })
+      );
+      const formatted = missing.filter((not_found) => not_found !== undefined).join(',');
+      if (formatted !== '') {
+        throw new Error(`Could not find passwords: ${formatted}`);
+      }
+    }),
     // for the work laptop, need to get the password first (if it is not passed in as an argument)
     func('Save LDAP password', ['workLaptop'], async () => {
       // try to get it from the input arg, otherwise prompt
