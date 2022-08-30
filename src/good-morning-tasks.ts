@@ -364,10 +364,10 @@ const config: Config = {
     }),
 
     group('Engtools', workMachines, [
-      exec('engtools update for laptop', ['workLaptop'], 'brew', ['engtools', 'update']),
+      exec('engtools update for laptop', ['workLaptop'], 'brewin', ['engtools', 'update']),
       exec('engtools install for laptop', ['workLaptop'], 'send-passwd-for-sudo', [
         process.env['LDAP_PASS']!,
-        'brew',
+        'brewin',
         'engtools',
         'install',
       ]),
