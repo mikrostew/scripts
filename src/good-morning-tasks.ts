@@ -435,7 +435,7 @@ const config: Config = {
 
     group('Add after-task outputs', allMachines, [
       func('Upcoming Dates', 'inherit', async () => {
-        const { stdout } = await execa('upcoming-dates.ts');
+        const { stdout } = await execa('upcoming-dates');
         FINAL_OUTPUT.push('', stdout, '');
       }),
       func('Current Priorities', 'inherit', async () => {
