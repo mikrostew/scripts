@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "build": "tsc --build",
     "postinstall": "tsc --build",
     "ts-watch": "tsc -w -p . --noEmit"
   },
