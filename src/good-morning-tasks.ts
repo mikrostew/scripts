@@ -407,18 +407,89 @@ const config: Config = {
       ),
     ]),
 
-    open_url('Open pages - work and home', laptopMachines, {
-      'Volta pnpm support RFC': 'https://github.com/volta-cli/rfcs/pull/46',
-    }),
-    open_url('Open pages - work', ['workLaptop'], {
-      blog: 'https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit#',
-      tasks:
-        'https://docs.google.com/spreadsheets/d/1PFz8_EXZ4W6Kb-r7wpqSSxhKNTE5Dx7evonVXteFqJQ/edit#gid=0',
-      reading:
-        'https://docs.google.com/document/d/1QXoiUy-DKZb76nkzxx4V_bqO63C6pdFnqCAeGV9WGYs/edit',
-      'acid-tmc-jobs':
-        'https://testmanager2.tools.corp.linkedin.com/#/product-details/voyager-web?taskName=send-acid-metrics',
-    }),
+    group('Open Pages', laptopMachines, [
+      func('Get open tabs', 'inherit', (ctx) => {
+        // this is kinda slow, oh well
+        const chromeOpenTabs = new Map(
+          execa
+            .sync('chrome-tabs')
+            .stdout.split('\n')
+            .map((tab) => {
+              // special case for google docs URLs, remove the '#' and everything after
+              if (/docs.google.com/.test(tab)) {
+                const hashPosition = tab.indexOf('#');
+                if (hashPosition > 0) {
+                  return tab.substring(0, hashPosition);
+                }
+              }
+              return tab;
+            })
+            .map((t) => {
+              return [t, true];
+            })
+        );
+        // set that in the context so I can use it for the following stuff
+        ctx['open-tabs'] = chromeOpenTabs;
+      }),
+      group('Open pages - work and home', laptopMachines, [
+        // TODO: rework how open_url works - this is wonky
+        func('Volta pnpm support RFC', 'inherit', (ctx) => {
+          if (!ctx['open-tabs'].get('https://github.com/volta-cli/rfcs/pull/46')) {
+            return execa('open', ['https://github.com/volta-cli/rfcs/pull/46']);
+          }
+        }),
+      ]),
+      group(
+        'Open pages - work',
+        ['workLaptop'],
+        [
+          func('blog', 'inherit', (ctx) => {
+            if (
+              !ctx['open-tabs'].get(
+                'https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit'
+              )
+            ) {
+              return execa('open', [
+                'https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit',
+              ]);
+            }
+          }),
+          func('tasks', 'inherit', (ctx) => {
+            if (
+              !ctx['open-tabs'].get(
+                'https://docs.google.com/spreadsheets/d/1PFz8_EXZ4W6Kb-r7wpqSSxhKNTE5Dx7evonVXteFqJQ/edit'
+              )
+            ) {
+              return execa('open', [
+                'https://docs.google.com/spreadsheets/d/1PFz8_EXZ4W6Kb-r7wpqSSxhKNTE5Dx7evonVXteFqJQ/edit',
+              ]);
+            }
+          }),
+          func('reading', 'inherit', (ctx) => {
+            if (
+              !ctx['open-tabs'].get(
+                'https://docs.google.com/document/d/1QXoiUy-DKZb76nkzxx4V_bqO63C6pdFnqCAeGV9WGYs/edit'
+              )
+            ) {
+              return execa('open', [
+                'https://docs.google.com/document/d/1QXoiUy-DKZb76nkzxx4V_bqO63C6pdFnqCAeGV9WGYs/edit',
+              ]);
+            }
+          }),
+          func('ACID TMC jobs', 'inherit', (ctx) => {
+            if (
+              !ctx['open-tabs'].get(
+                'https://testmanager2.tools.corp.linkedin.com/#/product-details/voyager-web?taskName=send-acid-metrics'
+              )
+            ) {
+              return execa('open', [
+                'https://testmanager2.tools.corp.linkedin.com/#/product-details/voyager-web?taskName=send-acid-metrics',
+              ]);
+            }
+          }),
+        ]
+      ),
+    ]),
 
     group('Start Apps', laptopMachines, [
       start_app(
@@ -427,7 +498,7 @@ const config: Config = {
         [
           '/Applications/Slack.app/Contents/MacOS/Slack',
           '/Applications/Microsoft Outlook.app/Contents/MacOS/Microsoft Outlook',
-          '/Applications/Discord.app/Contents/MacOS/Discord',
+          // '/Applications/Discord.app/Contents/MacOS/Discord',
         ]
       ),
       // TODO: anything for my personal laptop?
