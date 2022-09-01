@@ -46,23 +46,6 @@ const config: Config = {
     workVM: /mistewar-ld/,
   },
   tasks: [
-    // first check that passwords that I need later exist in the keychain
-    func('Check passwords exist', laptopMachines, async () => {
-      const missing = await Promise.all(
-        ['ldap_pass', 'open-weather-map', 'github-fork-token'].map(async (password_name) => {
-          try {
-            await execa('security', ['find-generic-password', '-ga', password_name, '-w']);
-            return undefined;
-          } catch (err) {
-            return password_name;
-          }
-        })
-      );
-      const formatted = missing.filter((not_found) => not_found !== undefined).join(',');
-      if (formatted !== '') {
-        throw new Error(`Could not find passwords: ${formatted}`);
-      }
-    }),
     // for the work laptop, need to get the password first (if it is not passed in as an argument)
     func('Save LDAP password', ['workLaptop'], async () => {
       // try to get it from the input arg, otherwise prompt
@@ -76,6 +59,33 @@ const config: Config = {
           '-w',
         ]);
         process.env['LDAP_PASS'] = stdout.trim();
+      }
+    }),
+
+    // then check that passwords that I need later exist in the keychain
+    // (since I already put in my password ^^, it shouldn't ask again?)
+    func('Check passwords exist (please Always Allow access)', laptopMachines, () => {
+      const errors = [];
+      const results = ['open-weather-map', 'github-fork-token'].map((password_name) => {
+        try {
+          execa.sync('security', ['find-generic-password', '-ga', password_name, '-w']);
+          return undefined;
+        } catch (err) {
+          errors.push(`Password '${password_name}' not found.`);
+          errors.push(
+            `Add it like '$  security add-generic-password -s '${password_name}' -a '${password_name}' -w '<password>'`
+          );
+          errors.push(
+            `NOTE: use a space in front of the command to prevent the password from saving in history!!!`
+          );
+          return password_name;
+        }
+      });
+      const missing = results.filter((r) => r !== undefined);
+      if (missing.length > 0) {
+        const formatted = missing.join(', ');
+        errors.push(`Could not find ${missing.length} passwords: ${formatted}`);
+        throw new Error(errors.join('\n'));
       }
     }),
 
