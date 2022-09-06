@@ -1,0 +1,28 @@
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
+# Run all migration scripts from ../migrations/
+
+# collect file names
+cd @@SCRIPT-DIR@@/../migrations/ || exit
+script_files=( ./* )
+
+# no files?
+if [ "${script_files[0]}" = "./*" ]
+then
+  echo "No migrations to run!"
+  exit 0
+else
+  echo "Found ${#script_files[@]} migration(s) to check"
+fi
+
+# migration script convention is to run from repo root
+cd @@SCRIPT-DIR@@/.. || exit
+
+for file in "${script_files[@]}"
+do
+  trimmed_file="${file//.\/}"
+  # run the file, and check for successful exit
+  #echo "file: $trimmed_file"
+  @wait-for-command "./migrations/$trimmed_file"
+done

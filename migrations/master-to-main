@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# check for any scripts that are only using 'master', not main
+
+COLOR_FG_BOLD_GREEN='\033[1;32m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+
+errors=0
+
+# step 1: also use 'main'
+echo ""
+where_is_master_used="$(grep -nIr master bin/ node/ | grep -v main | grep -v default_branch | grep --color=always master)"
+if [ "$?" -eq 0 ]
+then
+  echo -e "${COLOR_FG_RED}✖${COLOR_RESET} 'master' is still used in these scripts:"
+  echo "$where_is_master_used"
+  (( errors+=1 ))
+else
+  echo -e "${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} 'master' is not used, yay!"
+fi
+
+# (and check for Master)
+echo ""
+where_is_cap_master_used="$(grep -nIr Master bin/ node/ | grep -v Main | grep --color=always Master)"
+if [ "$?" -eq 0 ]
+then
+  echo -e "${COLOR_FG_RED}✖${COLOR_RESET} 'Master' is still used in these scripts:"
+  echo "$where_is_cap_master_used"
+  (( errors+=1 ))
+else
+  echo -e "${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} 'Master' is not used, yay!"
+fi
+
+# TODO:
+# step 2: move the default branch code to a badash function
+# step 3: try to remove all mentions of master/main --> default
+
+exit "$errors"
