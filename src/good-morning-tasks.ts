@@ -73,11 +73,9 @@ const config: Config = {
         } catch (err) {
           errors.push(`Password '${password_name}' not found.`);
           errors.push(
-            `Add it like '$  security add-generic-password -s '${password_name}' -a '${password_name}' -w '<password>'`
+            `Add it using '$ security add-generic-password -U -T "" -s ${password_name} -a ${password_name} -w`
           );
-          errors.push(
-            `NOTE: use a space in front of the command to prevent the password from saving in history!!!`
-          );
+          errors.push(`(you should be prompted for the password)`);
           return password_name;
         }
       });
