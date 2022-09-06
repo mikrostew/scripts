@@ -29,18 +29,11 @@ not_on_git_branch ()
 
 if in_git_repo && no_uncommitted_changes
 then
-  # is the default branch main or master?
-  # see https://stackoverflow.com/q/5167957
-  if git show-ref --verify --quiet refs/heads/main
-  then
-    default_branch="main"
-  elif git show-ref --verify --quiet refs/heads/master
-  then
-    default_branch="master"
-  else
-    @echo-err "Error: default branch is not 'main' or 'master'"
-    exit 1
-  fi
+  # what is the default branch?
+  # TODO: make this a badash function
+  if git show-ref --verify --quiet refs/heads/main; then default_branch="main"
+  elif git show-ref --verify --quiet refs/heads/master; then default_branch="master"
+  else echo "Error: default branch is not 'main' or 'master'"; exit 1; fi
 
   if not_on_git_branch "$default_branch"
   then
