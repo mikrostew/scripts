@@ -23,13 +23,14 @@ shellcheck_files=()
 eslint_files=()
 rubocop_files=()
 
-echo "Linting $# files"
+echo "Linting $# input files"
 
 for file in "$@"; do
   read -r firstline <"$file"
   shebang=$(trim "$firstline")
   filename="${file##*/}"
   extension=$([[ "$filename" = *.* ]] && echo ".${filename##*.}" || echo '.')
+  # TODO: --verbose option instead of commented out stuff like this
   #echo "file: $file, name: '$filename', extension: '$extension', shebang: '$shebang'"
 
   # first try by file extension
@@ -56,7 +57,7 @@ for file in "$@"; do
           rubocop_files+=( "$file" )
           ;;
         *)
-          echo "Unrecognized shebang '$shebang' in $file"
+          @echo-err "Unrecognized shebang '$shebang' in $file"
           (( num_errors+=1 ))
           ;;
       esac
@@ -71,6 +72,8 @@ done
 # then actually run the linting on those files
 if [ "${#shellcheck_files[@]}" -gt 0 ]
 then
+  echo ""
+  echo "${#shellcheck_files[@]} files for shellcheck"
   if ! @wait-for-command shellcheck "${shellcheck_files[@]}"
   then
     (( num_errors+=1 ))
@@ -78,6 +81,8 @@ then
 fi
 if [ "${#eslint_files[@]}" -gt 0 ]
 then
+  echo ""
+  echo "${#eslint_files[@]} files for eslint"
   if ! @wait-for-command yarn eslint "${eslint_files[@]}"
   then
     (( num_errors+=1 ))
@@ -85,6 +90,8 @@ then
 fi
 if [ "${#rubocop_files[@]}" -gt 0 ]
 then
+  echo ""
+  echo "${#rubocop_files[@]} files for rubocop"
   if ! @wait-for-command rubocop "${rubocop_files[@]}"
   then
     (( num_errors+=1 ))
@@ -94,6 +101,6 @@ fi
 if [ "$num_errors" -ne 0 ]
 then
   echo ""
-  echo "There were $num_errors errors"
+  echo "Found errors with $num_errors linter(s)"
   exit 1
 fi
