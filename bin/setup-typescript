@@ -7,8 +7,6 @@
 
 # typescript
 @wait-for-command yarn add typescript --dev
-# optional, to run scripts on the fly
-#@wait-for-command yarn add ts-node --dev
 
 # eslint
 @wait-for-command yarn add eslint --dev
@@ -21,6 +19,7 @@
 @wait-for-command yarn add eslint-plugin-prettier --dev
 
 # add scripts in package.json (build, watch, etc.)
+# TODO: this should use dlx instead of adding this as a devdep
 @wait-for-command yarn add npm-add-script --dev
 yarn npmAddScript -k "build" -v "tsc --build"
 yarn npmAddScript -k "build:watch" -v "tsc --build --watch"

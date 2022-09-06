@@ -194,7 +194,6 @@ const config: Config = {
       { name: 'ember-cli' },
       { name: 'eslint' },
       { name: 'gulp' },
-      { name: 'ts-node' },
       { name: 'typescript' },
     ]),
 

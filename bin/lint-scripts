@@ -49,7 +49,7 @@ for file in "$@"; do
         "#!/usr/bin/env bash"|"#!/usr/bin/env badash")
           shellcheck_files+=( "$file" )
           ;;
-        "#!/usr/bin/env node"|"#!/usr/bin/env ts-node")
+        "#!/usr/bin/env node")
           eslint_files+=( "$file" )
           ;;
         "#!/usr/bin/env ruby")
