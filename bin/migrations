@@ -24,5 +24,6 @@ do
   trimmed_file="${file//.\/}"
   # run the file, and check for successful exit
   #echo "file: $trimmed_file"
+  echo ""
   @wait-for-command "./migrations/$trimmed_file"
 done

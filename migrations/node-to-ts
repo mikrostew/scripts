@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# check for any Node scripts in bin/, they should be TS in src/
+
+COLOR_FG_BOLD_GREEN='\033[1;32m'
+COLOR_FG_RED='\033[0;31m'
+COLOR_RESET='\033[0m'
+
+errors=0
+
+# step 1: the only step
+echo ""
+where_is_node_used="$(grep -nIr --color=always '^#!\/usr\/bin\/env node' bin/)"
+if [ "$?" -eq 0 ]
+then
+  echo -e "${COLOR_FG_RED}✖${COLOR_RESET} Node is still used in these scripts:"
+  echo "$where_is_node_used"
+  (( errors+=1 ))
+else
+  echo -e "${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} Node is not used, yay!"
+fi
+
+exit "$errors"
