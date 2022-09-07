@@ -32,6 +32,6 @@ shift $((OPTIND-1))
 i=1
 num_dirs=$#
 for dir in "$@"; do
-  @wait-for-command --clear --show-output --msg "scanning $dir ($i of $num_dirs)" du -skx "$dir"
+  @wait-for-command --clear --show-output --msg "scanning ($i of $num_dirs) $dir" du -skx "$dir"
   (( i++ ))
 done | sort --numeric-sort --reverse
