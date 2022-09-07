@@ -19,35 +19,14 @@ fi
 # show a busy spinner while command is running
 # and only show output if there is an error
 _wait-for-command() {
-  # flags
-  #  --show-output (bool): always show command output
-  #  --clear (bool): clear the spinner
-  #  --msg (string): message to show instead of the command
-  local more_args=0
-  local message=""
-  while [ "$more_args" == 0 ]; do
-    if [ "$1" == "--show-output" ]; then
-      local show_output="true"
-      shift
-    elif [ "$1" == "--clear" ]; then
-      local clear="true"
-      shift
-    elif [ "$1" == "--msg" ]; then
-      shift
-      message="$1"
-      shift
-    else
-      more_args=1
-    fi
-  done
-  # (rest of the input is the command and arguments)
   # make sure cmd is not too wide for the terminal
   # - 3 chars for spinner, 3 for ellipsis, 2 for spacing
   local max_length=$(( COLUMNS - 8 ))
-  if [ -z "$message" ]; then message="$*"; fi
-  local cmd_display="$message"
+  local message="$*"
   if [ "${#message}" -gt "$max_length" ]; then
     cmd_display="${message:0:$max_length}..."
+  else
+    cmd_display="$message"
   fi
   local total_length=$(( 3 + ${#cmd_display} ))
 
@@ -80,15 +59,8 @@ _wait-for-command() {
   # check that the command was successful
   if [ "$exit_code" == 0 ]
   then
-    # attempt to clean up, for --clear option (best effort, this mostly works)
-    if [ -n "$clear" ]
-    then
-      printf "\r%-${total_length}s\r" ' ' >&2
-    else
-      printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} $cmd_display\n" >&2
-    fi
-    # show output if configured
-    if [ "$show_output" == "true" ]; then echo "$cmd_output"; fi
+    # write a final display with check mark for success
+    printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} $cmd_display\n" >&2
   else
     printf "\r ${COLOR_FG_RED}✖${COLOR_RESET} $cmd_display\n" >&2
     # if it fails, show the command output (in red)
@@ -145,6 +117,7 @@ overwrote=0
 total=0
 
 # TODO: use _wait-for-command with this mess
+# TODO: remove symlinks that are no longer used
 for repo_path in "$installed_bin_dir"/*
 do
   (( total++ ))
