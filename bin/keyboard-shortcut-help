@@ -1,24 +1,6 @@
-#!/usr/bin/env node
-// because I don't remember what all these things do
+#!/usr/bin/env badash
+# shellcheck shell=bash
 
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-
-// parse the karabiner config file
-const karabinerJson = fs.readFileSync(
-  path.join(os.homedir(), '.config/karabiner/karabiner.json'),
-  'utf8'
-);
-const karabinerConfig = JSON.parse(karabinerJson);
-
-const profile = karabinerConfig.profiles[0];
-const rules = profile.complex_modifications.rules;
-
-console.log('Karabiner shortcuts:');
-rules
-  .map((r) => r.description)
-  .sort()
-  .forEach((rule) => {
-    console.log(` ${rule}`);
-  });
+# A shim to run the corresponding JS file
+# Note: this will use the NodeJS version of the system, not this repo (_should_ be ok)
+node @@SCRIPT-DIR@@/../node/keyboard-shortcut-help.js "$@"
