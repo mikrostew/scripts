@@ -4,13 +4,25 @@
 
 echo "Starting Apps"
 # start these apps
-# OBS, camo studio, zoom (to check settings)
 run-app-path '/Applications/OBS.app/Contents/MacOS/obs'
 run-app-path '/Applications/Camo Studio 1.3.9.app/Contents/MacOS/Camo Studio'
-run-app-path '/Applications/zoom.us.app/Contents/MacOS/zoom.us'
+#run-app-path '/Applications/zoom.us.app/Contents/MacOS/zoom.us'
+
+echo ""
+echo "Starting Virtual Camera for OBS 📸 "
+# I setup a hotkey to start/stop the virtual camera in OBS Settings
+osascript <<END_SCRIPT
+tell application "System Events"
+  tell process "OBS"
+    set frontmost to true
+    key down 63 -- fn
+    key code 111 -- f12
+  end tell
+end tell
+END_SCRIPT
 
 # reminders on the screen
 echo ""
 echo "Reminders:"
-echo "  Make sure the microphone is on"
-echo "  Make sure the light is on"
+echo "  Make sure the microphone is on 🎤"
+echo "  Make sure the light is on 💡"
