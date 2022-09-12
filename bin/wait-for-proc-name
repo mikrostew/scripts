@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# wait for a process to be running (or timeout)
+
+# colors
+COLOR_RESET='\033[0m'
+COLOR_FG_BOLD_GREEN='\033[1;32m'
+COLOR_FG_GREEN='\033[0;32m'
+COLOR_FG_RED='\033[0;31m'
+
+# helper functions
+app-wait-info() {
+  action="$1"
+  name="$2"
+
+  echo -e -n "  ${COLOR_FG_BOLD_GREEN}$action${COLOR_RESET} for '$name' to be running..."
+}
+app-running() {
+  echo -e "[${COLOR_FG_GREEN}OK${COLOR_RESET}]"
+}
+app-error() {
+  echo -e "(${COLOR_FG_RED}error${COLOR_RESET})"
+}
+
+# arguments
+app_name="$1"
+wait_seconds="${2:-5}"  # default is 5 seconds
+
+app-wait-info "wait" "$app_name"
+waited_seconds=0
+while :
+do
+  if pgrep -f "$app_name" &>/dev/null
+  then
+    app-running
+    exit 0
+  fi
+
+  if [ "$waited_seconds" -gt "$wait_seconds" ]
+  then
+    app-error
+    exit 1
+  fi
+
+  sleep 1
+  (( waited_seconds+=1 ))
+done

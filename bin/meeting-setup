@@ -1,12 +1,14 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
+# shellcheck shell=bash
 
 # open applications and remind about settings for meetings
 
 echo "Starting Apps"
 # start these apps
-run-app-path '/Applications/OBS.app/Contents/MacOS/obs'
-run-app-path '/Applications/Camo Studio 1.3.9.app/Contents/MacOS/Camo Studio'
+@@SCRIPT-DIR@@/run-app-path '/Applications/OBS.app/Contents/MacOS/obs'
+@@SCRIPT-DIR@@/run-app-path '/Applications/Camo Studio 1.3.9.app/Contents/MacOS/Camo Studio'
 #run-app-path '/Applications/zoom.us.app/Contents/MacOS/zoom.us'
+@@SCRIPT-DIR@@/wait-for-proc-name "OBS"
 
 echo ""
 echo "Starting Virtual Camera for OBS 📸 "

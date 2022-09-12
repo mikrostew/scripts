@@ -24,6 +24,7 @@ app-error() {
   echo -e "(${COLOR_FG_RED}error${COLOR_RESET})"
 }
 
+# arguments
 app_path="$1"
 
 app-run-info "start" "$app_path"
