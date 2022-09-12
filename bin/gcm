@@ -1,0 +1,21 @@
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
+# [git] checkout default branch [main/master] (Git Checkout Main/Master)
+
+in_git_repo() {
+  git status > /dev/null && return 0 || @echo-err "Not in git repo" && return 1
+}
+no_uncommitted_changes() {
+  [ "$(git status --porcelain --untracked-files=no)" != "" ] && @echo-err ">_<  You have uncommitted changes" && return 1 || return 0
+}
+
+if in_git_repo && no_uncommitted_changes
+then
+  # what is the default branch?
+  # TODO: make this a badash function
+  default_branch="$( if git show-ref --verify --quiet refs/heads/main; then echo "main"; elif git show-ref --verify --quiet refs/heads/master; then echo "master"; else echo ""; fi; )"
+  if [ -z "$default_branch" ]; then @echo-err "Error: default branch is not 'main' or 'master'"; exit 1; fi
+
+  @wait-for-command git checkout "$default_branch"
+fi
