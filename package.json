@@ -2,6 +2,7 @@
   "scripts": {
     "build": "tsc --build",
     "postinstall": "tsc --build",
+    "serve-dir": "http-server",
     "ts-watch": "tsc -w -p . --noEmit"
   },
   "volta": {
@@ -14,6 +15,7 @@
     "chalk": "^4",
     "cli-table": "^0.3.6",
     "execa": "^5.0.0",
+    "http-server": "^14.1.1",
     "listr": "^0.14.3",
     "ora": "^5.4.0",
     "tmp": "^0.1.0",

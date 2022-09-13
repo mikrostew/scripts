@@ -21,7 +21,7 @@ num_errors=0
 # group the files by what should be used to lint them
 shellcheck_files=()
 eslint_files=()
-rubocop_files=()
+# rubocop_files=()
 
 echo "Linting $# input files"
 
@@ -41,9 +41,9 @@ for file in "$@"; do
     ".js"|".ts")
       eslint_files+=( "$file" )
       ;;
-    ".rb")
-      rubocop_files+=( "$file" )
-      ;;
+    # ".rb")
+    #   rubocop_files+=( "$file" )
+    #   ;;
     ".")
       # a lot of these files don't have an extension, check the shebang
       case "$shebang" in
@@ -53,9 +53,9 @@ for file in "$@"; do
         "#!/usr/bin/env node")
           eslint_files+=( "$file" )
           ;;
-        "#!/usr/bin/env ruby")
-          rubocop_files+=( "$file" )
-          ;;
+        # "#!/usr/bin/env ruby")
+        #   rubocop_files+=( "$file" )
+        #   ;;
         *)
           @echo-err "Unrecognized shebang '$shebang' in $file"
           (( num_errors+=1 ))
@@ -88,15 +88,15 @@ then
     (( num_errors+=1 ))
   fi
 fi
-if [ "${#rubocop_files[@]}" -gt 0 ]
-then
-  echo ""
-  echo "${#rubocop_files[@]} files for rubocop"
-  if ! @wait-for-command rubocop "${rubocop_files[@]}"
-  then
-    (( num_errors+=1 ))
-  fi
-fi
+# if [ "${#rubocop_files[@]}" -gt 0 ]
+# then
+#   echo ""
+#   echo "${#rubocop_files[@]} files for rubocop"
+#   if ! @wait-for-command rubocop "${rubocop_files[@]}"
+#   then
+#     (( num_errors+=1 ))
+#   fi
+# fi
 
 if [ "$num_errors" -ne 0 ]
 then

@@ -7,12 +7,12 @@ do
   echo -n "$file"
 
   # Ruby
-  if ruby -ryaml -e "YAML.load_file('$file')" 2>/dev/null
-  then
-    echo -n " ✅ Ruby"
-  else
-    echo -n " ❌ Ruby"
-  fi
+  # if ruby -ryaml -e "YAML.load_file('$file')" 2>/dev/null
+  # then
+  #   echo -n " ✅ Ruby"
+  # else
+  #   echo -n " ❌ Ruby"
+  # fi
 
   # Python
   if python3 -c "import yaml; stream = open('$file', 'r'); yaml.load(stream, yaml.Loader)" 2>/dev/null

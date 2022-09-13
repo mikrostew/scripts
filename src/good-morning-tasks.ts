@@ -159,7 +159,7 @@ const config: Config = {
     group('Homebrew', laptopMachines, [
       homebrew('common', laptopMachines, [
         'bats-core',
-        'chruby',
+        // 'chruby',
         'coreutils',
         'expect',
         'ffmpeg',
@@ -173,7 +173,7 @@ const config: Config = {
         'macvim',
         'moreutils',
         'pstree',
-        'ruby-install',
+        // 'ruby-install',
         'terminal-notifier',
         'tidy-html5',
         'tmux',

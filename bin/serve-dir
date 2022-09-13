@@ -38,9 +38,15 @@ shift $((OPTIND-1))
 
 port="${1:-8080}"
 
-@uses-cmds ifconfig awk ruby
+@uses-cmds ifconfig awk
 
 address="$(ifconfig | awk '/inet / && $2 != "127.0.0.1"{print $2}')"
-echo -e "Current directory: ${COLOR_FG_BOLD_BLUE}$PWD${COLOR_RESET}"
-echo -e "Serving at ${COLOR_FG_BOLD_BLUE}$address:$port${COLOR_RESET}"
-ruby -run -e httpd . -p "$port"
+directory="$PWD"
+
+echo -e "Serving dir: ${COLOR_FG_BOLD_BLUE}$directory${COLOR_RESET}"
+echo -e "Serving at: ${COLOR_FG_BOLD_BLUE}$address:$port${COLOR_RESET}"
+echo ""
+
+# use https://github.com/http-party/http-server for serving the dir
+# (have to cd to this repo for yarn to work)
+cd @@SCRIPT-DIR@@/.. && yarn serve-dir "$directory" -p "$port"
