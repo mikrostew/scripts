@@ -2,6 +2,7 @@
 # shellcheck shell=bash
 
 # write config for the keyboard shortcuts and mappings I use in karabiner
+# TODO: this is pretty slow, and uses a lot of 'jq' - I should rewrite this in JS
 
 @uses-cmds jq shasum
 
