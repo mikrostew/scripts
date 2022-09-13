@@ -23,6 +23,14 @@ get-key-code() {
   esac
 }
 
+# show a notification so I know things are working
+gen-keycode-notification() {
+  local name="$1"
+  # using https://github.com/julienXX/terminal-notifier
+  # fake this as if Karabiner actually sent it
+  echo "/usr/local/bin/terminal-notifier -message '$name' -title 'Keyboard Shortcut Activated' -sender 'org.pqrs.Karabiner-Elements.Preferences'"
+}
+
 # build up rules for the complex_modifications that need to be added
 declare -A key_mappings
 declare -A complex_mod_rules
@@ -46,7 +54,7 @@ do
   rule_config="$(jq --null-input --compact-output \
     --arg descr "Ctrl-Opt-Cmd-${key^^} - $description" \
     --argjson from "$key_mapping" \
-    --arg shell_cmd "$cmd" \
+    --arg shell_cmd "$(gen-keycode-notification "$description"); $cmd" \
     '{"description": $descr, "manipulators": [{"type": "basic", "from": $from, "to": [{ "shell_command": $shell_cmd }] }] }')"
 
   # hash that, and add it to the hashmap
