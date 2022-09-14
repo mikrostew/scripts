@@ -16,6 +16,7 @@ echo "Starting Virtual Camera for OBS 📸 "
 osascript <<END_SCRIPT
 tell application "System Events"
   tell process "OBS"
+    activate
     set frontmost to true
     key down 63 -- fn
     key code 111 -- f12
