@@ -7,7 +7,7 @@
   },
   "volta": {
     "node": "16.14.2",
-    "yarn": "1.22.17"
+    "yarn": "3.2.1"
   },
   "type": "commonjs",
   "dependencies": {

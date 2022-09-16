@@ -1,2 +1,5 @@
 # compiled/generated code
 node/
+
+# Yarn3
+.yarn/install-state.gz
