@@ -1,12 +1,13 @@
 {
+  "extends": "@tsconfig/node12/tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "noImplicitAny": true,
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "removeComments": false,
-    "outDir": "node",
-    "sourceMap": false
+    "sourceMap": true,
+
+    "outDir": "node"
   },
   "include": ["src/*.ts"],
   "exclude": ["node_modules"]

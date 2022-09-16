@@ -19,7 +19,7 @@ import {
   group,
   homebrew,
   kill_proc,
-  open_url,
+  // open_url,
   repo_update,
   start_app,
   volta,

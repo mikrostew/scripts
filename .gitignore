@@ -1,3 +1,6 @@
+# Node deps
+node_modules
+
 # compiled/generated code
 node/
 
