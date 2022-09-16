@@ -28,7 +28,10 @@ get-key-code() {
 gen-keycode-notification() {
   local name="$1"
   # using https://github.com/julienXX/terminal-notifier
-  # fake this as if Karabiner actually sent it
+  # (fake this as if Karabiner actually sent it)
+  # $ cat /Applications/Karabiner-Elements.app/Contents/Info.plist | grep -A1 CFBundleIdentifier
+  #         <key>CFBundleIdentifier</key>
+  #         <string>org.pqrs.Karabiner-Elements.Preferences</string>
   echo "/usr/local/bin/terminal-notifier -message '$name' -title 'Keyboard Shortcut Activated' -sender 'org.pqrs.Karabiner-Elements.Preferences'"
 }
 
