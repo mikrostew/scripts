@@ -1,7 +1,68 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
+# shellcheck shell=bash
 
 # Set the "Do Not Disturb" feature in OSX, for a limited amount of time
 # (normally you set it and it's on until midnight, which is not great)
+
+COLOR_FG_BOLD_GREEN='\033[1;32m'
+COLOR_RESET='\033[0m'
+
+# looks like the best way at this point is to use Shortcuts.app
+# (that will _maybe_ stay consistent from one OS release to the next?)
+
+# how to create a shortcut
+# open Shortcuts.app
+# click the "+"
+# name the shortcut "DND Focus Mode"
+# search for "if", and click and drag the "If" action into the left side
+# select "Shortcut Input" in that,
+# then setup the input task above it to "Receive 'Text' input from 'Nowhere'"
+#   and if there's no input, "Stop and Respond" "You need to pass 'on' or 'off' to this shortcut"
+# in the "If", click "Shortcut Input" and for type select "Text"
+# setup the IF to be "If Shortcut Input contains on"
+#   (I tried "is on", but that didn't work ¯\_(ツ)_/¯)
+# search for "focus" in the search bar on the right side
+# drag the "Set Focus" action so that it is under the "If"
+# set that up to be "Turn Do Not Disturb On until Turned Off"
+# drag another "Set Focus" action so that it is under the "Otherwise"
+# set that up to be "Turn Do Not Disturb Off"
+# that should do it
+
+SHORTCUT_NAME="DND Focus Mode"
+
+dnd_off() {
+  shortcuts run "$SHORTCUT_NAME" <<< "off"
+	#killall NotificationCenter
+	echo -e " ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} DND -> off"
+}
+
+dnd_on() {
+  shortcuts run "$SHORTCUT_NAME" <<< "on"
+	#killall NotificationCenter
+	echo -e " ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} DND -> on"
+}
+
+# first check that there is a shortcut
+if ! ( shortcuts list | grep "$SHORTCUT_NAME" >/dev/null )
+then
+  @echo-err "Error: shortcut '$SHORTCUT_NAME' does not exist, please create it"
+  @echo-err "  (see comments in the 'do-not-disturb' script)"
+  exit 1
+fi
+
+# optional args
+#  --on | --off  - just turn on or off, don't input minutes
+dnd_on_off="$1"
+case "$dnd_on_off" in
+  on)
+    dnd_on
+    exit
+    ;;
+  off)
+    dnd_off
+    exit
+    ;;
+esac
 
 # input the number of minutes to sleep
 echo -n "Do Not Disturb (Focus) for how many minutes? [30] "
@@ -12,6 +73,17 @@ then
 fi
 # and get seconds for the sleep command
 sleep_seconds=$(( sleep_minutes * 60 ))
+
+dnd_on
+# if this is Ctrl-C-ed, or it exits, clean up by turning off DND
+trap dnd_off SIGINT EXIT
+
+@wait-for-command --msg "waiting for $sleep_minutes minute(s)" sleep $sleep_seconds
+
+
+#####################################
+# previous stuff that doesn't work
+#####################################
 
 ## from:
 ## https://apple.stackexchange.com/a/303400
@@ -87,48 +159,3 @@ sleep_seconds=$(( sleep_minutes * 60 ))
 # but that is not working since 11.x
 # https://github.com/sindresorhus/do-not-disturb/issues/9
 # https://github.com/sindresorhus/do-not-disturb/issues/12
-
-# looks like the best way at this point is to use Shortcuts.app
-# (that will _maybe_ stay consistent from one OS release to the next?)
-
-# how to create a shortcut
-# open Shortcuts.app
-# click the "+"
-# name the shortcut "DND Focus Mode"
-# search for "if", and click and drag the "If" action into the left side
-# select "Shortcut Input" in that,
-# then setup the input task above it to "Receive 'Text' input from 'Nowhere'"
-#   and if there's no input, "Stop and Respond" "You need to pass 'on' or 'off' to this shortcut"
-# in the "If", click "Shortcut Input" and for type select "Text"
-# setup the IF to be "If Shortcut Input contains on"
-#   (I tried "is on", but that didn't work ¯\_(ツ)_/¯)
-# search for "focus" in the search bar on the right side
-# drag the "Set Focus" action so that it is under the "If"
-# set that up to be "Turn Do Not Disturb On until Turned Off"
-# drag another "Set Focus" action so that it is under the "Otherwise"
-# set that up to be "Turn Do Not Disturb Off"
-# that should do it
-
-SHORTCUT_NAME="DND Focus Mode"
-
-dnd_off() {
-  shortcuts run "$SHORTCUT_NAME" <<< "off"
-	#killall NotificationCenter
-	echo "DND -> off"
-}
-
-# first check that there is a shortcut
-if shortcuts list | grep "$SHORTCUT_NAME" >/dev/null
-then
-  shortcuts run "$SHORTCUT_NAME" <<< "on"
-	#killall NotificationCenter
-	echo "DND -> on"
-  # if this is Ctrl-C-ed, or it exits, clean up by turning off DND
-  trap dnd_off SIGINT EXIT
-
-	echo "(waiting for $sleep_minutes minute(s)...)"
-	sleep $sleep_seconds
-else
-  echo "Error: shortcut '$SHORTCUT_NAME' does not exist, please create it"
-  exit 1
-fi

@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
+# shellcheck shell=bash
 
 # close applications I use for meetings
 
@@ -11,3 +12,7 @@ kill-proc-name "Camo Studio"
 # meeting applications
 kill-proc-name "zoom.us"
 kill-proc-name "Teams"
+
+echo ""
+echo "Disabling Do-Not-Disturb"
+@@SCRIPT-DIR@@/do-not-disturb off

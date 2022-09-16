@@ -24,6 +24,10 @@ tell application "System Events"
 end tell
 END_SCRIPT
 
+echo ""
+echo "Setting Do-Not-Disturb"
+@@SCRIPT-DIR@@/do-not-disturb on
+
 # reminders on the screen
 echo ""
 echo "Reminders:"
