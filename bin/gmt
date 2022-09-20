@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# git - run mergetool for conflicts (git mergetool)
+
+git mergetool --tool=meld
