@@ -171,6 +171,7 @@ const config: Config = {
         'imagemagick',
         'jq',
         'macvim',
+        'meld',
         'moreutils',
         'pstree',
         // 'ruby-install',
