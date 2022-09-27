@@ -104,24 +104,26 @@ const config: Config = {
     ]),
 
     func('Check XCode path', laptopMachines, async () => {
+      // apparently this is what I should be using
+      const XCODE_PATH = '/Library/Developer/CommandLineTools';
       const { stdout, stderr } = await execa('xcode-select', ['--print-path']);
       if (!stdout) {
         throw new Error(`Could not get current XCode path\nstderr='${stderr}'`);
       }
-      if (stdout.trim() !== '/Applications/Xcode.app/Contents/Developer') {
+      if (stdout.trim() !== XCODE_PATH) {
         await execa('send-passwd-for-sudo', [
           process.env['LDAP_PASS']!,
           'sudo',
           'xcode-select',
           '-s',
-          '/Applications/Xcode.app/Contents/Developer',
+          XCODE_PATH,
         ]);
         // recheck this
         const { stdout, stderr } = await execa('xcode-select', ['--print-path']);
         if (!stdout) {
           throw new Error(`Could not get updated XCode path, stderr=${stderr}`);
         }
-        if (stdout.trim() !== '/Applications/Xcode.app/Contents/Developer') {
+        if (stdout.trim() !== XCODE_PATH) {
           throw new Error(`Could not change XCode path\nstdout='${stdout}'\nstderr='${stderr}'`);
         }
       }
