@@ -225,7 +225,7 @@ const config: Config = {
         'Lint script files',
         workMachines,
         'lint-scripts',
-        [`${__dirname}/../bin/*`, `${__dirname}/../src/*`],
+        [`${__dirname}/../bin/*`, `${__dirname}/../src/*.ts`, `${__dirname}/../src/*/*.ts`],
         {
           shell: true,
           cwd: path.resolve(__dirname, '..'),
