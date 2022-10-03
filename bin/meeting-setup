@@ -8,14 +8,16 @@ echo "Starting Apps"
 @@SCRIPT-DIR@@/run-app-path '/Applications/OBS.app/Contents/MacOS/obs'
 @@SCRIPT-DIR@@/run-app-path '/Applications/Camo Studio 1.3.9.app/Contents/MacOS/Camo Studio'
 #run-app-path '/Applications/zoom.us.app/Contents/MacOS/zoom.us'
-@@SCRIPT-DIR@@/wait-for-proc-name "OBS"
+# this is not working like I expect
+#@@SCRIPT-DIR@@/wait-for-proc-name "OBS"
 
 echo ""
 echo "Starting Virtual Camera for OBS 📸 "
+@wait-for-command --msg 'wait 5 seconds' sleep 5
 # I setup a hotkey to start/stop the virtual camera in OBS Settings
 osascript <<END_SCRIPT
 tell application "System Events"
-  tell process "OBS"
+  tell process "obs"
     activate
     set frontmost to true
     key down 63 -- fn
