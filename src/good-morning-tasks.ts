@@ -8,7 +8,6 @@ import execa from 'execa';
 import {
   Config,
   renameRenameFiles,
-  fileNameChecks,
   syncConflictCheck,
   sleep,
   runTasks,
@@ -24,6 +23,8 @@ import {
   start_app,
   volta,
 } from '@mikrostew/good-morning/lib/plugins';
+
+import { fileNameChecks } from './tasks/file-name-checks';
 
 // add things to this, to display after the tasks are run
 const FINAL_OUTPUT: string[] = [];
