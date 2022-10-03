@@ -31,13 +31,13 @@ COLOR_FG_RED='\033[0;31m'
 
 # error functions
 echo_err() {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" >&2
+  echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" >&2
 }
 exit_on_error() {
   if [ "$?" -ne 0 ]; then
     exit_code=$?
     echo_err "$1"
-    echo_err "$(< $error_file)"
+    echo_err "$(< "$error_file")"
     exit $exit_code
   fi
 }
@@ -46,7 +46,7 @@ exit_on_error() {
 requirements=( curl jq mktemp )
 all_reqs_ok="true"
 for executable in "${requirements[@]}"; do
-  if [ ! $(command -v $executable) ]; then
+  if [ ! "$(command -v "$executable")" ]; then
     echo_err "'$executable' is required but not installed"
     all_reqs_ok="false"
   fi
@@ -63,7 +63,7 @@ finish() {
 trap finish EXIT
 
 
-discovery_doc_json="$(curl "$GOOGLE_DISCOVERY_DOC" 2>$error_file)"
+discovery_doc_json="$(curl "$GOOGLE_DISCOVERY_DOC" 2>"$error_file")"
 exit_on_error "Failed to download discovery doc $GOOGLE_DISCOVERY_DOC"
 
 token_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.token_endpoint')"
@@ -77,7 +77,7 @@ curl \
   --data-urlencode "client_secret=$client_secret" \
   --data-urlencode "refresh_token=$refresh_token" \
   --data-urlencode "grant_type=refresh_token" \
-  "$token_endpoint" 2>$error_file | jq --compact-output '.'
+  "$token_endpoint" 2>"$error_file" | jq --compact-output '.'
 
 # should return something like this:
 #  {

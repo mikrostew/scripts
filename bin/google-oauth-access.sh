@@ -38,13 +38,13 @@ COLOR_FG_BOLD_BLUE='\033[1;34m'
 
 # error functions
 echo_err() {
-  echo -e "${COLOR_FG_RED}$@${COLOR_RESET}" >&2
+  echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" >&2
 }
 exit_on_error() {
   if [ "$?" -ne 0 ]; then
     exit_code=$?
     echo_err "$1"
-    echo_err "$(< $error_file)"
+    echo_err "$(< "$error_file")"
     exit $exit_code
   fi
 }
@@ -59,7 +59,7 @@ elif [ "$OS" == "Linux" ]; then
 fi
 all_reqs_ok="true"
 for executable in "${requirements[@]}"; do
-  if [ ! $(command -v $executable) ]; then
+  if [ ! "$(command -v "$executable")" ]; then
     echo_err "'$executable' is required but not installed"
     all_reqs_ok="false"
   fi
@@ -76,7 +76,7 @@ finish() {
 trap finish EXIT
 
 
-discovery_doc_json="$(curl "$GOOGLE_DISCOVERY_DOC" 2>$error_file)"
+discovery_doc_json="$(curl "$GOOGLE_DISCOVERY_DOC" 2>"$error_file")"
 exit_on_error "Failed to download discovery doc $GOOGLE_DISCOVERY_DOC"
 
 authorization_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.authorization_endpoint')"
@@ -91,7 +91,7 @@ if [ "$OS" == "Linux" ]; then
   # (see https://stackoverflow.com/questions/6180162/)
   nc -l localhost $proxy_port >/dev/null 2>&1 &
   # construct a URL to get the auth and refresh tokens
-  base_url="$(echo "$authorization_endpoint" | sed 's/https/http/')" # use http here so it shows the GET line
+  base_url="${authorization_endpoint//https/http}" # use http here so it shows the GET line
   # use curl to urlencode params (because `xdg-open` doesn't)
   authorization_url="$(curl \
     -G \
@@ -123,7 +123,7 @@ echo -e "${COLOR_FG_BOLD_BLUE}$authorization_url${COLOR_RESET}"
 echo "Waiting for approval..."
 
 # capture the code from the redirect (since it's going to the local machine):
-redirect_request="$(echo -en "$redirect_page" | nc -l $redirect_port 2>$error_file)"
+redirect_request="$(echo -en "$redirect_page" | nc -l $redirect_port 2>"$error_file")"
 # which returns something like:
 #  GET /?code=4/AACaTSd7...4D3mpI1Eo HTTP/1.1
 #  Host: 127.0.0.1:1234
@@ -150,7 +150,7 @@ curl \
   --data-urlencode "client_secret=$client_secret" \
   --data-urlencode "redirect_uri=$redirect_uri" \
   --data-urlencode "grant_type=authorization_code" \
-  "$token_endpoint" 2>$error_file | jq '.'
+  "$token_endpoint" 2>"$error_file" | jq '.'
 
 # should return something like this:
 #  {
