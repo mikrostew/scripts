@@ -444,9 +444,9 @@ const config: Config = {
       }),
       group('Open pages - work and home', laptopMachines, [
         // TODO: rework how open_url works - this is wonky
-        func('Volta pnpm support RFC', 'inherit', (ctx) => {
-          if (!ctx['open-tabs'].get('https://github.com/volta-cli/rfcs/pull/46')) {
-            return execa('open', ['https://github.com/volta-cli/rfcs/pull/46']);
+        func('Volta pnpm support PR', 'inherit', (ctx) => {
+          if (!ctx['open-tabs'].get('https://github.com/volta-cli/volta/pull/1273')) {
+            return execa('open', ['https://github.com/volta-cli/volta/pull/1273']);
           }
         }),
       ]),
