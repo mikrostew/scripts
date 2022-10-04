@@ -25,6 +25,7 @@ import {
 } from '@mikrostew/good-morning/lib/plugins';
 
 import { fileNameChecks } from './tasks/file-name-checks';
+import { getOpenTabs, openInTab } from './tasks/open-in-tabs';
 
 // add things to this, to display after the tasks are run
 const FINAL_OUTPUT: string[] = [];
@@ -419,85 +420,30 @@ const config: Config = {
     ]),
 
     group('Open Pages', laptopMachines, [
-      func('Get open tabs', 'inherit', (ctx) => {
-        // this is kinda slow, oh well
-        const chromeOpenTabs = new Map(
-          execa
-            .sync('chrome-tabs')
-            .stdout.split('\n')
-            .map((tab) => {
-              // special case for google docs URLs, remove the '#' and everything after
-              if (/docs.google.com/.test(tab)) {
-                const hashPosition = tab.indexOf('#');
-                if (hashPosition > 0) {
-                  return tab.substring(0, hashPosition);
-                }
-              }
-              return tab;
-            })
-            .map((t) => {
-              return [t, true];
-            })
-        );
-        // set that in the context so I can use it for the following stuff
-        ctx['open-tabs'] = chromeOpenTabs;
-      }),
+      getOpenTabs(),
       group('Open pages - work and home', laptopMachines, [
-        // TODO: rework how open_url works - this is wonky
-        func('Volta pnpm support PR', 'inherit', (ctx) => {
-          if (!ctx['open-tabs'].get('https://github.com/volta-cli/volta/pull/1273')) {
-            return execa('open', ['https://github.com/volta-cli/volta/pull/1273']);
-          }
-        }),
+        openInTab('Volta pnpm support PR', 'https://github.com/volta-cli/volta/pull/1273'),
       ]),
       group(
         'Open pages - work',
         ['workLaptop'],
         [
-          func('blog', 'inherit', (ctx) => {
-            if (
-              !ctx['open-tabs'].get(
-                'https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit'
-              )
-            ) {
-              return execa('open', [
-                'https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit',
-              ]);
-            }
-          }),
-          func('tasks', 'inherit', (ctx) => {
-            if (
-              !ctx['open-tabs'].get(
-                'https://docs.google.com/spreadsheets/d/1PFz8_EXZ4W6Kb-r7wpqSSxhKNTE5Dx7evonVXteFqJQ/edit'
-              )
-            ) {
-              return execa('open', [
-                'https://docs.google.com/spreadsheets/d/1PFz8_EXZ4W6Kb-r7wpqSSxhKNTE5Dx7evonVXteFqJQ/edit',
-              ]);
-            }
-          }),
-          func('reading', 'inherit', (ctx) => {
-            if (
-              !ctx['open-tabs'].get(
-                'https://docs.google.com/document/d/1QXoiUy-DKZb76nkzxx4V_bqO63C6pdFnqCAeGV9WGYs/edit'
-              )
-            ) {
-              return execa('open', [
-                'https://docs.google.com/document/d/1QXoiUy-DKZb76nkzxx4V_bqO63C6pdFnqCAeGV9WGYs/edit',
-              ]);
-            }
-          }),
-          func('ACID TMC jobs', 'inherit', (ctx) => {
-            if (
-              !ctx['open-tabs'].get(
-                'https://testmanager2.tools.corp.linkedin.com/#/product-details/voyager-web?taskName=send-acid-metrics'
-              )
-            ) {
-              return execa('open', [
-                'https://testmanager2.tools.corp.linkedin.com/#/product-details/voyager-web?taskName=send-acid-metrics',
-              ]);
-            }
-          }),
+          openInTab(
+            'blog',
+            'https://docs.google.com/document/d/1XQskTjmpzn7-SI7B4e0aNYy3gLE5lTfb9IC67rPN53c/edit'
+          ),
+          openInTab(
+            'tasks',
+            'https://docs.google.com/spreadsheets/d/1PFz8_EXZ4W6Kb-r7wpqSSxhKNTE5Dx7evonVXteFqJQ/edit'
+          ),
+          openInTab(
+            'reading',
+            'https://docs.google.com/document/d/1QXoiUy-DKZb76nkzxx4V_bqO63C6pdFnqCAeGV9WGYs/edit'
+          ),
+          openInTab(
+            'ACID TMC jobs',
+            'https://testmanager2.tools.corp.linkedin.com/#/product-details/voyager-web?taskName=send-acid-metrics'
+          ),
         ]
       ),
     ]),
