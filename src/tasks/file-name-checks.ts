@@ -68,6 +68,7 @@ export async function fileNameChecks(
     },
     {
       match: (fname: string) =>
+        !/Darko US/.test(fname) &&
         fname.split(' ').some((word) => /^[A-Z]{2,}$/.test(word) && !/II/.test(word)),
       errorMsg: '{} all caps',
     },
