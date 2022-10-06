@@ -7,6 +7,7 @@ echo "Closing Apps"
 
 # for camera and microphone
 kill-proc-name "obs"
+kill-proc-name "OBS"
 kill-proc-name "Camo Studio"
 
 # meeting applications
