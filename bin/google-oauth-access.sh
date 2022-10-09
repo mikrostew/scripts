@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
+# shellcheck shell=bash
 
 # script to get an OAuth access token for a Google API (because doing it by hand is a PITA)
 
@@ -8,25 +9,48 @@
 # This was the most helpful document I found to get this stuff setup:
 # https://developers.google.com/identity/protocols/OAuth2WebServer
 
+# some things need to be setup for this to work
+#  - the client credentials need to be set in the keychain,
+#    as <client-id>:<client-secret>
+#    (I tried to store the whole JSON blob, but keychain seems to have a 128-char limit)
+#    $ security add-generic-password -U -T "" -s <password-name> -a <password-name> -w
+#    Running that should prompt for the credentials
+#    (choose whatever name makes sense, for example I'm using `spreadsheet-client-creds`)
 
 usage=$(cat <<END_USAGE
 
 
 Usage:
-  $0 <client_id> <client_secret> <scope>
+  $0 <keychain-password-id> <scope> <redirect-port>
 END_USAGE
 )
 
 # Arguments:
-client_id="${1:?"No client_id given $usage"}"
-client_secret="${2:?"No client_secret given $usage"}"
-scope="${3:?"No scope given $usage"}"
+# TODO: prompt for these instead of failing?
+password_id="${1:?"No keychain-password-id given $usage"}"
+scope="${2:?"No scope given $usage"}"
+redirect_port="${3:?"No redirect-port given $usage"}"
+
+# get things this needs from the entry in the keychain
+client_creds="$(security find-generic-password -ga "$password_id" -w 2>&1)"
+@exit-on-error 'Error: Could not get client credentials:' 'echo "  $client_creds"'
+#echo "client creds: '$client_creds'"
+
+# split that on the ':'
+IFS=: read -r client_id client_secret <<< "$client_creds"
+if [ -z "$client_id" ] || [ -z "$client_secret" ]
+then
+  @echo-err "Could not get client ID and secret from the keychain"
+  @echo-err "Check that the '$password_id' entry is formatted as <client-id>:<client-secret>"
+  exit 1
+fi
+#echo "client id: '$client_id'"
+#echo "client secret: '$client_secret'"
 
 # various constants
 GOOGLE_DISCOVERY_DOC="https://accounts.google.com/.well-known/openid-configuration"
 proxy_port=8000
-redirect_port=1234
-redirect_uri="http://127.0.0.1:$redirect_port"
+redirect_uri="http://localhost:$redirect_port"
 redirect_page="HTTP/1.1 200 OK\r\nContent-Length: 28\r\n\r\n<html><body>ok</body></html>" # (this will be shown in the browser)
 
 OS="$(uname)"
@@ -36,20 +60,8 @@ COLOR_RESET='\033[0m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 
-# error functions
-echo_err() {
-  echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" >&2
-}
-exit_on_error() {
-  if [ "$?" -ne 0 ]; then
-    exit_code=$?
-    echo_err "$1"
-    echo_err "$(< "$error_file")"
-    exit $exit_code
-  fi
-}
-
 # check requirements
+# TODO: use the badash equivalent
 requirements=( curl jq sed grep mktemp nc )
 # OS-specific
 if [ "$OS" == "Darwin" ]; then
@@ -60,7 +72,7 @@ fi
 all_reqs_ok="true"
 for executable in "${requirements[@]}"; do
   if [ ! "$(command -v "$executable")" ]; then
-    echo_err "'$executable' is required but not installed"
+    @echo-err "'$executable' is required but not installed"
     all_reqs_ok="false"
   fi
 done
@@ -77,11 +89,12 @@ trap finish EXIT
 
 
 discovery_doc_json="$(curl "$GOOGLE_DISCOVERY_DOC" 2>"$error_file")"
-exit_on_error "Failed to download discovery doc $GOOGLE_DISCOVERY_DOC"
+@exit-on-error "Failed to download discovery doc $GOOGLE_DISCOVERY_DOC"
 
 authorization_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.authorization_endpoint')"
 token_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.token_endpoint')"
-
+#echo "auth endpoint: '$authorization_endpoint'"
+#echo "token endpoint: '$token_endpoint'"
 
 echo "Opening authorization URL in default browser..."
 
@@ -134,7 +147,7 @@ redirect_request="$(echo -en "$redirect_page" | nc -l $redirect_port 2>"$error_f
 #  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8
 #  Accept-Encoding: gzip, deflate, br
 #  Accept-Language: en-US,en;q=0.9
-exit_on_error "Error capturing the OAuth redirect"
+@exit-on-error "Error capturing the OAuth redirect"
 
 authorization_code="$(echo "$redirect_request" | grep GET | sed -e 's|GET /?code=||' -e 's| HTTP/1.1||')"
 echo "authorization_code: $authorization_code"
@@ -165,5 +178,5 @@ curl \
 #    "error_description": "Code was already redeemed."
 #  }
 
-exit_on_error "Error getting access token"
+@exit-on-error "Error getting access token"
 
