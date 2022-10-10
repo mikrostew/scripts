@@ -22,6 +22,9 @@ usage=$(cat <<END_USAGE
 
 Usage:
   $0 <keychain-password-id> <scope> <redirect-port>
+
+  Note:
+    scope should be something like auth/spreadsheets.readonly
 END_USAGE
 )
 
@@ -98,6 +101,9 @@ token_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.token_endpoint'
 
 echo "Opening authorization URL in default browser..."
 
+# because it seems like I need the entire URL for this
+full_scope="https://www.googleapis.com/$scope"
+
 # Linux
 if [ "$OS" == "Linux" ]; then
   # start netcat to use as a local proxy, so this doesn't actually go to google
@@ -111,7 +117,7 @@ if [ "$OS" == "Linux" ]; then
     -v \
     --max-time 1 \
     --proxy localhost:$proxy_port \
-    --data-urlencode "scope=$scope" \
+    --data-urlencode "scope=$full_scope" \
     --data-urlencode "redirect_uri=$redirect_uri" \
     --data-urlencode "response_type=code" \
     --data-urlencode "client_id=$client_id" \
@@ -127,7 +133,7 @@ fi
 # OSX
 if [ "$OS" == "Darwin" ]; then
   # (`open` automatically urlencodes the params)
-  authorization_url="$authorization_endpoint?scope=$scope&redirect_uri=$redirect_uri&response_type=code&client_id=$client_id&access_type=offline"
+  authorization_url="$authorization_endpoint?scope=$full_scope&redirect_uri=$redirect_uri&response_type=code&client_id=$client_id&access_type=offline"
   open "$authorization_url"
 fi
 
