@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# Nicely print out our existing overrides
+
+# This is only for LI stuff, so the file will always be here
+overrides_file=/usr/local/SyncThing/SyncDocs/LinkedIn/overrides.txt
+overrides_lines=()
+max_override_length=0
+
+# figure out the longest override name
+while read -r line
+do
+  # ignore comments and empty lines, and lines starting with '-'
+  if [ "${line:0:1}" == "#" ] || [ -z "$line" ]
+  then
+    continue
+  fi
+
+  # save these
+  if [ "${line:0:1}" == "-" ]
+  then
+    overrides_lines+=( "$line" )
+    continue
+  fi
+
+  # anything else is an override
+  # (and save it)
+  if [ "${#line}" -gt "$max_override_length" ]
+  then
+    max_override_length="${#line}"
+  fi
+  overrides_lines+=( "$line" )
+done < "$overrides_file"
+#echo "max override length: $max_override_length"
+
+# how long can lines be?
+terminal_width="$(tput cols)"
+max_line_length=$(( terminal_width - max_override_length - 1 ))
+
+# display the overrides
+current_override_width=0
+line_indent=0
+for line in "${overrides_lines[@]}"
+do
+  line_indent=$(( max_override_length - current_override_width + 1 ))
+  # lines that start with '-' are details of the validation
+  if [ "${line:0:1}" == "-" ]
+  then
+    # replace the '-' with ' ' for lines after the first one
+    if [ "$current_override_width" -eq 0 ]
+    then
+      line=" ${line:1}"
+    fi
+
+    # wrap long lines
+    while [ "${#line}" -gt "$max_line_length" ]
+    do
+      # find a space to break at
+      for (( i = max_line_length - 1; i > 0; i-- ))
+      do
+        if [ "${line:$i:1}" == " " ]
+        then
+          printf "%-${line_indent}s${line:0:$i}\n" ' '
+          skip_space=$(( i + 1 ))
+          # add some extra indent here
+          # (2 spaces to line up, 2 more to indent)
+          line="    ${line:$skip_space}"
+          #echo "'$line'"
+          break
+        fi
+      done
+      # 2 extra spaces to line up correctly
+      line_indent=$(( max_override_length + 1 ))
+    done
+    printf "%-${line_indent}s${line}\n" ' '
+
+    current_override_width=0
+    continue
+  fi
+
+  # other lines are the overrides
+  # (assuming these will not wrap)
+  echo ""
+  echo -n "$line"
+  current_override_width="${#line}"
+done
+
