@@ -1,0 +1,27 @@
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
+# Add an empty override commit
+
+# display the overrides so I can choose one
+@@SCRIPT-DIR@@/display-overrides
+
+echo ""
+echo -n "Which override? "
+read -r override
+if [ -z "$override" ]
+then
+  echo "(no override given)"
+  exit 1
+fi
+
+# what's the reason?
+echo -n "What reason for the override? "
+read -r reason
+if [ -z "$reason" ]
+then
+  echo "(no reason given)"
+  exit 1
+fi
+
+@wait-for-command git commit --allow-empty -m "$override - $reason"
