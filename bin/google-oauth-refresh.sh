@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env badash
+# shellcheck shell=bash
 
 # script to refresh an OAuth access token for a Google API
 
@@ -13,41 +14,47 @@ usage=$(cat <<END_USAGE
 
 
 Usage:
-  $0 <client_id> <client_secret> <refresh_token>
+  $0 <keychain-credential-id> <keychain-refresh-id>
+
+  Note:
+
+    <keychain-credential-id> is something like 'spreadsheet-client-creds'
+
+    <keychain-refresh-id> is something like 'spreadsheet-client-refresh'
 END_USAGE
 )
 
 # Arguments:
-client_id="${1:?"No client_id given $usage"}"
-client_secret="${2:?"No client_secret given $usage"}"
-refresh_token="${3:?"No refresh_token given $usage"}"
+# TODO: prompt for these instead of failing?
+credential_id="${1:?"No keychain-credential-id given $usage"}"
+refresh_id="${2:?"No keychain-refresh-id given $usage"}"
+
+# get things this needs from the keychain
+client_creds="$(security find-generic-password -ga "$credential_id" -w 2>&1)"
+@exit-on-error 'Error: Could not get client credentials:' 'echo "  $client_creds"'
+
+refresh_token="$(security find-generic-password -ga "$refresh_id" -w 2>&1)"
+@exit-on-error 'Error: Could not get refresh token:' 'echo "  $refresh_token"'
+
+# split the stored client creds on the ':'
+IFS=: read -r client_id client_secret <<< "$client_creds"
+if [ -z "$client_id" ] || [ -z "$client_secret" ]
+then
+  @echo-err "Could not get client ID and secret from the keychain"
+  @echo-err "Check that the '$credential_id' entry is formatted as <client-id>:<client-secret>"
+  exit 1
+fi
 
 # various constants
 GOOGLE_DISCOVERY_DOC="https://accounts.google.com/.well-known/openid-configuration"
 
-# colors
-COLOR_RESET='\033[0m'
-COLOR_FG_RED='\033[0;31m'
-
-# error functions
-echo_err() {
-  echo -e "${COLOR_FG_RED}$*${COLOR_RESET}" >&2
-}
-exit_on_error() {
-  if [ "$?" -ne 0 ]; then
-    exit_code=$?
-    echo_err "$1"
-    echo_err "$(< "$error_file")"
-    exit $exit_code
-  fi
-}
-
 # check requirements
+# TODO: use the badash equivalent
 requirements=( curl jq mktemp )
 all_reqs_ok="true"
 for executable in "${requirements[@]}"; do
   if [ ! "$(command -v "$executable")" ]; then
-    echo_err "'$executable' is required but not installed"
+    @echo-err "'$executable' is required but not installed"
     all_reqs_ok="false"
   fi
 done
@@ -64,9 +71,11 @@ trap finish EXIT
 
 
 discovery_doc_json="$(curl "$GOOGLE_DISCOVERY_DOC" 2>"$error_file")"
-exit_on_error "Failed to download discovery doc $GOOGLE_DISCOVERY_DOC"
+@exit-on-error 'Failed to download discovery doc $GOOGLE_DISCOVERY_DOC'
 
 token_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.token_endpoint')"
+
+echo "Refreshing access token..."
 
 # refresh the access token
 curl \
@@ -77,7 +86,7 @@ curl \
   --data-urlencode "client_secret=$client_secret" \
   --data-urlencode "refresh_token=$refresh_token" \
   --data-urlencode "grant_type=refresh_token" \
-  "$token_endpoint" 2>"$error_file" | jq --compact-output '.'
+  "$token_endpoint" 2>"$error_file" | jq '.'
 
 # should return something like this:
 #  {
@@ -87,5 +96,5 @@ curl \
 #    "scope": "https://www.googleapis.com/auth/gmail.readonly"
 #  }
 
-exit_on_error "Error refreshing access token"
+@exit-on-error "Error refreshing access token"
 

@@ -21,34 +21,34 @@ usage=$(cat <<END_USAGE
 
 
 Usage:
-  $0 <keychain-password-id> <scope> <redirect-port>
+  $0 <keychain-credential-id> <scope> <redirect-port>
 
   Note:
-    scope should be something like auth/spreadsheets.readonly
+
+    <keychain-credential-id> is something like 'spreadsheet-client-creds'
+
+    <scope> should be something like auth/spreadsheets.readonly
 END_USAGE
 )
 
 # Arguments:
 # TODO: prompt for these instead of failing?
-password_id="${1:?"No keychain-password-id given $usage"}"
+credential_id="${1:?"No keychain-credential-id given $usage"}"
 scope="${2:?"No scope given $usage"}"
 redirect_port="${3:?"No redirect-port given $usage"}"
 
-# get things this needs from the entry in the keychain
-client_creds="$(security find-generic-password -ga "$password_id" -w 2>&1)"
+# get things this needs from the keychain
+client_creds="$(security find-generic-password -ga "$credential_id" -w 2>&1)"
 @exit-on-error 'Error: Could not get client credentials:' 'echo "  $client_creds"'
-#echo "client creds: '$client_creds'"
 
 # split that on the ':'
 IFS=: read -r client_id client_secret <<< "$client_creds"
 if [ -z "$client_id" ] || [ -z "$client_secret" ]
 then
   @echo-err "Could not get client ID and secret from the keychain"
-  @echo-err "Check that the '$password_id' entry is formatted as <client-id>:<client-secret>"
+  @echo-err "Check that the '$credential_id' entry is formatted as <client-id>:<client-secret>"
   exit 1
 fi
-#echo "client id: '$client_id'"
-#echo "client secret: '$client_secret'"
 
 # various constants
 GOOGLE_DISCOVERY_DOC="https://accounts.google.com/.well-known/openid-configuration"
@@ -60,7 +60,6 @@ OS="$(uname)"
 
 # colors
 COLOR_RESET='\033[0m'
-COLOR_FG_RED='\033[0;31m'
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 
 # check requirements
@@ -92,7 +91,7 @@ trap finish EXIT
 
 
 discovery_doc_json="$(curl "$GOOGLE_DISCOVERY_DOC" 2>"$error_file")"
-@exit-on-error "Failed to download discovery doc $GOOGLE_DISCOVERY_DOC"
+@exit-on-error 'Failed to download discovery doc $GOOGLE_DISCOVERY_DOC'
 
 authorization_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.authorization_endpoint')"
 token_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.token_endpoint')"
