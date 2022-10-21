@@ -48,19 +48,22 @@ shift $((OPTIND-1))
 
 if in_git_repo
 then
-  # all branches, not including master
-  # TODO: also account for 'main'
-  all_branches="$(all_git_branches | sed '/^master$/d' | sort)"
+  # TODO: make this a badash function
+  default_branch="$( if git show-ref --verify --quiet refs/heads/main; then echo "main"; elif git show-ref --verify --quiet refs/heads/master; then echo "master"; else echo ""; fi; )"
+  if [ -z "$default_branch" ]; then @echo-err "Error: default branch is not 'main' or 'master'"; exit 1; fi
+
+  # all branches, not including the default
+  all_branches="$(all_git_branches | sed "/^$default_branch$/d" | sort)"
   if [ -z "$all_branches" ]
   then
-    echo_info "master is the only branch, nothing to delete"
+    echo_info "$default_branch is the only branch, nothing to delete"
     exit 0
   fi
 
   # all branches that have been merged (strip out leading asterisk and whitespace
   mapfile -t all_branches <<< "$all_branches"
   num_branches="${#all_branches[@]}"
-  mapfile -t all_merged <<< "$(git branch --merged master | sed -e 's/^\* //' -e 's/^  //')"
+  mapfile -t all_merged <<< "$(git branch --merged "$default_branch" | sed -e 's/^\* //' -e 's/^  //')"
   num_merged="${#all_merged[@]}"
 
   # construct an associative array to display if branches are merged
