@@ -4,9 +4,7 @@
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_BOLD_GREEN='\033[1;32m'
-COLOR_FG_GREEN='\033[0;32m'
 COLOR_FG_RED='\033[0;31m'
-COLOR_FG_YELLOW='\033[0;33m'
 COLOR_RESET='\033[0m'
 
 COLUMNS="$(if [ -z "$TERM" ] || [ "$TERM" = "dumb" ] || [ "$TERM" = "unknown" ]; then echo 80; else tput cols; fi)"
@@ -147,8 +145,45 @@ do
   fi
   printf "\r%-${total_length}s\r" ' '
 done
-printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} setup $total_links scripts: symlinked $linked, aliased $aliased\n"
+printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} setup scripts ($total_links): symlinked $linked, aliased $aliased\n"
 
-# TODO: remove symlinks that are no longer used
+
+# remove symlinks to any scripts that no longer exist
+bin_entries_to_process=( "$bin_dir"/* )
+total_links="${#bin_entries_to_process[@]}"
+current=0
+kept=0
+removed=0
+
+for bin_entry in "${bin_entries_to_process[@]}"
+do
+  (( current++ ))
+  # delete up to the last slash
+  script="${bin_entry##*/}"
+  # this is where the script exists in this repo
+  repo_path="$installed_bin_dir/$script"
+
+  echo -e -n "\r ($current/$total_links) $script "
+  total_length=$(( 2 + 3 + 1 + 3 + 2 + ${#script} + 1 ))
+
+  # if this is a link, and it points to this repo, check if that bin still exists
+  if [ -L "$bin_entry" ]
+  then
+    link_target="$(readlink "$bin_entry")"
+    if [ "$link_target" == "$repo_path" ]
+    then
+      if ! [ -f "$repo_path" ]
+      then
+        # target doesn't exist, remove the link
+        (( removed++ ))
+        rm "$bin_entry"
+      else
+        (( kept++ ))
+      fi
+    fi
+  fi
+  printf "\r%-${total_length}s\r" ' '
+done
+printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} check dead links ($total_links): kept $kept, removed $removed\n"
 
 cd "$install_dir" && _wait-for-command yarn install
