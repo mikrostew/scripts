@@ -9,12 +9,7 @@ COLOR_FG_RED='\033[0;31m'
 COLOR_FG_YELLOW='\033[0;33m'
 COLOR_RESET='\033[0m'
 
-if [ -z "$TERM" ] || [ "$TERM" = "dumb" ] || [ "$TERM" = "unknown" ]
-then
-  COLUMNS=80
-else
-  COLUMNS="$(tput cols)"
-fi
+COLUMNS="$(if [ -z "$TERM" ] || [ "$TERM" = "dumb" ] || [ "$TERM" = "unknown" ]; then echo 80; else tput cols; fi)"
 
 # show a busy spinner while command is running
 # and only show output if there is an error
