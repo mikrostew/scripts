@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 # Paste chars from the clipboard using system event keystrokes
 
-# initial delay by using `say`, so it doesn't catch any of the keyboard shortcut chars I'm holding down for this
-# (otherwise they will occasionally be part of what is initially pasted, which results in random behavior)
-
 # slight pause every 30 characters so this is fast but not super fast
+
+# initial delay to this doesn't capture the keyboard shortcut chars
+sleep 0.3
 
 osascript <<EOScript
 set charcount to 0
-say "paste"
 tell application "System Events"
   repeat with char in the characters of (the clipboard)
     keystroke char
