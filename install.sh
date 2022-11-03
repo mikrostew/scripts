@@ -2,7 +2,6 @@
 
 # install this repo and symlink scripts into the PATH
 
-COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -63,6 +62,51 @@ _wait-for-command() {
   return "$exit_code"
 }
 
+# show an animated prompt while waiting for input
+_prompt-for-input() {
+  # arguments:
+  # - prompt string
+  # - variable to store user input
+  prompt_str="$1"
+  read_var_name="$2"
+
+  local prompt_animation=( ">  " " > " "  >" " > " )
+  local num_frames=${#prompt_animation[@]}
+
+  # echo the prompt
+  printf "\r%s %s " "${prompt_animation[0]}" "$prompt_str"
+
+  # start the animation running async, and get its PID
+  (
+    i=0
+    while :
+    do
+      printf "\r%s %s " "${prompt_animation[$i]}" "$prompt_str" >&2
+      sleep 0.2
+      i=$(( (i + 1) % num_frames ))
+    done
+  ) & disown
+  local animation_pid="$!"
+
+  # kill the animation process for Ctrl-C, cleanup, and return failure
+  trap "kill $animation_pid && echo "" && return 1" INT TERM
+
+  # read input from the user
+  read -r "${read_var_name?}"
+
+  # clear the trap, and stop the spinner
+  trap - INT TERM
+  kill "$animation_pid"
+
+  # sometimes a duplicate line will be printed
+  # (race condition with killing the spawned process)
+  # so clean that up if it happens
+  printf "\r    %-${#total_length}s\r" ' ' >&2
+
+  return 0
+}
+
+
 # TODO: input options
 #  - update (the install dir)
 #  - prefix dir
@@ -86,8 +130,8 @@ bin_dir="$prefix_dir/bin"
 
 if [ -d "$install_dir" ]
 then
-  echo -e -n "${COLOR_FG_BOLD_BLUE}Dir '$install_dir' exists, overwrite? [y/N]${COLOR_RESET} "
-  read -r overwrite_confirm
+  _prompt-for-input "Dir '$install_dir' exists, overwrite? [y/N]" overwrite_confirm
+  if [ "$?" -ne 0 ]; then exit; fi # got Ctrl-C
   if [ "$overwrite_confirm" == "Y" ] || [ "$overwrite_confirm" == "y" ]
   then
     _wait-for-command rm -rf "$install_dir"

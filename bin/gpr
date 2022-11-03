@@ -21,21 +21,18 @@ prompt-for-input() {
   prompt_str="$1"
   read_var_name="$2"
 
-  local prompt_animation=( ">  "
-                           " > "
-                           "  >"
-                           " > " )
+  local prompt_animation=( ">  " " > " "  >" " > " )
   local num_frames=${#prompt_animation[@]}
 
   # echo the prompt
-  printf "${prompt_animation[0]} $prompt_str "
+  printf "\r%s %s " "${prompt_animation[0]}" "$prompt_str"
 
   # start the animation running async, and get its PID
   (
     i=0
     while :
     do
-      printf "\r${prompt_animation[$i]} $prompt_str " >&2
+      printf "\r%s %s " "${prompt_animation[$i]}" "$prompt_str" >&2
       sleep 0.2
       i=$(( (i + 1) % num_frames ))
     done
@@ -46,11 +43,16 @@ prompt-for-input() {
   trap "kill $animation_pid && echo "" && return 1" INT TERM
 
   # read input from the user
-  read -r "$read_var_name"
+  read -r "${read_var_name?}"
 
   # clear the trap, and stop the spinner
   trap - INT TERM
   kill "$animation_pid"
+
+  # sometimes a duplicate line will be printed
+  # (race condition with killing the spawned process)
+  # so clean that up if it happens
+  printf "\r    %-${#total_length}s\r" ' ' >&2
 
   return 0
 }
