@@ -1,20 +1,30 @@
 #!/usr/bin/env bash
 # Open the oncall info pages in the browser
 
-# backlog grooming
-open 'https://docs.google.com/document/d/1FCXglaAH7DFS7NGQGcD9q6XyaBySRlxWIREwUIp90TM/edit'
+host_name="$(hostname)"
+if [[ "$host_name" =~ mistewar-mn ]]
+then
+  # open a new Chrome window for this
+  # (clear clipboard so this doesn't open any URL that happens to be there)
+  echo '' | pbcopy
+  new-chrome
 
-# oncall logs
-open 'https://docs.google.com/document/d/1-r-ZEMDNTtJgpbLExl2JC69ErBfxNI6JhjaHVnIg6ac/edit'
+  # work laptop
+  oncall_file="/Users/mistewar/Sync/oncall-links.txt"
+  while read -r line
+  do
+    # skip empty lines
+    if [ -z "$line" ]; then continue; fi
 
-# oncall runbook
-open 'https://docs.google.com/document/d/1wHlGDt6-I6BmU0uc520GhShPSVxZnwqV0FOC68nK9OI/edit'
+    # skip comments
+    if [ "${line:0:1}" == "#" ]; then continue; fi
 
-# FI-Web backlog
-open 'https://jira01.corp.linkedin.com:8443/secure/Dashboard.jspa?selectPageId=38130'
-
-# weekly email summary template
-open 'https://docs.google.com/document/d/17syn-SRRZjnig5tymhfYRDf3WoqFrANYXaGwXCB2-58/edit'
-
-# another playbook (will be migrated to main docs)
-open 'https://pages.linkedin.githubprivate.com/multiproduct/voyager-docs/pillars/infra/web/playbooks/oncall'
+    # this should be a URL to open
+    open "$line"
+    # so that things open in the right order
+    sleep 0.5
+  done <"$oncall_file"
+else
+  echo "Why are you running this on '$host_name'?"
+  exit 1
+fi
