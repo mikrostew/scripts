@@ -7,7 +7,7 @@
 //  - Go to the Console
 //  - Copy and paste the script below, and hit enter to run it
 
-// when I ran this for the 492 accounts I was following, it took about 18 minutes
+// (when I ran this for the 492 accounts I was following, it took about 18 minutes)
 
 (async () => {
   function sleep(millis) {
