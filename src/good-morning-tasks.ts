@@ -421,9 +421,6 @@ const config: Config = {
 
     group('Open Pages', laptopMachines, [
       getOpenTabs(),
-      group('Open pages - work and home', laptopMachines, [
-        openInTab('Volta pnpm support PR', 'https://github.com/volta-cli/volta/pull/1273'),
-      ]),
       group(
         'Open pages - work',
         ['workLaptop'],
