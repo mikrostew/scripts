@@ -31,9 +31,11 @@ refresh_id="${2:?"No keychain-refresh-id given $usage"}"
 
 # get things this needs from the keychain
 client_creds="$(security find-generic-password -ga "$credential_id" -w 2>&1)"
+# shellcheck disable=SC2016
 @exit-on-error 'Error: Could not get client credentials:' 'echo "  $client_creds"'
 
 refresh_token="$(security find-generic-password -ga "$refresh_id" -w 2>&1)"
+# shellcheck disable=SC2016
 @exit-on-error 'Error: Could not get refresh token:' 'echo "  $refresh_token"'
 
 # split the stored client creds on the ':'
@@ -71,7 +73,7 @@ trap finish EXIT
 
 
 discovery_doc_json="$(curl "$GOOGLE_DISCOVERY_DOC" 2>"$error_file")"
-@exit-on-error 'Failed to download discovery doc $GOOGLE_DISCOVERY_DOC'
+@exit-on-error "Failed to download discovery doc $GOOGLE_DISCOVERY_DOC"
 
 token_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.token_endpoint')"
 

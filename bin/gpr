@@ -52,7 +52,7 @@ prompt-for-input() {
   # sometimes a duplicate line will be printed
   # (race condition with killing the spawned process)
   # so clean that up if it happens
-  printf "\r    %-${#total_length}s\r" ' ' >&2
+  printf "\r    %-${#prompt_str}s\r" ' ' >&2
 
   return 0
 }
@@ -78,6 +78,7 @@ then
   echo -e "${COLOR_FG_BOLD_YELLOW}$uncommitted_changes${COLOR_RESET}"
   echo ""
   prompt-for-input "Want to stash-rebase-pop? [y/N]" stash_confirm
+  # shellcheck disable=SC2154
   if [ "$stash_confirm" == "Y" ] || [ "$stash_confirm" == "y" ]
   then
     should_stash="y"

@@ -39,6 +39,7 @@ redirect_port="${3:?"No redirect-port given $usage"}"
 
 # get things this needs from the keychain
 client_creds="$(security find-generic-password -ga "$credential_id" -w 2>&1)"
+# shellcheck disable=SC2016
 @exit-on-error 'Error: Could not get client credentials:' 'echo "  $client_creds"'
 
 # split that on the ':'
@@ -91,7 +92,7 @@ trap finish EXIT
 
 
 discovery_doc_json="$(curl "$GOOGLE_DISCOVERY_DOC" 2>"$error_file")"
-@exit-on-error 'Failed to download discovery doc $GOOGLE_DISCOVERY_DOC'
+@exit-on-error "Failed to download discovery doc $GOOGLE_DISCOVERY_DOC"
 
 authorization_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.authorization_endpoint')"
 token_endpoint="$(echo "$discovery_doc_json" | jq --raw-output '.token_endpoint')"
@@ -141,7 +142,7 @@ echo -e "${COLOR_FG_BOLD_BLUE}$authorization_url${COLOR_RESET}"
 echo "Waiting for approval..."
 
 # capture the code from the redirect (since it's going to the local machine):
-redirect_request="$(echo -en "$redirect_page" | nc -l $redirect_port 2>"$error_file")"
+redirect_request="$(echo -en "$redirect_page" | nc -l "$redirect_port" 2>"$error_file")"
 # which returns something like:
 #  GET /?code=4/AACaTSd7...4D3mpI1Eo HTTP/1.1
 #  Host: 127.0.0.1:1234
