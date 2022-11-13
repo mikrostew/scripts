@@ -10,6 +10,10 @@ COLOR_RESET='\033[0m'
 
 COLUMNS="$(if [ -z "$TERM" ] || [ "$TERM" = "dumb" ] || [ "$TERM" = "unknown" ]; then echo 80; else tput cols; fi)"
 
+# figure out the directory where this script is located
+SCRIPT_FILE="$( [ -L "$0" ] && readlink "$0" || echo "$0" )"
+SCRIPT_DIR="$(cd -- "$(dirname -- "$SCRIPT_FILE")" &>/dev/null && pwd)"
+
 # show a busy spinner while command is running
 # and only show output if there is an error
 _wait-for-command() {
@@ -113,13 +117,21 @@ _exit-on-error() {
   if [ "$?" -ne 0 ]; then echo "$1"; exit 1; fi
 }
 
-
-# TODO: make this configurable
+# defaults
+# (TODO: make these configurable, if it makes sense)
+# where to install these scripts
 prefix_dir=/usr/local
+# install from a local checkout of the repo instead of github
+local_install="no"
 
+# script options
 while [ "$#" -gt 0 ]
 do
   case "$1" in
+    --local)
+      local_install="yes"
+      shift
+      ;;
     *)
       echo "Unknown argument '$1'"
       exit 1
@@ -135,20 +147,26 @@ bin_dir="$prefix_dir/bin"
 
 if [ -d "$install_dir" ]
 then
-  _prompt-for-input "Dir '$install_dir' exists, overwrite? [y/N]" overwrite_confirm
+  _prompt-for-input "Dir '$install_dir' exists - replace it? [y/N]" replace_confirm
   _exit-on-error "(not installing)" # got Ctrl-C
 
-  if [ "$overwrite_confirm" == "Y" ] || [ "$overwrite_confirm" == "y" ]
+  if [ "$replace_confirm" == "Y" ] || [ "$replace_confirm" == "y" ]
   then
     # dir exists, so clone to temp dir first, before deleting original dir
     # (probably good enough to use PID of this script to make a unique dir entry)
     temp_checkout_dir="$install_dir-$$"
-    _wait-for-command git clone "$REPO_URL" "$temp_checkout_dir"
-    _exit-on-error "could not clone the repo"
+    if [ "$local_install" == "yes" ]
+    then
+      _wait-for-command cp -R "$SCRIPT_DIR" "$temp_checkout_dir"
+      _exit-on-error "Failed: could not copy the repo from '$SCRIPT_DIR' to '$temp_checkout_dir'"
+    else
+      _wait-for-command git clone "$REPO_URL" "$temp_checkout_dir"
+      _exit-on-error "Failed: could not clone the repo to '$temp_checkout_dir'"
+    fi
     _wait-for-command rm -rf "$install_dir"
-    _exit-on-error "could not remove the existing dir"
+    _exit-on-error "Failed: could not remove the existing dir '$install_dir'"
     _wait-for-command mv "$temp_checkout_dir" "$install_dir"
-    _exit-on-error "could not rename the temp dir"
+    _exit-on-error "Failed: could not rename the temp dir from '$temp_checkout_dir' --> '$install_dir'"
   else
     echo "(not installing)"
     exit 1
@@ -156,7 +174,7 @@ then
 else
   # the dir doesn't exist, so clone it directly there
   _wait-for-command git clone "$REPO_URL" "$install_dir"
-  _exit-on-error "could not clone the repo"
+  _exit-on-error "Failed: could not clone the repo to '$temp_checkout_dir'"
 fi
 
 # TODO: convert these into functions
