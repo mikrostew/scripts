@@ -193,6 +193,7 @@ printf "\r ${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} setup scripts ($total_links):
 
 
 # remove symlinks to any scripts that no longer exist
+# (prompting before deleting)
 bin_entries_to_process=( "$bin_dir"/* )
 total_links="${#bin_entries_to_process[@]}"
 current=0
@@ -218,9 +219,17 @@ do
     then
       if ! [ -f "$repo_path" ]
       then
-        # target doesn't exist, remove the link
-        (( removed++ ))
-        rm "$bin_entry"
+        # target doesn't exist, prompt to remove the link
+        _prompt-for-input "Found stale link '$bin_entry' that no longer exists in scripts - remove it? [Y/n]" delete_confirm
+        if [ "$?" -ne 0 ]; then exit; fi # got Ctrl-C
+        if [ "$delete_confirm" == "Y" ] || [ "$delete_confirm" == "y" ] || [ -z "$delete_confirm" ]
+        then
+          _wait-for-command rm "$bin_entry"
+          (( removed++ ))
+        else
+          echo "(not removing)"
+          (( kept++ ))
+        fi
       else
         (( kept++ ))
       fi
