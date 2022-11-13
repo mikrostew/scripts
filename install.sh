@@ -2,6 +2,8 @@
 
 # install this repo and symlink scripts into the PATH
 
+REPO_URL="https://github.com/mikrostew/scripts.git"
+
 COLOR_FG_BOLD_GREEN='\033[1;32m'
 COLOR_FG_RED='\033[0;31m'
 COLOR_RESET='\033[0m'
@@ -106,10 +108,13 @@ _prompt-for-input() {
   return 0
 }
 
+# if the previous command returned non-zero, exit after printing a message
+_exit-on-error() {
+  if [ "$?" -ne 0 ]; then echo "$1"; exit 1; fi
+}
 
-# TODO: input options
-#  - update (the install dir)
-#  - prefix dir
+
+# TODO: make this configurable
 prefix_dir=/usr/local
 
 while [ "$#" -gt 0 ]
@@ -131,15 +136,30 @@ bin_dir="$prefix_dir/bin"
 if [ -d "$install_dir" ]
 then
   _prompt-for-input "Dir '$install_dir' exists, overwrite? [y/N]" overwrite_confirm
-  if [ "$?" -ne 0 ]; then exit; fi # got Ctrl-C
+  _exit-on-error "(not installing)" # got Ctrl-C
+
   if [ "$overwrite_confirm" == "Y" ] || [ "$overwrite_confirm" == "y" ]
   then
+    # dir exists, so clone to temp dir first, before deleting original dir
+    # (probably good enough to use PID of this script to make a unique dir entry)
+    temp_checkout_dir="$install_dir-$$"
+    _wait-for-command git clone "$REPO_URL" "$temp_checkout_dir"
+    _exit-on-error "could not clone the repo"
     _wait-for-command rm -rf "$install_dir"
-    _wait-for-command git clone https://github.com/mikrostew/scripts.git "$install_dir"
+    _exit-on-error "could not remove the existing dir"
+    _wait-for-command mv "$temp_checkout_dir" "$install_dir"
+    _exit-on-error "could not rename the temp dir"
+  else
+    echo "(not installing)"
+    exit 1
   fi
 else
-  _wait-for-command git clone https://github.com/mikrostew/scripts.git "$install_dir"
+  # the dir doesn't exist, so clone it directly there
+  _wait-for-command git clone "$REPO_URL" "$install_dir"
+  _exit-on-error "could not clone the repo"
 fi
+
+# TODO: convert these into functions
 
 linked=0
 aliased=0
