@@ -1,7 +1,7 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-# [git] Check if this branch is OK to merge, or it there are any conflicts with master (Git Merge Check)
+# [git] Check if this branch is OK to merge, or it there are any conflicts with main/master (Git Merge Check)
 # (adapted from https://stackoverflow.com/questions/501407/is-there-a-git-merge-dry-run-option)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
@@ -21,7 +21,7 @@ not_on_git_branch ()
   [ "$(current_git_branch)" == "$1" ] && @echo-err ">_<  Doesn't work on branch '$1'" && return 1 || return 0
 }
 show_help_msg() {
-  echo "gmc - [git] Check if this branch is OK to merge, or it there are any conflicts with master (Git Merge Check)"
+  echo "gmc - [git] Check if this branch is OK to merge, or it there are any conflicts with main/master (Git Merge Check)"
   echo 'Usage: gmc [options]'
   echo ''
   echo 'Options:'
@@ -49,55 +49,60 @@ shift $((OPTIND-1))
 
 # What I've already done that worked:
 #
-# $ git merge-base master toml-ordering
+# $ git merge-base main toml-ordering
 # ccec11efe8a4c171178366a8d8f8531cf4e77389
 #
-# $ git merge-tree ccec11efe8a4c171178366a8d8f8531cf4e77389 master toml-ordering
+# $ git merge-tree ccec11efe8a4c171178366a8d8f8531cf4e77389 main toml-ordering
 # (spews out a bunch of stuff)
 
-if in_git_repo && not_on_git_branch 'master'
+if in_git_repo
 then
-  branch_name="$(current_git_branch)"
+  @git-default-branch default_branch
 
-  merge_base="$(git merge-base master "$branch_name")"
-  # shellcheck disable=SC2016
-  @exit-on-error 'Error running git merge-base' 'echo "Output was: $merge_base"'
+  if not_on_git_branch "$default_branch"
+  then
+    branch_name="$(current_git_branch)"
 
-  merge_tree_output="$(git merge-tree "$merge_base" master "$branch_name")"
-  # shellcheck disable=SC2016
-  @exit-on-error 'Error running git merge-tree' 'echo "Output was: $merge_tree_output"'
+    merge_base="$(git merge-base "$default_branch" "$branch_name")"
+    # shellcheck disable=SC2016
+    @exit-on-error 'Error running git merge-base' 'echo "Output was: $merge_base"'
 
-  # colorize the printout to highlight the conflict lines
+    merge_tree_output="$(git merge-tree "$merge_base" "$default_branch" "$branch_name")"
+    # shellcheck disable=SC2016
+    @exit-on-error 'Error running git merge-tree' 'echo "Output was: $merge_tree_output"'
 
-  # have to interpret the color codes before using them in sed
-  blue="$(echo -e "$COLOR_FG_BOLD_BLUE")"
-  red="$(echo -e "$COLOR_FG_BOLD_RED")"
-  reset="$(echo -e "$COLOR_RESET")"
+    # colorize the printout to highlight the conflict lines
 
-  sed -n '
-    /^changed in both$/ {
-      # print that out and read in the next line, which should be "base"
-      p; n
-      # print that out and read in the next line, which should be "our"
-      # which is the master branch, so include that
-      p; n
-      s/.*/'"$blue"'& (master)'"$reset"'/
-      # print that out and read in the next line, which should be "their"
-      # which is the current branch, so include that
-      p; n
-      s/.*/'"$red"'& ('"$branch_name"')'"$reset"'/
-      # add a newline, and print that out
-      G; p
-    }
-    /+<<<<<<< .our/,/+>>>>>>> .their/ {
-      # highlight in blue and annotate
-      /+<<<<<<< .our/ s/.*/'"$blue"'& (master)'"$reset"'/
-      # print out this delimiter in yellow
-      # highlight in red, annotate, and add a newline
-      /+>>>>>>> .their/ { s/.*/'"$red"'& ('"$branch_name"')'"$reset"'/; G; }
-      p
-    }
-  ' <<< "$merge_tree_output"
+    # have to interpret the color codes before using them in sed
+    blue="$(echo -e "$COLOR_FG_BOLD_BLUE")"
+    red="$(echo -e "$COLOR_FG_BOLD_RED")"
+    reset="$(echo -e "$COLOR_RESET")"
+
+    sed -n '
+      /^changed in both$/ {
+        # print that out and read in the next line, which should be "base"
+        p; n
+        # print that out and read in the next line, which should be "our"
+        # which is the default branch, so include that
+        p; n
+        s/.*/'"$blue"'& ($default_branch)'"$reset"'/
+        # print that out and read in the next line, which should be "their"
+        # which is the current branch, so include that
+        p; n
+        s/.*/'"$red"'& ('"$branch_name"')'"$reset"'/
+        # add a newline, and print that out
+        G; p
+      }
+      /+<<<<<<< .our/,/+>>>>>>> .their/ {
+        # highlight in blue and annotate
+        /+<<<<<<< .our/ s/.*/'"$blue"'& ($default_branch)'"$reset"'/
+        # print out this delimiter in yellow
+        # highlight in red, annotate, and add a newline
+        /+>>>>>>> .their/ { s/.*/'"$red"'& ('"$branch_name"')'"$reset"'/; G; }
+        p
+      }
+    ' <<< "$merge_tree_output"
+  fi
 fi
 
 echo "coming soon..."

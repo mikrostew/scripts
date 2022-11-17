@@ -1,7 +1,7 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-# [git] Rebase current branch against main/master (Git Rebase Against Main/Master)
+# [git] Rebase current branch against default (Git Rebase Against Main/Master)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_RESET='\033[0m'
@@ -36,11 +36,7 @@ then
   branch_name=$(current_git_branch)
   need_to_remove_orig_files='no'
 
-  # what is the default branch?
-  # TODO: make this a badash function
-  if git show-ref --verify --quiet refs/heads/main; then default_branch="main"
-  elif git show-ref --verify --quiet refs/heads/master; then default_branch="master"
-  else echo "Error: default branch is not 'main' or 'master'"; exit 1; fi
+  @git-default-branch default_branch
 
   if not_on_git_branch "$default_branch"
   then

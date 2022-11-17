@@ -171,18 +171,20 @@ then
   squash-branch "$commit_msg" "$commit_msg_extra_line"
   @exit-on-error "Dang it! squashing failed (should probably do some kind of recovery here...)"
 
-  if not_on_git_branch 'master'
+  @git-default-branch default_branch
+
+  if not_on_git_branch "$default_branch"
   then
-    # rebase current branch against master
+    # rebase current branch against default
     gram
-    @exit-on-error "Failed to rebase against master"
-    # merge into master
+    @exit-on-error "Failed to rebase against $default_branch"
+    # merge into default
     gmm
-    @exit-on-error "Merge into master failed - good luck"
+    @exit-on-error "Merge into $default_branch failed - good luck"
   fi
 
   gpr
-  @exit-on-error "Failed to pull and rebase master"
+  @exit-on-error "Failed to pull and rebase $default_branch"
 
   # apply the RB to the commit
   # if this fails, means I don't have the necessary ACLs (for git submit repos)
@@ -196,7 +198,7 @@ then
   # (I _think_ it's adding the config before amending the commit, so the config is gone)
   # TODO: I should check if this exists and write it if necessary
   # add the config for the reviewid
-  if ! @wait-for-command git config branch.master.reviewid "$review_id"
+  if ! @wait-for-command git config branch.$default_branch.reviewid "$review_id"
   then
     @wait-for-keypress 'That ^^ failed. Try adding it to the config manually, then press any key to continue...'
   fi
@@ -224,7 +226,7 @@ then
       exit 1
     fi
     echo_success_banner
-    echo_info "Pulling changes into master..."
+    echo_info "Pulling changes into $default_branch..."
     # rebase to pick up the change
     gpr
     # and done!

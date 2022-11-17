@@ -1,7 +1,7 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-# [git] Merge current branch into master (Git Merge into Master)
+# [git] Merge current branch into default (Git Merge into Main/Master)
 
 current_git_branch ()
 {
@@ -48,21 +48,24 @@ do
 done
 shift $((OPTIND-1))
 
-# TODO: also handle main
-if in_git_repo && not_on_git_branch 'master' && no_uncommitted_changes
+if in_git_repo
 then
-  branch_name=$(current_git_branch)
-  if @wait-for-command git checkout master
+  @git-default-branch default_branch
+  if not_on_git_branch "$default_branch" && no_uncommitted_changes
   then
-    if @wait-for-command git merge "$branch_name"
+    branch_name=$(current_git_branch)
+    if @wait-for-command git checkout "$default_branch"
     then
-      echo "Merged into master branch"
-      exit
+      if @wait-for-command git merge "$branch_name"
+      then
+        echo "Merged into $default_branch branch"
+        exit
+      fi
     fi
-  fi
 
-  # error recovery to fix merge conflicts
-  @echo-err "Dang it! merge failed - good luck"
-  @wait-for-keypress "Press any key to start merge resolution... "
-  gmt
+    # error recovery to fix merge conflicts
+    @echo-err "Dang it! merge failed - good luck"
+    @wait-for-keypress "Press any key to start merge resolution... "
+    gmt
+  fi
 fi

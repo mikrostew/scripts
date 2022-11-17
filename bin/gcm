@@ -12,10 +12,7 @@ no_uncommitted_changes() {
 
 if in_git_repo && no_uncommitted_changes
 then
-  # what is the default branch?
-  # TODO: make this a badash function
-  default_branch="$( if git show-ref --verify --quiet refs/heads/main; then echo "main"; elif git show-ref --verify --quiet refs/heads/master; then echo "master"; else echo ""; fi; )"
-  if [ -z "$default_branch" ]; then @echo-err "Error: default branch is not 'main' or 'master'"; exit 1; fi
-
+  # figure out the default branch, and try to check it out
+  @git-default-branch default_branch
   @wait-for-command git checkout "$default_branch"
 fi

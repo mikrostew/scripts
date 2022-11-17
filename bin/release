@@ -21,19 +21,21 @@ echo_info()
 in_git_repo() {
   git status >/dev/null && return 0 || @echo-err "Not in git repo" && return 1
 }
-on_main_branch() {
+on_default_branch() {
+  @git-default-branch default_branch
+
   current_branch="$(current_git_branch)"
-  if [ "$current_branch" == "main" ] || [ "$current_branch" == "master" ]
+  if [ "$current_branch" == "$default_branch" ]
   then
     return 0
   else
-    @echo-err ">_<  Must be on branch 'main' or 'master' for this"
+    @echo-err ">_<  Must be on branch '$default_branch' for this"
     return 1
   fi
 }
 
 
-if in_git_repo && on_main_branch
+if in_git_repo && on_default_branch
 then
   tag="${1:?Must include a version argument}"
   current_branch="$(current_git_branch)"

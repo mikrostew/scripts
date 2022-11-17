@@ -17,7 +17,7 @@ on_symbolic_ref ()
 }
 
 show_help_msg() {
-  echo "gfs - [git] Sync master branch to the upstream fork (Git Fork Sync)"
+  echo "gfs - [git] Sync main/master branch to the upstream fork (Git Fork Sync)"
   echo 'Usage: gfs [options]'
   echo ''
   echo 'Options:'

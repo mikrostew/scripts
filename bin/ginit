@@ -72,6 +72,7 @@ cd "$repo_name" || exit
 
 # initialize the repo for git
 @wait-for-command git init
+@git-default-branch default_branch
 
 # initialize the README with "# repo" at the top
 echo "# $repo_name" > README.md
@@ -129,7 +130,7 @@ then
   if [ -n "$repo_origin" ]
   then
     @wait-for-command git remote add origin "$repo_origin"
-    @wait-for-command git push -u origin master
+    @wait-for-command git push -u origin "$default_branch"
   fi
 else
   echo_info "(not committing)"

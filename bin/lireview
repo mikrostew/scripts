@@ -83,12 +83,14 @@ then
 else
   # create
 
+  @git-default-branch default_branch
+
   echo_info "No RB for this branch - creating one..."
   # if there is an argument supplied, use that for the description
-  if [ "$branch_name" = "master" ]
+  if [ "$branch_name" = "$default_branch" ]
   then
     # no input description, so use the commit message
-    @echo-err "Don't create a review from the 'master' branch, use a feature branch"
+    @echo-err "Don't create a review from the '$default_branch' branch, use a feature branch"
     exit 1
   fi
   if [ -z "$input_description" ]
