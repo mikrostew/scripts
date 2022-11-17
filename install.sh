@@ -174,7 +174,7 @@ then
 else
   # the dir doesn't exist, so clone it directly there
   _wait-for-command git clone "$REPO_URL" "$install_dir"
-  _exit-on-error "Failed: could not clone the repo to '$temp_checkout_dir'"
+  _exit-on-error "Failed: could not clone the repo to '$install_dir'"
 fi
 
 # TODO: convert these into functions
