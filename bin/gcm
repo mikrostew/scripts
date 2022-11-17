@@ -14,5 +14,6 @@ if in_git_repo && no_uncommitted_changes
 then
   # figure out the default branch, and try to check it out
   @git-default-branch default_branch
+  # shellcheck disable=SC2154
   @wait-for-command git checkout "$default_branch"
 fi

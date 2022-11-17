@@ -38,6 +38,7 @@ then
 
   @git-default-branch default_branch
 
+  # shellcheck disable=SC2154
   if not_on_git_branch "$default_branch"
   then
     # update main/master

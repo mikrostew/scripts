@@ -173,6 +173,7 @@ then
 
   @git-default-branch default_branch
 
+  # shellcheck disable=SC2154
   if not_on_git_branch "$default_branch"
   then
     # rebase current branch against default
@@ -198,7 +199,7 @@ then
   # (I _think_ it's adding the config before amending the commit, so the config is gone)
   # TODO: I should check if this exists and write it if necessary
   # add the config for the reviewid
-  if ! @wait-for-command git config branch.$default_branch.reviewid "$review_id"
+  if ! @wait-for-command git "config branch.$default_branch.reviewid" "$review_id"
   then
     @wait-for-keypress 'That ^^ failed. Try adding it to the config manually, then press any key to continue...'
   fi

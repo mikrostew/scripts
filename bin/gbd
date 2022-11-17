@@ -51,6 +51,7 @@ then
   @git-default-branch default_branch
 
   # all branches, not including the default
+  # shellcheck disable=SC2154
   all_branches="$(all_git_branches | sed "/^$default_branch$/d" | sort)"
   if [ -z "$all_branches" ]
   then

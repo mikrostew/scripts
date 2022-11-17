@@ -87,6 +87,7 @@ else
 
   echo_info "No RB for this branch - creating one..."
   # if there is an argument supplied, use that for the description
+  # shellcheck disable=SC2154
   if [ "$branch_name" = "$default_branch" ]
   then
     # no input description, so use the commit message

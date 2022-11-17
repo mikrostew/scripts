@@ -25,6 +25,7 @@ on_default_branch() {
   @git-default-branch default_branch
 
   current_branch="$(current_git_branch)"
+  # shellcheck disable=SC2154
   if [ "$current_branch" == "$default_branch" ]
   then
     return 0

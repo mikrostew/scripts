@@ -130,6 +130,7 @@ then
   if [ -n "$repo_origin" ]
   then
     @wait-for-command git remote add origin "$repo_origin"
+    # shellcheck disable=SC2154
     @wait-for-command git push -u origin "$default_branch"
   fi
 else

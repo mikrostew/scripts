@@ -59,6 +59,7 @@ if in_git_repo
 then
   @git-default-branch default_branch
 
+  # shellcheck disable=SC2154
   if not_on_git_branch "$default_branch"
   then
     branch_name="$(current_git_branch)"
@@ -85,7 +86,7 @@ then
         # print that out and read in the next line, which should be "our"
         # which is the default branch, so include that
         p; n
-        s/.*/'"$blue"'& ($default_branch)'"$reset"'/
+        s/.*/'"$blue"'& ('"$default_branch"')'"$reset"'/
         # print that out and read in the next line, which should be "their"
         # which is the current branch, so include that
         p; n
@@ -95,7 +96,7 @@ then
       }
       /+<<<<<<< .our/,/+>>>>>>> .their/ {
         # highlight in blue and annotate
-        /+<<<<<<< .our/ s/.*/'"$blue"'& ($default_branch)'"$reset"'/
+        /+<<<<<<< .our/ s/.*/'"$blue"'& ('"$default_branch"')'"$reset"'/
         # print out this delimiter in yellow
         # highlight in red, annotate, and add a newline
         /+>>>>>>> .their/ { s/.*/'"$red"'& ('"$branch_name"')'"$reset"'/; G; }

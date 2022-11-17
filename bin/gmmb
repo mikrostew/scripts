@@ -32,6 +32,7 @@ then
   # what is the default branch?
   @git-default-branch default_branch
 
+  # shellcheck disable=SC2154
   if not_on_git_branch "$default_branch"
   then
     # merge straight from origin, without updating local main/master
