@@ -8,16 +8,17 @@ COLOR_RESET='\033[0m'
 
 commit_diff_on_branch ()
 {
-    local git_rev_list_origin
-    git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)"
-    # shellcheck disable=SC2181
-    if [ "$?" -eq 0 ] && [ -n "$git_rev_list_origin" ]; then
-        local git_origin_arr
-        mapfile -t git_origin_arr <<< "$git_rev_list_origin"
-        echo "${git_origin_arr[0]}";
-    else
-        echo "0"
-    fi
+  local git_rev_list_origin
+  git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)"
+  # shellcheck disable=SC2181
+  if [ "$?" -eq 0 ] && [ -n "$git_rev_list_origin" ]; then
+    # split those two numbers by spaces, into an array
+    # shellcheck disable=SC2034
+    read -r left right <<< "$git_rev_list_origin"
+    echo "$left";
+  else
+    echo "0"
+  fi
 }
 current_git_branch ()
 {
@@ -70,6 +71,7 @@ if in_git_repo
 then
   @git-default-branch default_branch
 
+  # shellcheck disable=SC2154
   if on_git_branch "$default_branch"
   then
     num_commits="$(commit_diff_on_branch "$default_branch" "origin/$default_branch")"
