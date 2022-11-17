@@ -14,10 +14,6 @@ echo_info ()
 {
     echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
 }
-gmt ()
-{
-    @wait-for-command git mergetool --tool=opendiff
-}
 in_git_repo ()
 {
     git status > /dev/null && return 0 || @echo-err "Not in git repo" && return 1
@@ -53,7 +49,7 @@ then
       need_to_remove_orig_files='yes'
       # TODO: if I fix conflicts so there have been no changes, need to do `git rebase --skip` here
       # (have to detect that from the output of `git rebase --continue`)
-      gmt && git rebase --continue
+      @@SCRIPT-DIR@@/gmt && git rebase --continue
       # TODO: how to detect that I should abort? change the "press a key" prompt?
     done
 

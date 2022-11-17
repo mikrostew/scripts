@@ -7,10 +7,6 @@ current_git_branch ()
 {
   git rev-parse --abbrev-ref HEAD
 }
-gmt ()
-{
-  @wait-for-command git mergetool --tool=opendiff
-}
 in_git_repo ()
 {
   git status > /dev/null && return 0 || @echo-err "Not in git repo" && return 1
@@ -67,6 +63,6 @@ then
     # error recovery to fix merge conflicts
     @echo-err "Dang it! merge failed - good luck"
     @wait-for-keypress "Press any key to start merge resolution... "
-    gmt
+    @@SCRIPT-DIR@@/gmt
   fi
 fi
