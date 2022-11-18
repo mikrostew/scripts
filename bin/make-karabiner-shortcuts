@@ -2,7 +2,7 @@
 # shellcheck shell=bash
 
 # write config for the keyboard shortcuts and mappings I use in karabiner
-# TODO: this is pretty slow, and uses a lot of 'jq' - I should rewrite this in JS
+# TODO: this is pretty slow, and uses a lot of 'jq' - I should rewrite this in TS
 
 @uses-cmds jq shasum
 
@@ -73,6 +73,7 @@ done <<END_OF_ENTRIES
 { "key":"b", "description":"Close Apps for Meetings", "cmd":"$prefix/script-wrapper --exit-conf meeting-teardown" }
 { "key":"o", "description":"Open oncall links in browser", "cmd":"$prefix/open-oncall-pages" }
 { "key":"s", "description":"Type the shrug emoji ¯\\\_(ツ)_/¯", "cmd":"$prefix/shrug" }
+{ "key":"j", "description":"Type the shrug emoji ¯\\\_(ツ)_/¯ for Jira", "cmd":"$prefix/shrug-jira" }
 { "key":"t", "description":"New iTerm2 Window", "cmd":"$prefix/new-terminal" }
 { "key":"v", "description":"Paste using System Events", "cmd":"$prefix/mac-paste" }
 { "key":"z", "description":"Paste my Zoom meeting link", "cmd":"$prefix/zoom-link" }

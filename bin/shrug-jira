@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Paste the shrug emoji ¯\_(ツ)_/¯ for Jira
+# (have to do this in Text mode or it doesn't work)
+
+# initial delay to this doesn't capture the keyboard shortcut chars
+sleep 0.3
+
+# (saving and restoring any existing clipboard contents)
+osascript <<'EOF'
+set save_clipboard to get the clipboard
+set the clipboard to "¯&bsol;\\_(ツ)\\_/¯"
+tell application "System Events" to keystroke "v" using command down
+delay 0.3
+set the clipboard to save_clipboard
+EOF
