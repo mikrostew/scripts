@@ -1,0 +1,26 @@
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
+# [git] Update master branch to main, after doing that on Github
+
+in_git_repo () {
+  git status > /dev/null && return 0 || @echo-err "Not in git repo" && return 1
+}
+
+if in_git_repo
+then
+  # what is the default branch?
+  @git-default-branch default_branch
+  # shellcheck disable=SC2154
+  if [ "$default_branch" = "main" ]
+  then
+    @echo-err "'main' is already the default branch, nothing to do"
+    exit 1
+  fi
+
+  # These are the steps that github shows after renaming the default branch
+  @wait-for-command git branch -m master main
+  @wait-for-command git fetch origin
+  @wait-for-command git branch -u origin/main main
+  @wait-for-command git remote set-head origin -a
+fi
