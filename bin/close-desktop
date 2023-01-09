@@ -218,12 +218,11 @@ echo "Clicking close button for desktop $current_index, at $button_x,$button_y"
 # option up
 #osascript -e 'tell application "System Events" to key up option'
 
-exit
 
 ########################################
 # get out of Mission Control
 ########################################
 
 # then escape to get out of mission control
-osascript -e 'tell application "System Events" to key code 53'
+#osascript -e 'tell application "System Events" to key code 53'
 
