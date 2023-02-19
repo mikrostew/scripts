@@ -183,6 +183,7 @@ const config: Config = {
         'tidy-html5',
         'tmux',
         'tree',
+        'vlc',
         'watch',
         'wget',
         'youtube-dl',
