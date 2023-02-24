@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Show capacity for /System/Volumes/Data
+
+disk_space="$(df -h)"
+
+# header
+echo "$disk_space" | head -n 1
+# the only line I care about
+# (using the 2nd grep to highlight the percentage)
+echo "$disk_space" | grep "/System/Volumes/Data$" | grep --color -E '[0-9]+%'
