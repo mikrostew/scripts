@@ -58,7 +58,7 @@ export async function fileNameChecks(
     {
       match: (fname: string) =>
         fname
-          .split('-')
+          .split(/[-;]/)
           .some(
             (part) =>
               / (Of|A|And|To|The|For|Or|In|On|Out|Up) /.test(part.trim()) &&
