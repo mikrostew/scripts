@@ -406,9 +406,19 @@ const config: Config = {
         'yarn',
       ]),
       repo_update('badash', allMachines, '/usr/local/lib/badash/', ['pull&rebase']),
+      repo_update('scripts', allMachines, path.join(os.homedir(), 'src/gh/scripts'), [
+        'pull&rebase',
+        'push',
+      ]),
       repo_update('voyager-web', workMachines, path.join(os.homedir(), 'src/li/voyager-web'), [
         'pull&rebase',
       ]),
+      repo_update(
+        'ember4/voyager-web',
+        workMachines,
+        path.join(os.homedir(), 'src/ember4/voyager-web'),
+        ['pull&rebase']
+      ),
       repo_update('work blog', ['workLaptop'], path.join(os.homedir(), 'src/li/blog'), [
         'pull&rebase',
       ]),
