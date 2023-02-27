@@ -373,7 +373,7 @@ const config: Config = {
           return !(/^Name/.test(line) || /------/.test(line));
         });
       const numMachines = rdevMachines.length;
-      if (numMachines > 1) {
+      if (numMachines > 2) {
         throw new Error(
           `'rdev ls' output:\n${rdevLsStdout}\nYou have ${numMachines} rdev machines. Run 'rdev delete <machine>' to get rid of at least one of these: ${rdevMachines.join(
             ', '
