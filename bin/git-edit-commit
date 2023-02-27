@@ -1,0 +1,85 @@
+#!/usr/bin/env badash
+# shellcheck shell=bash
+
+# [git] Modify a previous commit on the current branch
+
+COLOR_FG_BOLD_BLUE='\033[1;34m'
+COLOR_RESET='\033[0m'
+
+based_on_local_or_origin ()
+{
+  local branch_name="$1"
+  local origin_default="$2"
+
+  # shellcheck disable=SC2155
+  local tracking_branch="$(git rev-parse --abbrev-ref --symbolic-full-name "$branch_name@{u}" 2>/dev/null)";
+
+  if [ "$tracking_branch" == "origin/$origin_default" ]; then
+      echo "origin/$origin_default";
+  else
+      echo "$origin_default";
+  fi
+}
+
+commit_diff_on_branch () {
+  local git_rev_list_origin
+  git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)";
+  # shellcheck disable=SC2181
+  if [ "$?" -eq 0 ] && [ -n "$git_rev_list_origin" ]; then
+    # split those two numbers by spaces, into an array
+    # shellcheck disable=SC2034
+    read -r left right <<< "$git_rev_list_origin"
+    echo "$left";
+  else
+    echo "0";
+  fi
+}
+current_git_branch ()
+{
+    git rev-parse --abbrev-ref HEAD
+}
+echo_info ()
+{
+    echo -e "${COLOR_FG_BOLD_BLUE}$*${COLOR_RESET}" 1>&2
+}
+# TODO: make this a badash function
+# echo the command before running it
+echo_cmd() {
+  (set -x; "$@")
+}
+
+branch_name="$(current_git_branch)"
+
+# what is the default branch?
+@git-default-branch default_branch
+
+# shellcheck disable=SC2154
+based_on="$(based_on_local_or_origin "$branch_name" "$default_branch")"
+
+# this may not be what I want in all situations - fix this when it becomes a problem
+num_commits="$(commit_diff_on_branch "$branch_name" "$based_on")"
+
+echo_info "$num_commits commit(s) on branch '$branch_name'"
+
+mapfile -t list_of_commits <<< "$(git log -n"$num_commits" --pretty='format:%h - %s')"
+
+# display the commits and prompt for choice
+for((i=0; i<num_commits; i++))
+do
+  commit_description="${list_of_commits[$i]}"
+  # display a 1-based index, which is nicer to select
+  echo "[$(( i + 1 ))] $commit_description"
+done
+echo -n "Commit to edit: "
+read -r commit_number
+echo ""
+
+# validate choice and start the rebase
+if [ -n "$commit_number" ] && (( "$commit_number" <= "$num_commits" ))
+then
+  # TODO: write out some help messages about what commands to use, etc.
+  # (see https://stackoverflow.com/a/1186549)
+  echo_cmd git rebase --interactive "HEAD~$commit_number"
+else
+  echo_info "(no commit selected)"
+fi
