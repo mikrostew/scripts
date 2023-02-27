@@ -25,3 +25,4 @@ then
 fi
 
 @wait-for-command git commit --allow-empty -m "$override - $reason"
+git log -n1

@@ -6,8 +6,7 @@
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_RESET='\033[0m'
 
-commit_diff_on_branch ()
-{
+commit_diff_on_branch () {
   local git_rev_list_origin
   git_rev_list_origin="$(git rev-list --count --left-right "$1"..."$2" 2>/dev/null)"
   # shellcheck disable=SC2181
