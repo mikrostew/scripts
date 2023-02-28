@@ -3,15 +3,83 @@
 
 # [git] checkout default branch [main/master] (Git Checkout Main/Master)
 
+# colors
+COLOR_FG_BOLD_YELLOW='\033[1;33m'
+COLOR_RESET='\033[0m'
+
+# helpers
 in_git_repo() {
   git status > /dev/null && return 0 || @echo-err "Not in git repo" && return 1
 }
-no_uncommitted_changes() {
-  [ "$(git status --porcelain --untracked-files=no)" != "" ] && @echo-err ">_<  You have uncommitted changes" && return 1 || return 0
+
+# TODO: this could be a badash thing
+# show an animated prompt while waiting for input
+prompt-for-input() {
+  # arguments:
+  # - prompt string
+  # - variable to store user input
+  prompt_str="$1"
+  read_var_name="$2"
+
+  local prompt_animation=( ">  " " > " "  >" " > " )
+  local num_frames=${#prompt_animation[@]}
+
+  # echo the prompt
+  printf "\r%s %s " "${prompt_animation[0]}" "$prompt_str"
+
+  # start the animation running async, and get its PID
+  (
+    i=0
+    while :
+    do
+      printf "\r%s %s " "${prompt_animation[$i]}" "$prompt_str" >&2
+      sleep 0.2
+      i=$(( (i + 1) % num_frames ))
+    done
+  ) & disown
+  local animation_pid="$!"
+
+  # kill the animation process for Ctrl-C, cleanup, and return failure
+  trap "kill $animation_pid && echo "" && return 1" INT TERM
+
+  # read input from the user
+  read -r "${read_var_name?}"
+
+  # clear the trap, and stop the spinner
+  trap - INT TERM
+  kill "$animation_pid"
+
+  # sometimes a duplicate line will be printed
+  # (race condition with killing the spawned process)
+  # so clean that up if it happens
+  printf "\r    %-${#prompt_str}s\r" ' ' >&2
+
+  return 0
 }
 
-if in_git_repo && no_uncommitted_changes
+
+if in_git_repo
 then
+  # if there are local changes, checkout will fail
+  # so prompt to stash those first
+  uncommitted_changes="$(git status --porcelain --untracked-files=no)"
+  if [ "$uncommitted_changes" != "" ]
+  then
+    echo ""
+    echo "You have uncommitted changes:"
+    echo -e "${COLOR_FG_BOLD_YELLOW}$uncommitted_changes${COLOR_RESET}"
+    echo ""
+    prompt-for-input "Want to stash before checkout? [y/N]" stash_confirm
+    # shellcheck disable=SC2154
+    if [ "$stash_confirm" == "Y" ] || [ "$stash_confirm" == "y" ]
+    then
+      @wait-for-command git stash
+    else
+      echo "(not stashing, maybe you should commit...)"
+      exit 1
+    fi
+  fi
+
   # figure out the default branch, and try to check it out
   @git-default-branch default_branch
   # shellcheck disable=SC2154
