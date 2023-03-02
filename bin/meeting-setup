@@ -13,7 +13,7 @@ echo "Starting Apps"
 
 echo ""
 echo "Starting Virtual Camera for OBS 📸 "
-@wait-for-command --msg 'wait 5 seconds' sleep 5
+@wait-for-command --msg 'wait 10 seconds' sleep 10
 # I setup a hotkey to start/stop the virtual camera in OBS Settings
 osascript <<END_SCRIPT
 tell application "System Events"
