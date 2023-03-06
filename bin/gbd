@@ -7,9 +7,8 @@ COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_FG_GREEN='\033[0;32m'
 COLOR_RESET='\033[0m'
 
-all_git_branches ()
-{
-    git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||'
+all_git_branches() {
+  @wait-for-command --show-output git for-each-ref --format="%(refname)" refs/heads/ | sed 's|refs/heads/||'
 }
 echo_info ()
 {
@@ -74,6 +73,7 @@ then
     merge_status[$name]="${COLOR_FG_GREEN}(merged)${COLOR_RESET}"
   done
 
+  echo ""
   # display the branches and prompt for choice
   for((i=0; i<num_branches; i++))
   do
@@ -81,6 +81,7 @@ then
     # display a 1-based index, which is nicer to select
     echo -e "[$(( i + 1 ))] $branch_name ${merge_status[$branch_name]}"
   done
+  echo ""
   echo -n "Branch to delete: "
   read -r branch_num
   echo ""
