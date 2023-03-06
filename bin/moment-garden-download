@@ -204,6 +204,7 @@ async function downloadMedia(metadataDir, mediaDir) {
   await fsPromises.mkdir(videoDir, { recursive: true });
 
   let numFilesDownloaded = 0;
+  let numErrors = 0;
 
   try {
     console.log(`Checking ${allFiles.length} metadata items for download`);
@@ -215,6 +216,7 @@ async function downloadMedia(metadataDir, mediaDir) {
         continue;
       }
       let didDownload = false;
+      let errString;
 
       const contents = await fsPromises.readFile(path.join(metadataDir, file), 'utf8');
       let item;
@@ -235,7 +237,7 @@ async function downloadMedia(metadataDir, mediaDir) {
         //break;
       } else if (type === TYPE_VIDEO) {
         //console.log('TODO: video to download...');
-        didDownload = await maybeDownloadVideo(item, videoDir);
+        [didDownload, errString] = await maybeDownloadVideo(item, videoDir);
         //break;
       } else if (type === TYPE_EVENT) {
         // don't need to download - already have the text info in the JSON file
@@ -244,6 +246,17 @@ async function downloadMedia(metadataDir, mediaDir) {
         // unknown type
         console.error(`Unknown item type ${type}`);
         throw new Error(`Unknown item type ${type}`);
+      }
+
+      if (errString !== undefined) {
+        numErrors++;
+        // so that this will exit non-zero
+        process.exitCode = 1;
+        // wait between files
+        await countdownSpinner(
+          5,
+          `${chalk.yellow('wait')}: downloaded ${numFilesDownloaded}, waiting between files`
+        );
       }
 
       if (didDownload) {
@@ -268,6 +281,7 @@ async function downloadMedia(metadataDir, mediaDir) {
   }
 
   console.log(`Downloaded ${numFilesDownloaded} files`);
+  console.log(`With ${numErrors} errors`);
   console.log('');
 }
 
@@ -337,7 +351,8 @@ async function maybeDownloadImage(item, imageDir) {
 }
 
 // TODO: keep stats on this stuff - return something like 'downloaded | skipped | somethingelse'
-// returns whether something was downloaded or not
+// returns 2-item tuple:
+//  [whether something was downloaded or not, error string if there was an error]
 async function maybeDownloadVideo(item, videoDir) {
   const id = item.id;
   const date = dateFromTimestamp(item.unix_timestamp);
@@ -349,19 +364,20 @@ async function maybeDownloadVideo(item, videoDir) {
     url = item.meta.video_path;
   } else {
     // where is the video URL?
-    console.error(`[${id}] item does not have ".meta.video_path_hd" or ".meta.video_path"`);
+    const errString = `[${id}] item does not have ".meta.video_path_hd" or ".meta.video_path"`;
+    console.error(errString);
     console.error(item);
-    throw new Error(`[${id}] item does not have ".meta.video_path_hd" or ".meta.video_path"`);
+    return [false, errString];
   }
 
   const filePath = outputFilePath(date, url, videoDir);
   if (!(await isDownloaded(filePath))) {
     //console.log(`Downloading ${url}...`);
     await downloadItem(url, filePath, { id, date });
-    return true;
+    return [true, undefined];
   } else {
     //console.log(`${chalk.yellow('(skip)')} ${url}`);
-    return false;
+    return [false, undefined];
   }
 }
 
