@@ -186,7 +186,7 @@ const config: Config = {
         'vlc',
         'watch',
         'wget',
-        'youtube-dl',
+        'yt-dlp',
       ]),
       homebrew('work laptop', ['workLaptop'], ['mysql']),
     ]),

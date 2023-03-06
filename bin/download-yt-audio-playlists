@@ -35,7 +35,7 @@ download_playlist() {
   # options:
   # - download best audio versions of all files from the playlist,
   # - sleep for 5 seconds between each download
-  youtube-dl \
+  yt-dlp \
     --extract-audio \
     --audio-format best \
     -o "$download_dir/%(title)s.%(ext)s" \
