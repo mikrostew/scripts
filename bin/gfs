@@ -47,7 +47,7 @@ then
 
   # first try to update upstream, and fail early since I often mess this up
   @wait-for-command git fetch upstream
-  @exit-on-error "" "@echo-err \"Error: Looks like 'upstream' is not setup - use 'git remote add upstream <repo>' to set it\""
+  @exit-on-error "Error: Looks like 'upstream' is not setup - use 'git remote add upstream <repo>' to set it"
 
   # also update this
   @wait-for-command git fetch origin
