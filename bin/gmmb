@@ -39,7 +39,7 @@ then
     starting_branch="$(current_git_branch)"
 
     # try to update main branch and get back to the starting branch
-    @@SCRIPT-DIR@@/gcm && mint update && @@SCRIPT-DIR@@/gc "$current_git_branch"
+    @@SCRIPT-DIR@@/gcm && mint update && @@SCRIPT-DIR@@/gc "$starting_branch"
     @exit-on-error 'Error updating main branch and getting back to current branch'
 
     # merge the updated commits from local main/master
