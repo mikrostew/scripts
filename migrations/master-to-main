@@ -43,17 +43,17 @@ else
   echo -e "${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} 'default_branch' is using badash, yay!"
 fi
 
-# TODO:
-# step 3: try to remove all mentions of master/main --> default
-echo "Step 3:"
-where_is_master_used="$(grep --color=always -nIr -i master bin/ node/)"
-if [ "$?" -eq 0 ]
-then
-  echo -e "${COLOR_FG_RED}✖${COLOR_RESET} 'master' is still used in these scripts:"
-  echo "$where_is_master_used"
-  (( errors+=1 ))
-else
-  echo -e "${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} 'master' is not used, yay!"
-fi
+# step 3: try to remove all mentions of master/main --> default?
+# (actually, I don't want to do this, the scripts are fine at this point)
+# echo "Step 3:"
+# where_is_master_used="$(grep --color=always -nIr -i master bin/ node/)"
+# if [ "$?" -eq 0 ]
+# then
+#   echo -e "${COLOR_FG_RED}✖${COLOR_RESET} 'master' is still used in these scripts:"
+#   echo "$where_is_master_used"
+#   (( errors+=1 ))
+# else
+#   echo -e "${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} 'master' is not used, yay!"
+# fi
 
 exit "$errors"
