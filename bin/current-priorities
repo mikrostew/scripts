@@ -1,42 +1,6 @@
-#!/usr/bin/env node
+#!/usr/bin/env badash
+# shellcheck shell=bash
 
-// show upcoming dates, from the input config file
-
-const path = require('path');
-const os = require('os');
-
-// different paths for different machines
-function getConfig() {
-  const hostName = os.hostname();
-
-  let syncDir;
-  if (/MacBook-Air/.test(hostName) || /Michaels-Air/.test(hostName)) {
-    // home laptop
-    syncDir = path.join('/', 'Users', 'mikrostew', 'Sync');
-  } else if (/mistewar-mn/.test(hostName)) {
-    // work laptop
-    syncDir = path.join('/', 'Users', 'mistewar', 'Sync');
-  }
-
-  const priorityConfig = require(path.join(syncDir, 'priorities.js'));
-  return priorityConfig;
-}
-
-// printout
-
-const priorityConfig = getConfig();
-
-console.log('Priorities');
-priorityConfig.priorities.forEach((priority) => {
-  const category = priority.category;
-  const description = priority.description;
-  console.log(`  - (${category}) ${description}`);
-});
-
-console.log('');
-console.log('Maintenance');
-priorityConfig.maintenance.forEach((priority) => {
-  const category = priority.category;
-  const description = priority.description;
-  console.log(`  - (${category}) ${description}`);
-});
+# A shim to run the corresponding JS file
+# Note: this will use the NodeJS version of the system, not this repo (_should_ be ok)
+node @@SCRIPT-DIR@@/../node/current-priorities.js "$@"
