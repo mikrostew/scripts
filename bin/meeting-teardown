@@ -17,3 +17,9 @@ kill-proc-name "Teams"
 echo ""
 echo "Disabling Do-Not-Disturb"
 @@SCRIPT-DIR@@/do-not-disturb off
+
+# reminders on the screen
+echo ""
+echo "Reminders:"
+echo "  Make sure the microphone is off 🎤"
+echo "  Make sure the light is off 💡"
