@@ -278,7 +278,7 @@ async function downloadMedia(metadataDir: string, mediaDir: string) {
         //console.log(`${chalk.yellow('(skip)')} Text type - nothing to do here`);
       } else if (type === TYPE_IMAGE) {
         //console.log('TODO: image to download...');
-        didDownload = await maybeDownloadImage(item, imageDir);
+        [didDownload, errString] = await maybeDownloadImage(item, imageDir);
         //break;
       } else if (type === TYPE_VIDEO) {
         //console.log('TODO: video to download...');
@@ -353,9 +353,13 @@ async function countdownSpinner(seconds: number, message: string) {
 
 // TODO: keep stats on this stuff - return something like 'downloaded | skipped | somethingelse'
 // returns whether something was downloaded or not
-async function maybeDownloadImage(item: MomentItem, imageDir: string): Promise<boolean> {
+async function maybeDownloadImage(
+  item: MomentItem,
+  imageDir: string
+): Promise<[boolean, string | undefined]> {
   if (item.meta && item.meta.montage) {
     let didADownload = false;
+    let errString = '';
     // montage, which has multiple possible images to download
     const id = item.id;
     // like the other images, get the full resolution
@@ -368,14 +372,26 @@ async function maybeDownloadImage(item: MomentItem, imageDir: string): Promise<b
       const url = urls[i];
       const filePath = outputFilePath(date, url, imageDir);
       if (!(await isDownloaded(filePath))) {
-        //console.log(`Downloading ${url}...`);
-        await downloadItem(url, filePath, { id, date });
-        didADownload = true;
+        try {
+          //console.log(`Downloading ${url}...`);
+          await downloadItem(url, filePath, { id, date });
+          didADownload = true;
+        } catch (err) {
+          if (err instanceof Error) {
+            console.error(err.message);
+            errString += err.message;
+          } else {
+            throw err;
+          }
+        }
       } else {
         //console.log(`${chalk.yellow('(skip)')} ${url}`);
       }
     }
-    return didADownload;
+    if (errString !== '') {
+      return [didADownload, errString];
+    }
+    return [didADownload, undefined];
   } else {
     // just a single URL to download
     const id = item.id;
@@ -386,12 +402,20 @@ async function maybeDownloadImage(item: MomentItem, imageDir: string): Promise<b
     const date = dateFromTimestamp(item.unix_timestamp);
     const filePath = outputFilePath(date, url, imageDir);
     if (!(await isDownloaded(filePath))) {
-      //console.log(`Downloading ${url}...`);
-      await downloadItem(url, filePath, { id, date });
-      return true;
+      try {
+        //console.log(`Downloading ${url}...`);
+        await downloadItem(url, filePath, { id, date });
+        return [true, undefined];
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error(err.message);
+          return [false, err.message];
+        }
+        throw err;
+      }
     } else {
       //console.log(`${chalk.yellow('(skip)')} ${url}`);
-      return false;
+      return [false, undefined];
     }
   }
 }
@@ -436,15 +460,21 @@ function outputFilePath(date: string, url: string, dir: string) {
   return path.join(dir, `${date}_${basename}`);
 }
 
+// check if file exists, and it has size > 0
 async function isDownloaded(filePath: string) {
   try {
     await fsPromises.access(filePath);
     // if that works, the file exists, yay
-    return true;
+    const fileStats = await fsPromises.stat(filePath);
+    if (fileStats.size > 0) {
+      return true;
+    }
   } catch (err) {
     // that throws if the file doesn't exist
     return false;
   }
+  // file is size 0
+  return false;
 }
 
 async function downloadItem(url: string, filePath: string, itemInfo: { id: string; date: string }) {
@@ -452,11 +482,13 @@ async function downloadItem(url: string, filePath: string, itemInfo: { id: strin
   const fileStream = fs.createWriteStream(filePath);
   const downloadSpinner = ora(`${chalk.yellow('download')}: ${itemInfo.date} - ${url}`).start();
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const request = https.get(url, (response) => {
       if (response.statusCode !== 200) {
         downloadSpinner.fail();
-        throw new Error(`Failed to GET '${url}' (status: ${response.statusCode})`);
+        //throw new Error(`Failed to GET '${url}' (status: ${response.statusCode})`);
+        reject(new Error(`Failed to GET '${url}' (status: ${response.statusCode})`));
+        return;
       }
       // pipe the download stream to the file
       response.pipe(fileStream);
