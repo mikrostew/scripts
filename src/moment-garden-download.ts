@@ -497,10 +497,16 @@ async function downloadItem(url: string, filePath: string, itemInfo: { id: strin
     // don't resolve on the end of the response
     // wait to resolve until this finishes, which is after the response completes
     fileStream.on('finish', () => {
-      // don't need to show success for every file
-      downloadSpinner.stop();
-      // TODO: send anything back here?
-      resolve('ok');
+      // sometimes this happens if the upload is messed up, I think?
+      if (fileStream.bytesWritten === 0) {
+        downloadSpinner.fail();
+        reject(new Error(`File '${filePath}' downloaded 0 bytes`));
+      } else {
+        // don't need to show success for every file
+        downloadSpinner.stop();
+        // TODO: send anything back here?
+        resolve('ok');
+      }
     });
 
     request.on('error', (err) => {
