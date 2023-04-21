@@ -1,7 +1,7 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-# [git] Merge current branch into default (Git Merge into Main/Master)
+# [git] Merge current branch into default (Git Merge into Main)
 
 current_git_branch ()
 {

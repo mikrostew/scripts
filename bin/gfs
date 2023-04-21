@@ -1,7 +1,7 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-# [git] Sync main/master branch to the upstream fork (Git Fork Sync)
+# [git] Sync main branch to the upstream fork (Git Fork Sync)
 
 current_git_branch ()
 {
@@ -17,7 +17,7 @@ on_symbolic_ref ()
 }
 
 show_help_msg() {
-  echo "gfs - [git] Sync main/master branch to the upstream fork (Git Fork Sync)"
+  echo "gfs - [git] Sync main branch to the upstream fork (Git Fork Sync)"
   echo 'Usage: gfs [options]'
   echo ''
   echo 'Options:'
@@ -70,7 +70,7 @@ then
   @wait-for-command git merge "upstream/$upstream_default"
 
   # if branch name has changed, check that out locally
-  # (master -> main is common now)
+  # (updating to main is common now)
   if [ "$upstream_default" != "$origin_default" ]
   then
     @wait-for-command git checkout "$upstream_default"

@@ -1,7 +1,7 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-# git - create new branch that tracks origin/(main|master)
+# git - create new branch that tracks origin/main
 
 current_git_branch () {
   git rev-parse --abbrev-ref HEAD

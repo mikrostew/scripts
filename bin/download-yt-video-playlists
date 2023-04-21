@@ -34,9 +34,8 @@ download_playlist() {
 
   # options:
   # - download best format available but no better than 480p
-  #   (https://github.com/ytdl-org/youtube-dl/blob/master/README.md#format-selection-examples)
   # - sleep for 5 seconds between each download
-  youtube-dl \
+  yt-dlp \
     -f 'bestvideo[height<=480]+bestaudio/best[height<=480]' \
     -o "$download_dir/%(title)s.%(ext)s" \
     --sleep-interval 5 \

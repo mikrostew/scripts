@@ -10,7 +10,7 @@ errors=0
 
 # step 1: also use 'main' - DONE
 echo "Step 1:"
-where_is_master_used="$(grep -nIr master bin/ node/ | grep -v main | grep -v default_branch | grep -v -F blob/master | grep --color=always master)"
+where_is_master_used="$(grep -nIr master bin node | grep -v main | grep -v default_branch | grep -v -F blob/master | grep --color=always master)"
 if [ "$?" -eq 0 ]
 then
   echo -e "${COLOR_FG_RED}✖${COLOR_RESET} 'master' is still used in these scripts:"
@@ -33,7 +33,7 @@ fi
 
 # step 2: move the default branch code to a badash function - DONE
 echo "Step 2:"
-where_is_default_branch_used="$(grep --color=always -nIr -F 'default_branch=' bin/ node/)"
+where_is_default_branch_used="$(grep --color=always -nIr -F 'default_branch=' bin node)"
 if [ "$?" -eq 0 ]
 then
   echo -e "${COLOR_FG_RED}✖${COLOR_RESET} 'default_branch' is still manually determined in these scripts:"
@@ -43,17 +43,17 @@ else
   echo -e "${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} 'default_branch' is using badash, yay!"
 fi
 
-# step 3: try to remove all mentions of master/main --> default?
-# (actually, I don't want to do this, the scripts are fine at this point)
-# echo "Step 3:"
-# where_is_master_used="$(grep --color=always -nIr -i master bin/ node/)"
-# if [ "$?" -eq 0 ]
-# then
-#   echo -e "${COLOR_FG_RED}✖${COLOR_RESET} 'master' is still used in these scripts:"
-#   echo "$where_is_master_used"
-#   (( errors+=1 ))
-# else
-#   echo -e "${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} 'master' is not used, yay!"
-# fi
+# step 3: try to remove all mentions of master
+# (exception for bin/gm2m, which converts repos from master --> main)
+echo "Step 3:"
+where_is_master_used="$(grep --color=always -nIr --exclude bin/gm2m -i master bin node)"
+if [ "$?" -eq 0 ]
+then
+  echo -e "${COLOR_FG_RED}✖${COLOR_RESET} 'master' is still used in these scripts:"
+  echo "$where_is_master_used"
+  (( errors+=1 ))
+else
+  echo -e "${COLOR_FG_BOLD_GREEN}✔${COLOR_RESET} 'master' is not used, yay!"
+fi
 
 exit "$errors"

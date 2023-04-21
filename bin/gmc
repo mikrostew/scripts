@@ -1,7 +1,7 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-# [git] Check if this branch is OK to merge, or it there are any conflicts with main/master (Git Merge Check)
+# [git] Check if this branch is OK to merge, or it there are any conflicts with main (Git Merge Check)
 # (adapted from https://stackoverflow.com/questions/501407/is-there-a-git-merge-dry-run-option)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
@@ -21,7 +21,7 @@ not_on_git_branch ()
   [ "$(current_git_branch)" == "$1" ] && @echo-err ">_<  Doesn't work on branch '$1'" && return 1 || return 0
 }
 show_help_msg() {
-  echo "gmc - [git] Check if this branch is OK to merge, or it there are any conflicts with main/master (Git Merge Check)"
+  echo "gmc - [git] Check if this branch is OK to merge, or it there are any conflicts with main (Git Merge Check)"
   echo 'Usage: gmc [options]'
   echo ''
   echo 'Options:'

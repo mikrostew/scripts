@@ -1,7 +1,7 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-# [git] Rebase current branch against default (Git Rebase Against Main/Master)
+# [git] Rebase current branch against default (Git Rebase Against Main)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_RESET='\033[0m'
@@ -37,7 +37,7 @@ then
   # shellcheck disable=SC2154
   if not_on_git_branch "$default_branch"
   then
-    # update main/master
+    # update main
     @@SCRIPT-DIR@@/gc "$default_branch" && @@SCRIPT-DIR@@/gpr
     # shellcheck disable=SC2016
     @exit-on-error "Failed to pull and rebase $default_branch" 'gc "$branch_name"'

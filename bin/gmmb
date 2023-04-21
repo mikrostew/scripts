@@ -1,7 +1,7 @@
 #!/usr/bin/env badash
 # shellcheck shell=bash
 
-# [git] Merge main/master into current branch (Git Merge Main into Branch)
+# [git] Merge main into current branch (Git Merge Main into Branch)
 
 COLOR_FG_BOLD_BLUE='\033[1;34m'
 COLOR_RESET='\033[0m'
@@ -42,7 +42,7 @@ then
     @@SCRIPT-DIR@@/gcm && mint update && @@SCRIPT-DIR@@/gc "$starting_branch"
     @exit-on-error 'Error updating main branch and getting back to current branch'
 
-    # merge the updated commits from local main/master
+    # merge the updated commits from local main
     if ! @wait-for-command git merge "$default_branch"
     then
       echo_info "Merge failed"
