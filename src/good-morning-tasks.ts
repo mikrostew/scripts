@@ -152,11 +152,13 @@ const config: Config = {
       func('Brew doctor', 'inherit', async () => {
         // this fails because of the check for config scripts (LI has some in ULL/ECL), so skip that one
         // get a list of all checks, then skip the config check
-        const brewChecks = (await execa('brew', ['doctor', '--list-checks'])).stdout
-          .split('\n')
-          .map((c) => c.trim())
-          .filter((c) => c !== 'check_for_config_scripts');
-        return execa('brew', ['doctor', ...brewChecks]);
+        // const brewChecks = (await execa('brew', ['doctor', '--list-checks'])).stdout
+        //   .split('\n')
+        //   .map((c) => c.trim())
+        //   .filter((c) => c !== 'check_for_config_scripts');
+        // return execa('brew', ['doctor', ...brewChecks]);
+        // actually, I think this is ok now?
+        return execa('brew', ['doctor']);
       }),
     ]),
 
