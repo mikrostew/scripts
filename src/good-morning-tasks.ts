@@ -206,7 +206,7 @@ const config: Config = {
     exec('Rust', allMachines, 'rustup', ['update']),
 
     group('Downloads', laptopMachines, [
-      exec('Moment garden pics & videos', 'inherit', 'moment-garden-download', []),
+      // exec('Moment garden pics & videos', 'inherit', 'moment-garden-download', []),
       exec('Audio playlists from YT', 'inherit', 'download-yt-audio-playlists', []),
       exec('Video playlists from YT', 'inherit', 'download-yt-video-playlists', []),
     ]),
