@@ -415,12 +415,6 @@ const config: Config = {
       repo_update('voyager-web', workMachines, path.join(os.homedir(), 'src/li/voyager-web'), [
         'pull&rebase',
       ]),
-      repo_update(
-        'ember4/voyager-web',
-        workMachines,
-        path.join(os.homedir(), 'src/ember4/voyager-web'),
-        ['pull&rebase']
-      ),
       repo_update('work blog', ['workLaptop'], path.join(os.homedir(), 'src/li/blog'), [
         'pull&rebase',
       ]),
