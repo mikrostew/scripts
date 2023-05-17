@@ -665,16 +665,18 @@ async function downloadItem(url: string, filePath: string, itemInfo: { id: strin
 async function combineSharedMedia(baseDir: string, garden1: MgConfig, garden2: MgConfig) {
   const combinedDir = path.join(baseDir, 'combined');
   console.log(`Combining ${garden1.name} and ${garden2.name}, in ${combinedDir}`);
-  let numCombined = 0;
+  let numCombinedImages = 0;
+  let numCombinedVideos = 0;
 
   // ensure the directory exists
   await mkdir(combinedDir, { recursive: true });
 
-  // I know garden2 is shorter, so iterate over that
+  // images
+  // (I know garden2 is shorter, so iterate over that)
   const garden1ImageDir = path.join(SYNC_DIR, garden1.name, 'image');
   const garden2ImageDir = path.join(SYNC_DIR, garden2.name, 'image');
-  const imageNames = await readdir(garden2ImageDir);
-  for (const file of imageNames) {
+  const imageFileNames = await readdir(garden2ImageDir);
+  for (const file of imageFileNames) {
     const maybeOtherFile = path.join(garden1ImageDir, file);
     try {
       // this will throw if the file doesn't exist
@@ -689,10 +691,34 @@ async function combineSharedMedia(baseDir: string, garden1: MgConfig, garden2: M
     const renameResult = await rename(origFile, combinedFile);
     console.log(renameResult);
     await unlink(maybeOtherFile);
-    numCombined++;
+    numCombinedImages++;
   }
 
-  console.log(`Combined ${numCombined} files`);
+  console.log(`Combined ${numCombinedImages} image files`);
+
+  // video
+  const garden1VideoDir = path.join(SYNC_DIR, garden1.name, 'video');
+  const garden2VideoDir = path.join(SYNC_DIR, garden2.name, 'video');
+  const videoFileNames = await readdir(garden2VideoDir);
+  for (const file of videoFileNames) {
+    const maybeOtherFile = path.join(garden1VideoDir, file);
+    try {
+      // this will throw if the file doesn't exist
+      await access(maybeOtherFile);
+    } catch (err) {
+      // file does not exist, carry on
+      continue;
+    }
+    console.log(`File ${file} exists in both!`);
+    const origFile = path.join(garden2VideoDir, file);
+    const combinedFile = path.join(combinedDir, file);
+    const renameResult = await rename(origFile, combinedFile);
+    console.log(renameResult);
+    await unlink(maybeOtherFile);
+    numCombinedVideos++;
+  }
+
+  console.log(`Combined ${numCombinedVideos} video files`);
 }
 
 (async function () {
