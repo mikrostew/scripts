@@ -1,17 +1,26 @@
 // download images and video from Moment Garden
 
+import {
+  access,
+  mkdir,
+  readdir,
+  readFile,
+  rename,
+  stat,
+  writeFile,
+  unlink,
+} from 'node:fs/promises';
+import path from 'node:path';
 import chalk from 'chalk';
 import fs from 'fs';
-import { access, mkdir, readdir, readFile, stat, writeFile, unlink } from 'node:fs/promises';
 import https from 'https';
 import ora from 'ora';
 import os from 'os';
-import path from 'path';
 import yargs from 'yargs';
 import { parse } from 'node-html-parser';
 
 // different paths for different machines
-let SYNC_DIR;
+let SYNC_DIR: string;
 const HOST_NAME = os.hostname();
 if (/MacBook-Air/.test(HOST_NAME) || /Michaels-Air/.test(HOST_NAME)) {
   // home laptop
@@ -61,9 +70,9 @@ type MgConfig = {
   name: string;
   cookies: string[];
   gardenId: string;
-}[];
+};
 
-const mgConfig: MgConfig = require(path.join(SYNC_DIR, '.mg-config.js'));
+const mgConfig: MgConfig[] = require(path.join(SYNC_DIR, '.mg-config.js'));
 
 type MomentItemMeta = {
   montage?: string;
@@ -323,10 +332,10 @@ async function downloadComments(gardenId: string, cookies: string[], metadataDir
     if (!file.endsWith('.json')) {
       continue;
     }
-    const contents = await readFile(path.join(metadataDir, file), 'utf8');
 
     let item: MomentItem;
     try {
+      const contents = await readFile(path.join(metadataDir, file), 'utf8');
       item = JSON.parse(contents);
     } catch (err) {
       console.error(`Error: Failed to parse file '${path.join(metadataDir, file)}' as JSON`);
@@ -355,7 +364,7 @@ async function downloadComments(gardenId: string, cookies: string[], metadataDir
 }
 
 // verify that all media (images, videos, etc.) have been downloaded for all cached metadata
-async function downloadMedia(metadataDir: string, mediaDir: string) {
+async function downloadMedia(metadataDir: string, mediaDir: string, combinedDir: string) {
   const allFiles = await readdir(metadataDir);
 
   // output directories
@@ -378,12 +387,16 @@ async function downloadMedia(metadataDir: string, mediaDir: string) {
         await unlink(path.join(metadataDir, file));
         continue;
       }
+      // don't try to parse directories as JSON
+      if (!file.endsWith('.json')) {
+        continue;
+      }
       let didDownload = false;
       let errString;
 
-      const contents = await readFile(path.join(metadataDir, file), 'utf8');
       let item: MomentItem;
       try {
+        const contents = await readFile(path.join(metadataDir, file), 'utf8');
         item = JSON.parse(contents);
       } catch (err) {
         console.error(`Error: Failed to parse file '${path.join(metadataDir, file)}' as JSON`);
@@ -395,10 +408,10 @@ async function downloadMedia(metadataDir: string, mediaDir: string) {
         // don't need to download - already have the text info in the JSON file
         //console.log(`${chalk.yellow('(skip)')} Text type - nothing to do here`);
       } else if (type === TYPE_IMAGE) {
-        [didDownload, errString] = await maybeDownloadImage(item, imageDir);
+        [didDownload, errString] = await maybeDownloadImage(item, imageDir, combinedDir);
         //break;
       } else if (type === TYPE_VIDEO) {
-        [didDownload, errString] = await maybeDownloadVideo(item, videoDir);
+        [didDownload, errString] = await maybeDownloadVideo(item, videoDir, combinedDir);
         //break;
       } else if (type === TYPE_EVENT) {
         // don't need to download - already have the text info in the JSON file
@@ -471,7 +484,8 @@ async function countdownSpinner(seconds: number, message: string) {
 // returns whether something was downloaded or not
 async function maybeDownloadImage(
   item: MomentItem,
-  imageDir: string
+  imageDir: string,
+  combinedDir: string
 ): Promise<[boolean, string | undefined]> {
   if (item.meta && item.meta.montage) {
     let didADownload = false;
@@ -487,7 +501,8 @@ async function maybeDownloadImage(
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
       const filePath = outputFilePath(date, url, imageDir);
-      if (!(await isDownloaded(filePath))) {
+      const sharedFilePath = outputFilePath(date, url, combinedDir);
+      if (!(await isDownloaded(filePath)) && !(await isDownloaded(sharedFilePath))) {
         try {
           //console.log(`Downloading ${url}...`);
           await downloadItem(url, filePath, { id, date });
@@ -517,7 +532,8 @@ async function maybeDownloadImage(
     const url = item.path.replace('moments-large', 'moments-full');
     const date = dateFromTimestamp(item.unix_timestamp);
     const filePath = outputFilePath(date, url, imageDir);
-    if (!(await isDownloaded(filePath))) {
+    const sharedFilePath = outputFilePath(date, url, combinedDir);
+    if (!(await isDownloaded(filePath)) && !(await isDownloaded(sharedFilePath))) {
       try {
         //console.log(`Downloading ${url}...`);
         await downloadItem(url, filePath, { id, date });
@@ -541,7 +557,8 @@ async function maybeDownloadImage(
 //  [whether something was downloaded or not, error string if there was an error]
 async function maybeDownloadVideo(
   item: MomentItem,
-  videoDir: string
+  videoDir: string,
+  combinedDir: string
 ): Promise<[boolean, string | undefined]> {
   const id = item.id;
   const date = dateFromTimestamp(item.unix_timestamp);
@@ -560,7 +577,8 @@ async function maybeDownloadVideo(
   }
 
   const filePath = outputFilePath(date, url, videoDir);
-  if (!(await isDownloaded(filePath))) {
+  const sharedFilePath = outputFilePath(date, url, combinedDir);
+  if (!(await isDownloaded(filePath)) && !(await isDownloaded(sharedFilePath))) {
     //console.log(`Downloading ${url}...`);
     await downloadItem(url, filePath, { id, date });
     return [true, undefined];
@@ -644,6 +662,39 @@ async function downloadItem(url: string, filePath: string, itemInfo: { id: strin
   });
 }
 
+async function combineSharedMedia(baseDir: string, garden1: MgConfig, garden2: MgConfig) {
+  const combinedDir = path.join(baseDir, 'combined');
+  console.log(`Combining ${garden1.name} and ${garden2.name}, in ${combinedDir}`);
+  let numCombined = 0;
+
+  // ensure the directory exists
+  await mkdir(combinedDir, { recursive: true });
+
+  // I know garden2 is shorter, so iterate over that
+  const garden1ImageDir = path.join(SYNC_DIR, garden1.name, 'image');
+  const garden2ImageDir = path.join(SYNC_DIR, garden2.name, 'image');
+  const imageNames = await readdir(garden2ImageDir);
+  for (const file of imageNames) {
+    const maybeOtherFile = path.join(garden1ImageDir, file);
+    try {
+      // this will throw if the file doesn't exist
+      await access(maybeOtherFile);
+    } catch (err) {
+      // file does not exist, carry on
+      continue;
+    }
+    console.log(`File ${file} exists in both!`);
+    const origFile = path.join(garden2ImageDir, file);
+    const combinedFile = path.join(combinedDir, file);
+    const renameResult = await rename(origFile, combinedFile);
+    console.log(renameResult);
+    await unlink(maybeOtherFile);
+    numCombined++;
+  }
+
+  console.log(`Combined ${numCombined} files`);
+}
+
 (async function () {
   // parse options
   const options: CliOptions = yargs(process.argv.slice(2))
@@ -678,6 +729,7 @@ async function downloadItem(url: string, filePath: string, itemInfo: { id: strin
 
     const metadataDir = path.join(SYNC_DIR, garden.name, 'metadata');
     const mediaDir = path.join(SYNC_DIR, garden.name);
+    const combinedDir = path.join(SYNC_DIR, 'combined');
 
     if (options['metadata']) {
       console.log(`Downloading metadata to dir '${metadataDir}'...`);
@@ -690,7 +742,9 @@ async function downloadItem(url: string, filePath: string, itemInfo: { id: strin
 
     if (options['media'] && !options['metadata-only']) {
       console.log(`Downloading media to dir '${mediaDir}'...`);
-      await downloadMedia(metadataDir, mediaDir);
+      await downloadMedia(metadataDir, mediaDir, combinedDir);
     }
   }
+
+  await combineSharedMedia(SYNC_DIR, mgConfig[0], mgConfig[1]);
 })();
