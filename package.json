@@ -19,10 +19,12 @@
     "jsdom": "^20.0.0",
     "listr": "^0.14.3",
     "node-fetch": "^2.6.7",
+    "node-html-parser": "^6.1.5",
     "ora": "^5.4.0",
     "tmp": "^0.1.0",
     "which": "^2.0.2",
-    "yaml": "^2.1.1"
+    "yaml": "^2.1.1",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@tsconfig/node12": "^1.0.11",

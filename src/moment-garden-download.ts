@@ -1,25 +1,14 @@
 // download images and video from Moment Garden
 
-// function printUsage() {
-//   console.log('Usage:');
-//   console.log('  moment-garden-download [options]');
-//   console.log('');
-//   // TODO
-//   // Options
-//   //  --full   --> go thru the whole garden, download everything to check if I missed something
-//   //  --local, or --no-cache    --> don't query the MG site, just download anything that doesn't exist locally
-//   //  --limit     --> limit the number of files downloaded (default is all)
-//   //  --verbose    --> log everything
-//   //  --help    --> show this message
-// }
-
 import chalk from 'chalk';
 import fs from 'fs';
-import fsPromises from 'fs/promises';
+import { access, mkdir, readdir, readFile, stat, writeFile, unlink } from 'node:fs/promises';
 import https from 'https';
 import ora from 'ora';
 import os from 'os';
 import path from 'path';
+import yargs from 'yargs';
+import { parse } from 'node-html-parser';
 
 // different paths for different machines
 let SYNC_DIR;
@@ -44,9 +33,17 @@ const PER_PAGE = 50;
 // types of moments
 const TYPE_TEXT = 1;
 const TYPE_IMAGE = 2;
-// TODO: what is type 3?
+// what is type 3?
 const TYPE_VIDEO = 4;
 const TYPE_EVENT = 5;
+
+type CliOptions = {
+  comments: boolean;
+  metadata: boolean;
+  'metadata-only': boolean;
+  media: boolean;
+  // 'media-only': boolean;
+};
 
 // config for this stuff
 // (so I don't commit secrets to the repo)
@@ -95,7 +92,7 @@ type MomentItem = {
   meta: MomentItemMeta | null;
   // aspect_ratio: number | null;
   // m_size: string;
-  // comment_cnt: number;
+  comment_cnt: number;
   // love_cnt: number;
   // private: string;
   // fb_post_id: string | null;
@@ -104,7 +101,12 @@ type MomentItem = {
   // created: string;
 };
 
-// TODO: configurable limit to number of downloaded files
+type CommentItem = {
+  name: string | undefined;
+  comment: string | undefined;
+};
+
+// TODO: configurable limit to number of downloaded files?
 const DOWNLOAD_FILE_LIMIT = 20;
 
 function dateFromTimestamp(unixTimestamp: string) {
@@ -112,7 +114,7 @@ function dateFromTimestamp(unixTimestamp: string) {
   return new Date(Number(unixTimestamp) * 1000).toISOString().split('T')[0];
 }
 
-// make the request to moment garden
+// make the request to moment garden for a page of moments
 async function requestMoments(
   gardenID: string,
   pageNumber: number,
@@ -132,7 +134,7 @@ async function requestMoments(
       'X-Requested-With': 'XMLHttpRequest',
       // TODO: how can I update this periodically?
       'User-Agent':
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:87.0) Gecko/20100101 Firefox/87.0',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/115.0',
       Cookie: cookies.join('; '),
     },
   };
@@ -171,36 +173,109 @@ async function requestMoments(
   });
 }
 
+// make the request to moment garden for comments on a moment
+async function requestComments(
+  gardenId: string,
+  momentId: string,
+  timestamp: number,
+  cookies: string[]
+): Promise<CommentItem[]> {
+  const options = {
+    method: 'GET',
+    hostname: 'momentgarden.com',
+    port: 443, // default
+    path: `/comments/slideshow/${momentId}?_=${timestamp}`,
+    headers: {
+      Accept: 'text/html, */*; q=0.01',
+      'Accept-Language': 'en-US,en;q=0.5',
+      Referer: `https://momentgarden.com/moments/gardens/${gardenId}?src=mm_mv`,
+      'X-Requested-With': 'XMLHttpRequest',
+      // TODO: how can I update this periodically?
+      'User-Agent':
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/115.0',
+      Cookie: cookies.join('; '),
+    },
+  };
+
+  let data = '';
+  const comments: CommentItem[] = [];
+
+  return new Promise((resolve) => {
+    const req = https.request(options, (res) => {
+      if (res.statusCode != 200) {
+        console.log('statusCode:', res.statusCode);
+      }
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        try {
+          // the problem with these comments is that they are HTML, not JSON
+          const parsed = parse(data.trim());
+          const commentDivs = parsed.querySelectorAll('.comment_data');
+          for (const commentDiv of commentDivs) {
+            const comment: CommentItem = {
+              name: commentDiv.querySelector('.comment_title')?.textContent,
+              comment: commentDiv.querySelector('.comment_comment')?.textContent,
+            };
+            comments.push(comment);
+          }
+          resolve(comments);
+        } catch (err) {
+          console.error('DATA:');
+          console.error(data);
+          throw err;
+        }
+      });
+    });
+
+    req.on('error', (e) => {
+      throw e;
+    });
+    req.end();
+  });
+}
+
 // write each item in the input array to disk
 // return count of new (previously un-cached) items
 async function cacheMetadata(items: MomentItem[], cacheDir: string) {
   let newlyCachedItems = 0;
 
+  // ensure that directory exists
+  await mkdir(cacheDir, { recursive: true });
+
   for (const item of items) {
     const id = item.id;
     const itemCacheFile = path.join(cacheDir, `${id}.json`);
 
-    // ensure that directory exists
-    await fsPromises.mkdir(cacheDir, { recursive: true });
-
     // check if cache file already exists
     try {
-      // this will throw/reject if files doesn't exist
-      await fsPromises.access(itemCacheFile);
-      // console.log(`File ${itemCacheFile} exists, skipping`);
+      // this will throw/reject if file doesn't exist
+      await access(itemCacheFile);
     } catch (error: unknown) {
-      await fsPromises.writeFile(itemCacheFile, JSON.stringify(item));
-      // console.log(`Wrote new file ${itemCacheFile}`);
       newlyCachedItems++;
     }
+    // write the file
+    // (even if it already exists, I want it to be updated)
+    await writeFile(itemCacheFile, JSON.stringify(item, null, 2));
   }
   return newlyCachedItems;
 }
 
 // download any new metadata for recent moments
-async function downloadMomentMetadata(gardenId: string, cookies: string[], metadataDir: string) {
+async function downloadMomentMetadata(
+  gardenId: string,
+  cookies: string[],
+  metadataDir: string,
+  options: CliOptions
+) {
   let currentPage = 1;
   let newItemsFound = 0;
+
+  if (options['metadata-only']) {
+    console.log('Downloading all metadata for garden...');
+  }
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -211,19 +286,18 @@ async function downloadMomentMetadata(gardenId: string, cookies: string[], metad
     //console.log(`(page ${currentPage}) Downloaded info for ${someMoments.length} moments`);
 
     if (someMoments.length === 0) {
-      //console.log('No more moments to download');
+      console.log('No more moments to download');
       break;
     }
 
     // go thru each object in that array, and write it to disk,
     // like 12347890.json, in a single directory (should be fine for the number of files there are)
     const newItems = await cacheMetadata(someMoments, metadataDir);
-    //console.log(`found ${newItems} new item(s)`);
+    console.log(`found ${newItems} new item(s)`);
     newItemsFound += newItems;
 
     // if no new items after checking at least 2 pages, exit
-    // TODO: unless --full
-    if (newItems === 0 && currentPage >= 2) {
+    if (!options['metadata-only'] && newItems === 0 && currentPage >= 2) {
       //console.log('No more new items found');
       break;
     }
@@ -236,17 +310,61 @@ async function downloadMomentMetadata(gardenId: string, cookies: string[], metad
   console.log(`Found ${newItemsFound} new item(s)`);
 }
 
+// download any comments that are missing from the local cache
+async function downloadComments(gardenId: string, cookies: string[], metadataDir: string) {
+  const allMetadataFiles = await readdir(metadataDir);
+  const commentsDir = path.join(metadataDir, 'comments');
+
+  // ensure the directory exists
+  await mkdir(commentsDir, { recursive: true });
+
+  console.log(`Checking ${allMetadataFiles.length} metadata items for comments to download`);
+  for (const file of allMetadataFiles) {
+    if (!file.endsWith('.json')) {
+      continue;
+    }
+    const contents = await readFile(path.join(metadataDir, file), 'utf8');
+
+    let item: MomentItem;
+    try {
+      item = JSON.parse(contents);
+    } catch (err) {
+      console.error(`Error: Failed to parse file '${path.join(metadataDir, file)}' as JSON`);
+      throw err;
+    }
+
+    if (item.comment_cnt > 0) {
+      // first, check if the comments have already been downloaded
+      const commentsFile = path.join(commentsDir, `${item.id}.json`);
+      try {
+        // this will throw/reject if file doesn't exist
+        await access(commentsFile);
+        // if we get here, the file exists, so skip this item
+        continue;
+      } catch (error: unknown) {
+        // if we get here, the file doesn't exist, so we need to download the comments
+        const comments = await requestComments(gardenId, item.id, TIMESTAMP, cookies);
+        console.log(`${gardenId}:`, comments);
+        // TODO: verify that the length of the comments array matches the comment_cnt property? whatever
+        // write comments to disk
+        await writeFile(commentsFile, JSON.stringify(comments, null, 2));
+        await countdownSpinner(5, `${chalk.yellow('wait')}: between API requests`);
+      }
+    }
+  }
+}
+
 // verify that all media (images, videos, etc.) have been downloaded for all cached metadata
 async function downloadMedia(metadataDir: string, mediaDir: string) {
-  const allFiles = await fsPromises.readdir(metadataDir);
+  const allFiles = await readdir(metadataDir);
 
   // output directories
   const imageDir = path.join(mediaDir, 'image');
   const videoDir = path.join(mediaDir, 'video');
 
   // ensure the output directories exist
-  await fsPromises.mkdir(imageDir, { recursive: true });
-  await fsPromises.mkdir(videoDir, { recursive: true });
+  await mkdir(imageDir, { recursive: true });
+  await mkdir(videoDir, { recursive: true });
 
   let numFilesDownloaded = 0;
   let numErrors = 0;
@@ -257,13 +375,13 @@ async function downloadMedia(metadataDir: string, mediaDir: string) {
       if (file === '.DS_Store') {
         // this will fail, I hate these files, delete it and keep going
         console.log(`Removing dumb file ${path.join(metadataDir, file)}`);
-        await fsPromises.unlink(path.join(metadataDir, file));
+        await unlink(path.join(metadataDir, file));
         continue;
       }
       let didDownload = false;
       let errString;
 
-      const contents = await fsPromises.readFile(path.join(metadataDir, file), 'utf8');
+      const contents = await readFile(path.join(metadataDir, file), 'utf8');
       let item: MomentItem;
       try {
         item = JSON.parse(contents);
@@ -277,11 +395,9 @@ async function downloadMedia(metadataDir: string, mediaDir: string) {
         // don't need to download - already have the text info in the JSON file
         //console.log(`${chalk.yellow('(skip)')} Text type - nothing to do here`);
       } else if (type === TYPE_IMAGE) {
-        //console.log('TODO: image to download...');
         [didDownload, errString] = await maybeDownloadImage(item, imageDir);
         //break;
       } else if (type === TYPE_VIDEO) {
-        //console.log('TODO: video to download...');
         [didDownload, errString] = await maybeDownloadVideo(item, videoDir);
         //break;
       } else if (type === TYPE_EVENT) {
@@ -463,9 +579,9 @@ function outputFilePath(date: string, url: string, dir: string) {
 // check if file exists, and it has size > 0
 async function isDownloaded(filePath: string) {
   try {
-    await fsPromises.access(filePath);
+    await access(filePath);
     // if that works, the file exists, yay
-    const fileStats = await fsPromises.stat(filePath);
+    const fileStats = await stat(filePath);
     if (fileStats.size > 0) {
       return true;
     }
@@ -529,18 +645,52 @@ async function downloadItem(url: string, filePath: string, itemInfo: { id: strin
 }
 
 (async function () {
+  // parse options
+  const options: CliOptions = yargs(process.argv.slice(2))
+    .scriptName('moment-garden-download')
+    .usage('$0 [options]')
+    .option('comments', {
+      default: false,
+      describe: 'Download any missing comments',
+      type: 'boolean',
+    })
+    .option('metadata', {
+      default: true,
+      describe: 'Download metadata',
+      type: 'boolean',
+    })
+    .option('metadata-only', {
+      default: false,
+      describe: 'Download all metadata, and nothing else',
+      type: 'boolean',
+    })
+    .option('media', {
+      default: true,
+      describe: 'Do not download any media files (images, videos)',
+      type: 'boolean',
+    })
+    .parseSync();
+
+  console.log(options);
+
   for (const garden of mgConfig) {
     console.log(`Garden: ${garden.name}`);
 
     const metadataDir = path.join(SYNC_DIR, garden.name, 'metadata');
     const mediaDir = path.join(SYNC_DIR, garden.name);
 
-    //console.log(`Downloading metadata to dir '${metadataDir}'...`);
-    await downloadMomentMetadata(garden.gardenId, garden.cookies, metadataDir);
+    if (options['metadata']) {
+      console.log(`Downloading metadata to dir '${metadataDir}'...`);
+      await downloadMomentMetadata(garden.gardenId, garden.cookies, metadataDir, options);
+    }
 
-    //console.log(`Downloading media to dir '${mediaDir}'...`);
-    await downloadMedia(metadataDir, mediaDir);
+    if (options['comments'] && !options['metadata-only']) {
+      await downloadComments(garden.gardenId, garden.cookies, metadataDir);
+    }
+
+    if (options['media'] && !options['metadata-only']) {
+      console.log(`Downloading media to dir '${mediaDir}'...`);
+      await downloadMedia(metadataDir, mediaDir);
+    }
   }
-
-  //console.log('DONE!');
 })();
