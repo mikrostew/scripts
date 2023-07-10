@@ -150,15 +150,15 @@ const config: Config = {
         return execa('brew', ['cleanup']);
       }),
       func('Brew doctor', 'inherit', async () => {
-        // this fails because of the check for config scripts (LI has some in ULL/ECL), so skip that one
-        // get a list of all checks, then skip the config check
-        // const brewChecks = (await execa('brew', ['doctor', '--list-checks'])).stdout
-        //   .split('\n')
-        //   .map((c) => c.trim())
-        //   .filter((c) => c !== 'check_for_config_scripts');
-        // return execa('brew', ['doctor', ...brewChecks]);
-        // actually, I think this is ok now?
-        return execa('brew', ['doctor']);
+        // this fails because of the check for unnecessary core tap (I think LI config is resetting that?)
+        // get a list of all checks, then skip the core tap check
+        const brewChecks = (await execa('brew', ['doctor', '--list-checks'])).stdout
+          .split('\n')
+          .map((c) => c.trim())
+          .filter((c) => c !== 'check_for_unnecessary_core_tap');
+        return execa('brew', ['doctor', ...brewChecks]);
+        // TODO: when that is fixed
+        // return execa('brew', ['doctor']);
       }),
     ]),
 
