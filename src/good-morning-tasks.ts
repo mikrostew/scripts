@@ -372,7 +372,7 @@ const config: Config = {
         .filter((line) => line !== '')
         .filter((line) => {
           // strip out the initial lines that are not actually rdev machines
-          return !(/^Name/.test(line) || /------/.test(line));
+          return !(/^You can now list/.test(line) || /^Name/.test(line) || /^------/.test(line));
         });
       const numMachines = rdevMachines.length;
       if (numMachines > 2) {
