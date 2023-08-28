@@ -444,10 +444,6 @@ const config: Config = {
             'reading',
             'https://docs.google.com/document/d/1QXoiUy-DKZb76nkzxx4V_bqO63C6pdFnqCAeGV9WGYs/edit'
           ),
-          openInTab(
-            'ACID TMC jobs',
-            'https://testmanager2.tools.corp.linkedin.com/#/product-details/voyager-web?taskName=send-acid-metrics'
-          ),
         ]
       ),
     ]),
